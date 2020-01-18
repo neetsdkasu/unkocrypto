@@ -41,31 +41,31 @@ public final class Crypto
         }
     }
 
-    public static byte[] decode(int size, Checksum checksum, Random rand, byte[] src)
+    public static byte[] decrypt(int size, Checksum checksum, Random rand, byte[] src)
     {
         validateParams(size, checksum, rand, src);
-        return doDecode(size, checksum, rand, src, 0);
+        return doDecrypt(size, checksum, rand, src, 0);
     }
 
-    public static byte[] decode(int size, Checksum checksum, Random rand, byte[] src, int off)
+    public static byte[] decrypt(int size, Checksum checksum, Random rand, byte[] src, int off)
     {
         validateParams(size, checksum, rand, src);
-        return doDecode(size, checksum, rand, src, off);
+        return doDecrypt(size, checksum, rand, src, off);
     }
 
-    public static byte[] encode(int size, Checksum checksum, Random rand, byte[] src)
+    public static byte[] encrypt(int size, Checksum checksum, Random rand, byte[] src)
     {
         validateParams(size, checksum, rand, src);
-        return doEncode(size, checksum, rand, src, 0, src.length);
+        return doEncrypt(size, checksum, rand, src, 0, src.length);
     }
 
-    public static byte[] encode(int size, Checksum checksum, Random rand, byte[] src, int off, int len)
+    public static byte[] encrypt(int size, Checksum checksum, Random rand, byte[] src, int off, int len)
     {
         validateParams(size, checksum, rand, src);
-        return doEncode(size, checksum, rand, src, off, len);
+        return doEncrypt(size, checksum, rand, src, off, len);
     }
 
-    private static byte[] doDecode(int size, Checksum checksum, Random rand, byte[] src, int off)
+    private static byte[] doDecrypt(int size, Checksum checksum, Random rand, byte[] src, int off)
     {
         try
         {
@@ -142,7 +142,7 @@ public final class Crypto
     }
 
 
-    private static byte[] doEncode(int size, Checksum checksum, Random rand, byte[] src, int off, int len)
+    private static byte[] doEncrypt(int size, Checksum checksum, Random rand, byte[] src, int off, int len)
     {
         try
         {
