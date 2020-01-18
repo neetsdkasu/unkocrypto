@@ -1,14 +1,14 @@
 @pushd "%~dp0"
 @setlocal
 @set dstdir=classes
-@set srcdir=src\neetsdkasu\
+@set srcdir=src
 @if not exist %dstdir% mkdir %dstdir%
 
 javac ^
     -encoding "utf8" ^
     -d %dstdir% ^
-    -sourcepath src ^
-    %srcdir%crypto\Crypto.java
+    -sourcepath %srcdir% ^
+    %srcdir%\neetsdkasu\crypto\Crypto.java
 
 @endlocal
 @popd
