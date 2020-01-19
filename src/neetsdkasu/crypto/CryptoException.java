@@ -26,15 +26,16 @@ public final class CryptoException extends RuntimeException
     
     private final int type;
     
-    CryptoException(int type)
+    public CryptoException(int type)
     {
         super(makeTypeMessage(type));
         this.type = type;
     }
-    
-    CryptoException(Exception ex)
+
+    public CryptoException(Exception ex)
     {
-        super(ex);
+        // super(ex);
+        super(ex.toString()); // CLDC/MIDP
         type = TYPE_UNKNOWN;
     }
     

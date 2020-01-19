@@ -12,11 +12,11 @@ public final class Crypto
 {
     public static final int MIN_SIZE = 32;
     public static final int MAX_SIZE = 1024;
-    public static final int META_SIZE = (Integer.SIZE / 8) + (Long.SIZE / 8);
+    public static final int META_SIZE = (/* Integer.SIZE */ 32 / 8) + (/* Long.SIZE */ 64 / 8); // SIZE is nothing CLDC/MIDP
 
-    private Crypto()
-    {
-        throw new UnsupportedOperationException();
+    private Crypto() {
+        // throw new UnsupportedOperationException();
+        throw new RuntimeException("UnsupportedOperationException");
     }
 
     private static void validateParams(int size, Checksum checksum, Random rand, byte[] src)
@@ -205,7 +205,5 @@ public final class Crypto
             throw new CryptoException(ex);
         }
     }
-
-
 
 }
