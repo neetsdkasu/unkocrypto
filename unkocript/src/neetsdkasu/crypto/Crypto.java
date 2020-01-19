@@ -6,7 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
-import java.util.zip.Checksum;
+import neetsdkasu.util.zip.Checksum;
 
 public final class Crypto
 {

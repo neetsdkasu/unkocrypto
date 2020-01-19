@@ -1,0 +1,3 @@
+[submodule "gzip-for-openappli"]
+	path = gzip-for-openappli
+	url = https://github.com/neetsdkasu/gzip-for-openappli.git
