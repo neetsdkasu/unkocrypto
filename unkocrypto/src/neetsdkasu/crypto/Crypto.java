@@ -75,15 +75,15 @@ public final class Crypto
                 throw new IllegalArgumentException(
                     "OUT OF RANGE fromIndex(" + fromIndex + "): 0 <= fromIndex < src.length(" + src.length + ")");
             }
-            if (toIndex < fromIndex || src.length < toIndex)
+            if (toIndex <= fromIndex || src.length < toIndex)
             {
                 throw new IllegalArgumentException(
-                    "OUT OF RANGE toIndex(" + toIndex + "): fromIndex(" + fromIndex + ") <= toIndex <= src.length(" + src.length + ")");
+                    "OUT OF RANGE toIndex(" + toIndex + "): fromIndex(" + fromIndex + ") < toIndex <= src.length(" + src.length + ")");
             }
             int len = toIndex - fromIndex;
-            if (len == 0 || len % blockSize != 0) {
+            if (len % blockSize != 0) {
                 throw new IllegalArgumentException(
-                    "OUT OF RANGE toIndex(" + toIndex + "): fromIndex(" + fromIndex + ") <= toIndex <= src.length(" + src.length + ")");
+                    "LENGTH(toIndex(" + toIndex + ") - fromIndex(" + fromIndex + ")) MUST HAVE DIVISOR blockSize(" + blockSize + ")");
             }
             int blockCount = len / blockSize;
             int dataSize = blockSize - META_SIZE;
@@ -168,7 +168,7 @@ public final class Crypto
             int len = toIndex - fromIndex;
             int blockCount = (int)(((long)len + (long)dataSize - 1L) / (long)dataSize);
             long totalSize = (long)blockCount * (long)blockSize;
-            if (totalSize > (long)Integer.MAX_VALUE) {
+            if (totalSize > (long)java.lang.Integer.MAX_VALUE) {
                 throw new CryptoException(CryptoException.TYPE_INVALID_DATASIZE);
             }
             byte[] ret = new byte[(int)totalSize];
