@@ -107,15 +107,16 @@ class CryptoTest
     static void run10000CycleAtRandom(Checksum cs, RandomInstanceProvider prov)
     {
         Random rand = prov.getInstance();
+        rand.setSeed(System.currentTimeMillis());
         long seed = 0;
         for (int cy = 0; cy < 10000; cy++)
         {
-            seed = (seed << (cy % 20)) ^ System.currentTimeMillis();
+            seed = rand.nextLong();
 
             byte[] originalData = new byte[rand.nextInt(Crypto.MAX_BLOCKSIZE * 5)];
             rand.nextBytes(originalData);
 
-            int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE + 1) + MIN_BLOCKSIZE;
+            int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE + 1) + Crypto.MIN_BLOCKSIZE;
 
             rand = prov.getInstance();
             rand.setSeed(seed);
