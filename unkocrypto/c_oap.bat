@@ -9,9 +9,9 @@ javac ^
     -encoding "utf8" ^
     -d %dstdir% ^
     -sourcepath %srcdir%;%gzipdir% ^
-     -target 1.3 ^
-     -source 1.3 ^
-     -bootclasspath "%bootcp%" ^
+    -target 1.3 ^
+    -source 1.3 ^
+    -bootclasspath "%bootcp%" ^
     %srcdir%\neetsdkasu\crypto\oap\Crypto.java
 
 @endlocal
