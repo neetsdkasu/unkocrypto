@@ -16,7 +16,8 @@ public final class Crypto
     private static final int BYTE = 0x100; // 256
     private static final int MASK = 0x0FF; // 255
 
-    private Crypto() {
+    private Crypto()
+    {
         throw new UnsupportedOperationException();
     }
 
@@ -68,6 +69,12 @@ public final class Crypto
 
     private static byte[] doDecrypt(int blockSize, Checksum checksum, Random rand, byte[] src, int fromIndex, int toIndex)
     {
+        /* <DEBUG> */
+        // System.err.printf(
+            // "blockSize: %d, src.length: %d, fromIndex: %d, toIndex: %d\n",
+            // blockSize, src.length, fromIndex, toIndex
+        // );
+        /* </DEBUG> */
         try
         {
             if (fromIndex < 0 || src.length <= fromIndex)
@@ -81,7 +88,8 @@ public final class Crypto
                     "OUT OF RANGE toIndex(" + toIndex + "): fromIndex(" + fromIndex + ") < toIndex <= src.length(" + src.length + ")");
             }
             int len = toIndex - fromIndex;
-            if (len % blockSize != 0) {
+            if (len % blockSize != 0)
+            {
                 throw new IllegalArgumentException(
                     "LENGTH(toIndex(" + toIndex + ") - fromIndex(" + fromIndex + ")) MUST HAVE DIVISOR blockSize(" + blockSize + ")");
             }
@@ -117,7 +125,11 @@ public final class Crypto
                 int count = dis.readInt();
                 long code = dis.readLong();
                 dis.close();
-                if (count <= 0 || dataSize < count)
+                /* <DEBUG> */
+                // System.err.printf("fromIndex: %d, count: %d, code: %d\n",
+                    // fromIndex, count, code);
+                /* </DEBUG> */
+                if (count < 0 || (count == 0 && (blockCount > 0 || fromIndex != toIndex)) || dataSize < count)
                 {
                     // Invalid
                     throw new CryptoException(CryptoException.TYPE_INVALID_COUNT);
@@ -130,7 +142,7 @@ public final class Crypto
                         ret.write(data[i]);
                         checksum.update(MASK & (int)data[i]);
                     }
-                    else if (data[i] != 0)
+                    else if (data[i] != 0) // これダメっしょ(data[i]==0のデータが復元されてる可能性を否定できてない)
                     {
                         throw new CryptoException(CryptoException.TYPE_INVALID_DATA);
                     }
@@ -152,9 +164,15 @@ public final class Crypto
 
     private static byte[] doEncrypt(int blockSize, Checksum checksum, Random rand, byte[] src, int fromIndex, int toIndex)
     {
+        /* <DEBUG> */
+        // System.err.printf(
+            // "blockSize: %d, src.length: %d, fromIndex: %d, toIndex: %d\n",
+            // blockSize, src.length, fromIndex, toIndex
+        // );
+        /* </DEBUG> */
         try
         {
-            if (fromIndex < 0 || src.length <= fromIndex)
+            if (fromIndex < 0 || (0 < src.length && src.length <= fromIndex))
             {
                 throw new IllegalArgumentException(
                     "OUT OF RANGE fromIndex(" + fromIndex + "): 0 <= fromIndex < src.length(" + src.length + ")");
@@ -167,21 +185,33 @@ public final class Crypto
             int dataSize = blockSize - META_SIZE;
             int len = toIndex - fromIndex;
             int blockCount = (int)(((long)len + (long)dataSize - 1L) / (long)dataSize);
+            if (len == 0)
+            {
+                blockCount = 1;
+            }
             long totalSize = (long)blockCount * (long)blockSize;
-            if (totalSize > (long)java.lang.Integer.MAX_VALUE) {
+            /* <DEBUG> */
+            // System.err.printf(
+                // "dataSize: %d, len: %d, blockCount: %d, totalSize: %d\n",
+                // dataSize, len, blockCount, totalSize
+            // );
+            /* </DEBUG> */
+            if (totalSize > (long)java.lang.Integer.MAX_VALUE)
+            {
                 throw new CryptoException(CryptoException.TYPE_INVALID_DATASIZE);
             }
             byte[] ret = new byte[(int)totalSize];
             int pos = 0;
             ByteArrayOutputStream baos = new ByteArrayOutputStream(blockSize);
             DataOutputStream dos = new DataOutputStream(baos);
-            do {
+            do
+            {
                 baos.reset();
                 checksum.reset();
                 int count = 0;
                 for (; count < dataSize; count++)
                 {
-                    if (fromIndex + count >= toIndex)
+                    if (fromIndex >= toIndex)
                     {
                         break;
                     }
@@ -191,6 +221,10 @@ public final class Crypto
                     dos.writeByte(b);
                     fromIndex++;
                 }
+                /* <DEBUG> */
+                // System.err.printf("fromIndex: %d, count: %d, code: %d\n",
+                    // fromIndex, count, checksum.getValue());
+                /* </DEBUG> */
                 for (int i = count; i < dataSize; i++)
                 {
                     int b = MASK & rand.nextInt(BYTE);
@@ -213,6 +247,12 @@ public final class Crypto
                     memory[i] = memory[j];
                     memory[j] = tmp;
                 }
+                /* <DEBUG> */
+                // System.err.printf(
+                    // "ret.size: %d, pos: %d, memory.size: %d\n",
+                    // ret.length, pos, memory.length
+                // );
+                /* </DEBUG> */
                 System.arraycopy(memory, 0, ret, pos, memory.length);
                 pos += memory.length;
             } while (fromIndex < toIndex);
