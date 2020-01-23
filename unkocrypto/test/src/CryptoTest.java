@@ -2,6 +2,9 @@
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.zip.Adler32;
@@ -17,7 +20,7 @@ import neetsdkasu.crypto.CryptoException;
 
 class CryptoTest
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
         for (Method m : CryptoTest.class.getDeclaredMethods())
         {
@@ -42,36 +45,38 @@ class CryptoTest
     }
 
     @Test
-    static void testRandomWithAdler32()
+    static void testRandomWithAdler32() throws Exception
     {
         run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
-            public Random getInstance()
+            public Random getInstance(long seed)
             {
-                return new Random();
+                return new Random(seed);
             }
         });
     }
 
     @Test
-    static void testRandomWithCRC32()
+    static void testRandomWithCRC32() throws Exception
     {
         run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
-            public Random getInstance()
+            public Random getInstance(long seed)
             {
-                return new Random();
+                return new Random(seed);
             }
         });
     }
 
     @Test
-    static void testSecureRandomWithAdler32()
+    static void testSecureRandomWithAdler32() throws Exception
     {
         run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
-            public Random getInstance()
+            public Random getInstance(long seed)
             {
                 try
                 {
-                    return java.security.SecureRandom.getInstance("SHA1PRNG");
+                    Random rand = java.security.SecureRandom.getInstance("SHA1PRNG");
+                    rand.setSeed(seed);
+                    return rand;
                 }
                 catch (Exception ex)
                 {
@@ -82,14 +87,16 @@ class CryptoTest
     }
 
     @Test
-    static void testSecureRandomWithCRC32()
+    static void testSecureRandomWithCRC32() throws Exception
     {
         run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
-            public Random getInstance()
+            public Random getInstance(long seed)
             {
                 try
                 {
-                    return java.security.SecureRandom.getInstance("SHA1PRNG");
+                    Random rand = java.security.SecureRandom.getInstance("SHA1PRNG");
+                    rand.setSeed(seed);
+                    return rand;
                 }
                 catch (Exception ex)
                 {
@@ -101,42 +108,41 @@ class CryptoTest
 
     static interface RandomInstanceProvider
     {
-        Random getInstance();
+        Random getInstance(long seed);
     }
 
-    static void run10000CycleAtRandom(Checksum cs, RandomInstanceProvider prov)
+    static void run10000CycleAtRandom(Checksum cs, RandomInstanceProvider prov) throws Exception
     {
-        Random rand = prov.getInstance();
-        rand.setSeed(System.currentTimeMillis());
+        Random rand = prov.getInstance(System.currentTimeMillis());
         long seed = 0;
         for (int cy = 0; cy < 10000; cy++)
         {
             seed = rand.nextLong();
 
-            byte[] originalData = new byte[rand.nextInt(Crypto.MAX_BLOCKSIZE * 5)];
-            rand.nextBytes(originalData);
+            byte[] originalBuffer = new byte[rand.nextInt(Crypto.MAX_BLOCKSIZE * 5)];
+            rand.nextBytes(originalBuffer);
 
             int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE + 1) + Crypto.MIN_BLOCKSIZE;
 
-            rand = prov.getInstance();
-            rand.setSeed(seed);
-            byte[] secret = Crypto.encrypt(blockSize, cs, rand, originalData);
+            ByteArrayInputStream originalData = new ByteArrayInputStream(originalBuffer);
+            ByteArrayOutputStream secret = new ByteArrayOutputStream();
+            rand = prov.getInstance(seed);
+            int secretSize = Crypto.encrypt(blockSize, cs, rand, originalData, secret);
 
-            rand = prov.getInstance();
-            rand.setSeed(seed);
-            byte[] recover = Crypto.decrypt(blockSize, cs, rand, secret);
+            ByteArrayInputStream secretData = new ByteArrayInputStream(secret.toByteArray());
+            ByteArrayOutputStream recoverData = new ByteArrayOutputStream();
+            rand = prov.getInstance(seed);
+            int recoverSize = Crypto.decrypt(blockSize, cs, rand, secretData, recoverData);
+            byte[] recover = recoverData.toByteArray();
 
-            if (originalData.length != recover.length)
+            if (originalBuffer.length != recover.length)
             {
                 throw new RuntimeException("length invalid");
             }
 
-            for (int i = 0; i < originalData.length; i++)
+            if (!Arrays.equals(originalBuffer, recover))
             {
-                if (originalData[i] != recover[i])
-                {
-                    throw new RuntimeException("unmatch data");
-                }
+                throw new RuntimeException("unmatch data");
             }
         }
     }
