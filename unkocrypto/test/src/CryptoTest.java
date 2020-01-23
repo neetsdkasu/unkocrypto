@@ -128,16 +128,20 @@ class CryptoTest
             ByteArrayOutputStream secret = new ByteArrayOutputStream();
             rand = prov.getInstance(seed);
             int secretSize = Crypto.encrypt(blockSize, cs, rand, originalData, secret);
+            byte[] secretBuffer = secret.toByteArray();
+            if (secretBuffer.length != secretSize)
+            {
+                throw new RuntimeException("invalid secret buffer size");
+            }
 
-            ByteArrayInputStream secretData = new ByteArrayInputStream(secret.toByteArray());
+            ByteArrayInputStream secretData = new ByteArrayInputStream(secretBuffer);
             ByteArrayOutputStream recoverData = new ByteArrayOutputStream();
             rand = prov.getInstance(seed);
             int recoverSize = Crypto.decrypt(blockSize, cs, rand, secretData, recoverData);
             byte[] recover = recoverData.toByteArray();
-
-            if (originalBuffer.length != recover.length)
+            if (recover.length != recoverSize)
             {
-                throw new RuntimeException("length invalid");
+                throw new RuntimeException("invalid recover buffer size");
             }
 
             if (!Arrays.equals(originalBuffer, recover))
