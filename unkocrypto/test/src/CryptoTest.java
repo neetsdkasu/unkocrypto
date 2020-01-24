@@ -4,6 +4,9 @@ import java.lang.reflect.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
@@ -151,4 +154,235 @@ class CryptoTest
         }
     }
 
+    static final String ErrorMessageChecksumIsNull = "checksum is null";
+
+    @Test
+    static void testChecksumIsNullCallEncrypt() throws Exception
+    {
+        try
+        {
+            Crypto.encrypt(Crypto.MIN_BLOCKSIZE, null,
+                new Random(), new DummyInputStream(), new DummyOutputStream());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageChecksumIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check checksum is null");
+    }
+
+    @Test
+    static void testChecksumIsNullCallDecrypt() throws Exception
+    {
+        try
+        {
+            Crypto.decrypt(Crypto.MIN_BLOCKSIZE, null,
+                new Random(), new DummyInputStream(), new DummyOutputStream());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageChecksumIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check checksum is null");
+    }
+
+    static final String ErrorMessageRandIsNull = "rand is null";
+
+    @Test
+    static void testRandIsNullCallEncrypt() throws Exception
+    {
+        try
+        {
+            Crypto.encrypt(Crypto.MIN_BLOCKSIZE, new Adler32(),
+                null, new DummyInputStream(), new DummyOutputStream());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageRandIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check rand is null");
+    }
+
+    @Test
+    static void testRandIsNullCallDecrypt() throws Exception
+    {
+        try
+        {
+            Crypto.decrypt(Crypto.MIN_BLOCKSIZE, new Adler32(),
+                null, new DummyInputStream(), new DummyOutputStream());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageRandIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check rand is null");
+    }
+
+    static final String ErrorMessageSrcIsNull = "src is null";
+
+    @Test
+    static void testSrcIsNullCallEncrypt() throws Exception
+    {
+        try
+        {
+            Crypto.encrypt(Crypto.MIN_BLOCKSIZE, new Adler32(),
+                new Random(), null, new DummyOutputStream());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageSrcIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check src is null");
+    }
+
+    @Test
+    static void testSrcIsNullCallDecrypt() throws Exception
+    {
+        try
+        {
+            Crypto.decrypt(Crypto.MIN_BLOCKSIZE, new Adler32(),
+                new Random(), null, new DummyOutputStream());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageSrcIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check src is null");
+    }
+
+    static final String ErrorMessageDstIsNull = "dst is null";
+
+    @Test
+    static void testDstIsNullCallEncrypt() throws Exception
+    {
+        try
+        {
+            Crypto.encrypt(Crypto.MIN_BLOCKSIZE, new Adler32(),
+                new Random(), new DummyInputStream(), null);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageDstIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check dst is null");
+    }
+
+    @Test
+    static void testDstIsNullCallDecrypt() throws Exception
+    {
+        try
+        {
+            Crypto.decrypt(Crypto.MIN_BLOCKSIZE, new Adler32(),
+                new Random(), new DummyInputStream(), null);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            if (ErrorMessageDstIsNull.equals(ex.getMessage()))
+            {
+                return;
+            }
+        }
+        throw new RuntimeException("invalid check dst is null");
+    }
+
+    static String errorMessageIlligalBlockSize(int blockSize)
+    {
+        return "OUT OF RANGE blockSize(" + blockSize + "): "
+            + Crypto.MIN_BLOCKSIZE + " <= blockSize <= " + Crypto.MAX_BLOCKSIZE;
+    }
+
+    @Test
+    static void testInvalidBlockSizeCallEncrypt() throws Exception
+    {
+        int[] testSizes = {
+            Crypto.MIN_BLOCKSIZE - 1,
+            Crypto.MAX_BLOCKSIZE + 1,
+            0,
+            -1
+        };
+        for (int blockSize : testSizes)
+        {
+            String errorMessage = errorMessageIlligalBlockSize(blockSize);
+            try
+            {
+                Crypto.encrypt(blockSize, new Adler32(),
+                    new Random(), new DummyInputStream(), new DummyOutputStream());
+            }
+            catch (IllegalArgumentException ex)
+            {
+                if (errorMessage.equals(ex.getMessage()))
+                {
+                    continue;
+                }
+            }
+            throw new RuntimeException("invalid size check at " + blockSize);
+        }
+    }
+
+    @Test
+    static void testInvalidBlockSizeCallDecrypt() throws Exception
+    {
+        int[] testSizes = {
+            Crypto.MIN_BLOCKSIZE - 1,
+            Crypto.MAX_BLOCKSIZE + 1,
+            0,
+            -1
+        };
+        for (int blockSize : testSizes)
+        {
+            String errorMessage = errorMessageIlligalBlockSize(blockSize);
+            try
+            {
+                Crypto.decrypt(blockSize, new Adler32(),
+                    new Random(), new DummyInputStream(), new DummyOutputStream());
+            }
+            catch (IllegalArgumentException ex)
+            {
+                if (errorMessage.equals(ex.getMessage()))
+                {
+                    continue;
+                }
+            }
+            throw new RuntimeException("invalid size check at " + blockSize);
+        }
+    }
+}
+
+class DummyInputStream extends InputStream
+{
+    @Override
+    public int read() throws IOException
+    {
+        throw new UnsupportedOperationException();
+    }
+}
+
+class DummyOutputStream extends OutputStream
+{
+    @Override
+    public void write(int b) throws IOException
+    {
+        throw new UnsupportedOperationException();
+    }
 }
