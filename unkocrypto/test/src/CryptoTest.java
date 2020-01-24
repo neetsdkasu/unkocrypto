@@ -170,6 +170,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check checksum is null");
     }
@@ -188,6 +189,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check checksum is null");
     }
@@ -208,6 +210,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check rand is null");
     }
@@ -226,6 +229,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check rand is null");
     }
@@ -246,6 +250,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check src is null");
     }
@@ -264,6 +269,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check src is null");
     }
@@ -284,6 +290,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check dst is null");
     }
@@ -302,6 +309,7 @@ class CryptoTest
             {
                 return;
             }
+            throw ex;
         }
         throw new RuntimeException("invalid check dst is null");
     }
@@ -335,6 +343,7 @@ class CryptoTest
                 {
                     continue;
                 }
+                throw ex;
             }
             throw new RuntimeException("invalid size check at " + blockSize);
         }
@@ -363,6 +372,7 @@ class CryptoTest
                 {
                     continue;
                 }
+                throw ex;
             }
             throw new RuntimeException("invalid size check at " + blockSize);
         }
