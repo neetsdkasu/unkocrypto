@@ -1,0 +1,8 @@
+[submodule "gzip-for-openappli"]
+	path = gzip-for-openappli
+	url = https://github.com/neetsdkasu/gzip-for-openappli.git
+	branch = master
+[submodule "mt19937ar-MersenneTwister"]
+	path = mt19937ar-MersenneTwister
+	url = https://github.com/neetsdkasu/mt19937ar-MersenneTwister.git
+	branch = master
