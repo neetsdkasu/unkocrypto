@@ -13,14 +13,14 @@ unkocrypto
 // Encrypt
 try
 {
-	int writtenBytes = neetsdkasu.crypto.Crypto.encode((int)blockSize, (java.util.zip.Checksum)cs, (java.util.Random)rand, (java.io.InputStream)src, (java.io.OutputStream)dst);
+	int writtenBytes = neetsdkasu.crypto.Crypto.encrypt((int)blockSize, (java.util.zip.Checksum)cs, (java.util.Random)rand, (java.io.InputStream)src, (java.io.OutputStream)dst);
 }
 catch (java.io.IOException ex) {}
 
 // Decrypt
 try
 {
-	int writtenBytes = neetsdkasu.crypto.Crypto.decode((int)blockSize, (java.util.zip.Checksum)cs, (java.util.Random)rand, (java.io.InputStream)src, (java.io.OutputStream)dst);
+	int writtenBytes = neetsdkasu.crypto.Crypto.decrypt((int)blockSize, (java.util.zip.Checksum)cs, (java.util.Random)rand, (java.io.InputStream)src, (java.io.OutputStream)dst);
 }
 catch (java.io.IOException ex) {}
 ```
