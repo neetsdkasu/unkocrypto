@@ -7,6 +7,7 @@ set deploydir=test_oap\lib
 
 set gziplib=gzip.jar
 set cryptolib=crypto.jar
+set mtlib=mt.jar
 
 set bootcp=C:\WTK2.5.2\lib\midpapi20.jar;C:\WTK2.5.2\lib\cldcapi11.jar
 set commonflags= -encoding "utf8" -target 1.3 -source 1.3 -bootclasspath %bootcp%
@@ -26,12 +27,23 @@ goto buildlib
 
 
 :makecrypto
-set nextlabel=endpoint
+set nextlabel=makemtwister
 set additionalflags= -cp %deploydir%\%gziplib%
 set libname=%cryptolib%
 set clsdir=oapclasses
 set srcdir=src
 set sources=%srcdir%\neetsdkasu\crypto\oap\Crypto.java
+
+goto buildlib
+
+
+:makemtwister
+set nextlabel=endpoint
+set additionalflags=
+set libname=%mtlib%
+set clsdir=mtclasses
+set srcdir=..\mt19937ar-MersenneTwister\mt19937ar\src
+set sources=%srcdir%\mt19937ar\Random.java
 
 goto buildlib
 

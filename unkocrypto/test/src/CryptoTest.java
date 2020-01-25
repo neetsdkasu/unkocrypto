@@ -25,10 +25,20 @@ class CryptoTest
 {
     public static void main(String[] args) throws Exception
     {
+        String target = null;
+        if (args.length > 0)
+        {
+            target = args[0];
+        }
+
         for (Method m : CryptoTest.class.getDeclaredMethods())
         {
             if (m.isAnnotationPresent(Test.class))
             {
+                if (target != null && m.getName().indexOf(target) < 0)
+                {
+                    continue;
+                }
                 Calendar cal = Calendar.getInstance();
                 System.out.print("[" + cal.getTime() + "]");
                 System.out.print(" " + m.getName() + ": ");
@@ -45,15 +55,18 @@ class CryptoTest
                 }
             }
         }
+        System.out.println("done.");
     }
 
     @Test
     static void testRandomWithAdler32() throws Exception
     {
         run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+            Random rand = new Random();
             public Random getInstance(long seed)
             {
-                return new Random(seed);
+                rand.setSeed(seed);
+                return rand;
             }
         });
     }
@@ -62,9 +75,11 @@ class CryptoTest
     static void testRandomWithCRC32() throws Exception
     {
         run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+            Random rand = new Random();
             public Random getInstance(long seed)
             {
-                return new Random(seed);
+                rand.setSeed(seed);
+                return rand;
             }
         });
     }
@@ -105,6 +120,32 @@ class CryptoTest
                 {
                     throw new RuntimeException(ex);
                 }
+            }
+        });
+    }
+
+    @Test
+    static void testMersenneTwisterWithAdler32() throws Exception
+    {
+        run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+            Random rand = new mt19937ar.Random();
+            public Random getInstance(long seed)
+            {
+                rand.setSeed(seed);
+                return rand;
+            }
+        });
+    }
+
+    @Test
+    static void testMersenneTwisterWithCRC32() throws Exception
+    {
+        run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+            Random rand = new mt19937ar.Random();
+            public Random getInstance(long seed)
+            {
+                rand.setSeed(seed);
+                return rand;
             }
         });
     }
@@ -375,6 +416,86 @@ class CryptoTest
                 throw ex;
             }
             throw new RuntimeException("invalid size check at " + blockSize);
+        }
+    }
+
+    @Test
+    static void testZeroSizeData() throws Exception
+    {
+        long seed = 123456789L;
+        Random rand = new Random();
+        Checksum cs = new CRC32();
+        int blockSize = (Crypto.MAX_BLOCKSIZE + Crypto.MIN_BLOCKSIZE) / 2;
+
+        InputStream zeroSizeData = new ByteArrayInputStream(new byte[0]);
+        ByteArrayOutputStream secret = new ByteArrayOutputStream();
+        rand.setSeed(seed);
+        int encrytedSize = Crypto.encrypt(blockSize, cs, rand, zeroSizeData, secret);
+        if (encrytedSize != blockSize)
+        {
+            throw new RuntimeException("invalid encrytedSize: " + encrytedSize);
+        }
+        InputStream secretData = new ByteArrayInputStream(secret.toByteArray());
+        OutputStream recover = new DummyOutputStream();
+        rand.setSeed(seed);
+        int decryptedSize = Crypto.decrypt(blockSize, cs, rand, secretData, recover);
+        if (decryptedSize != 0)
+        {
+            throw new RuntimeException("invalid decryptedSize: " + decryptedSize);
+        }
+    }
+
+    @Test
+    static void testBoundaryValueBlockSize() throws Exception
+    {
+        int[] blockSizes = { Crypto.MIN_BLOCKSIZE, Crypto.MAX_BLOCKSIZE };
+        int[] dataSizes = {
+            Crypto.MIN_BLOCKSIZE / 2,
+            Crypto.MIN_BLOCKSIZE - Crypto.META_SIZE,
+            Crypto.MIN_BLOCKSIZE,
+            (Crypto.MIN_BLOCKSIZE - Crypto.META_SIZE) * 2,
+            Crypto.MIN_BLOCKSIZE * 2,
+            Crypto.MAX_BLOCKSIZE / 2,
+            Crypto.MAX_BLOCKSIZE - Crypto.META_SIZE,
+            Crypto.MAX_BLOCKSIZE,
+            (Crypto.MAX_BLOCKSIZE - Crypto.META_SIZE) * 2,
+            Crypto.MAX_BLOCKSIZE * 2
+        };
+        long seed = 123456789L;
+        Random rand = new Random();
+        Checksum cs = new CRC32();
+        for (int blockSize : blockSizes)
+        {
+            for (int dataSize : dataSizes)
+            {
+                byte[] buffer = new byte[dataSize];
+                rand.nextBytes(buffer);
+
+                InputStream zeroSizeData = new ByteArrayInputStream(buffer);
+                ByteArrayOutputStream secret = new ByteArrayOutputStream();
+                rand.setSeed(seed);
+                int encrytedSize = Crypto.encrypt(blockSize, cs, rand, zeroSizeData, secret);
+                byte[] secretBuffer = secret.toByteArray();
+                if (encrytedSize != secretBuffer.length)
+                {
+                    throw new RuntimeException("invalid encrytedSize");
+                }
+
+                InputStream secretData = new ByteArrayInputStream(secretBuffer);
+                ByteArrayOutputStream recover = new ByteArrayOutputStream();
+                rand.setSeed(seed);
+                int decryptedSize = Crypto.decrypt(blockSize, cs, rand, secretData, recover);
+                byte[] recoverBuffer = recover.toByteArray();
+                if (decryptedSize != recoverBuffer.length)
+                {
+                    throw new RuntimeException("invalid decryptedSize");
+                }
+
+                if (!Arrays.equals(buffer, recoverBuffer))
+                {
+                    throw new RuntimeException("unmatch data");
+                }
+            }
         }
     }
 }

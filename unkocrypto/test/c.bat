@@ -3,14 +3,15 @@
 @if ERRORLEVEL 1 goto endlabel
 @setlocal
 @set dstdir=classes
-@set srcdir1=src
+@set srcdir=src
+@set mtsrcdir=..\..\mt19937ar-MersenneTwister\mt19937ar\src
 @set cpdir=..\classes
 @if not exist %dstdir% mkdir %dstdir%
 
 javac ^
     -encoding "utf8" ^
     -d %dstdir% ^
-    -sourcepath %srcdir1% ^
+    -sourcepath %srcdir%;%mtsrcdir% ^
     -cp %cpdir% ^
     src\CryptoTest.java
 

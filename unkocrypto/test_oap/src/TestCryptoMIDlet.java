@@ -50,15 +50,49 @@ public class TestCryptoMIDlet extends MIDlet
             return;
         }
 
+        try
+        {
+            Calendar cal = Calendar.getInstance();
+            System.out.print("[" + cal.getTime() + "] ");
+            System.out.print("testMersenneTwisterWithAdler32: ");
+            testMersenneTwisterWithAdler32();
+            System.out.println("passed");
+        }
+        catch (Exception ex)
+        {
+            System.out.println("failed");
+            ex.printStackTrace();
+            notifyDestroyed();
+            return;
+        }
+
+        try
+        {
+            Calendar cal = Calendar.getInstance();
+            System.out.print("[" + cal.getTime() + "] ");
+            System.out.print("testMersenneTwisterWithCRC32: ");
+            testMersenneTwisterWithCRC32();
+            System.out.println("passed");
+        }
+        catch (Exception ex)
+        {
+            System.out.println("failed");
+            ex.printStackTrace();
+            notifyDestroyed();
+            return;
+        }
+
         notifyDestroyed();
     }
 
     static void testRandomWithAdler32() throws Exception
     {
         run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+            Random rand = new Random();
             public Random getInstance(long seed)
             {
-                return new Random(seed);
+                rand.setSeed(seed);
+                return rand;
             }
         });
     }
@@ -66,9 +100,35 @@ public class TestCryptoMIDlet extends MIDlet
     static void testRandomWithCRC32() throws Exception
     {
         run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+            Random rand = new Random();
             public Random getInstance(long seed)
             {
-                return new Random(seed);
+                rand.setSeed(seed);
+                return rand;
+            }
+        });
+    }
+
+    static void testMersenneTwisterWithAdler32() throws Exception
+    {
+        run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+            Random rand = new mt19937ar.Random();
+            public Random getInstance(long seed)
+            {
+                rand.setSeed(seed);
+                return rand;
+            }
+        });
+    }
+
+    static void testMersenneTwisterWithCRC32() throws Exception
+    {
+        run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+            Random rand = new mt19937ar.Random();
+            public Random getInstance(long seed)
+            {
+                rand.setSeed(seed);
+                return rand;
             }
         });
     }
