@@ -1,4 +1,4 @@
-package neetsdkasu.crypto;
+package neetsdkasu.crypto.oap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,7 +8,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Random;
-import java.util.zip.Checksum;
+import neetsdkasu.util.zip.Checksum;
+import neetsdkasu.crypto.CryptoException;
 
 public final class Crypto
 {
