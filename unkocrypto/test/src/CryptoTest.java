@@ -134,7 +134,7 @@ class CryptoTest
     static void testMersenneTwisterWithAdler32() throws Exception
     {
         run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
-            Random rand = new mt19937ar.Random();
+            Random rand = new mt19937ar.MTRandom();
             public Random getInstance(long seed)
             {
                 rand.setSeed(seed);
@@ -147,7 +147,7 @@ class CryptoTest
     static void testMersenneTwisterWithCRC32() throws Exception
     {
         run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
-            Random rand = new mt19937ar.Random();
+            Random rand = new mt19937ar.MTRandom();
             public Random getInstance(long seed)
             {
                 rand.setSeed(seed);
