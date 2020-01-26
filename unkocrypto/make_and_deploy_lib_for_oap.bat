@@ -43,7 +43,7 @@ set additionalflags=
 set libname=%mtlib%
 set clsdir=mtclasses
 set srcdir=..\mt19937ar-MersenneTwister\mt19937ar\src
-set sources=%srcdir%\mt19937ar\Random.java
+set sources=%srcdir%\mt19937ar\MTRandom.java
 
 goto buildlib
 
