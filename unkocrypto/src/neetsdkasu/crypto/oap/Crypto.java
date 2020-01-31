@@ -50,6 +50,21 @@ public final class Crypto
         }
     }
 
+    private static int nextInt(Random rand, int bound)
+    {
+        if ((bound & -bound) == bound)
+        {
+            return (int)(((long)bound * (long)(rand.nextInt() >>> 1)) >> 31);
+        }
+        int bits, val;
+        do
+        {
+            bits = rand.nextInt() >>> 1;
+            val = bits % bound;
+        } while (bits - val + (bound - 1) < 0);
+        return val;
+    }
+
     public static int decrypt(int blockSize, Checksum checksum, Random rand, InputStream src, OutputStream dst) throws IOException
     {
         validateParams(blockSize, checksum, rand, src, dst);
@@ -63,12 +78,12 @@ public final class Crypto
         {
             for (int i = 0; i < blockSize; i++)
             {
-                mask[i] = rand.nextInt(BYTE);
+                mask[i] = nextInt(rand, BYTE);
                 indexes[i] = i;
             }
             for (int i = 0; i < blockSize; i++)
             {
-                int j = rand.nextInt(blockSize - i) + i;
+                int j = nextInt(rand, blockSize - i) + i;
                 int tmp = indexes[i];
                 indexes[i] = indexes[j];
                 indexes[j] = tmp;
@@ -135,13 +150,13 @@ public final class Crypto
                 }
                 int b = MASK & onebyte;
                 checksum.update(b);
-                b ^= MASK & rand.nextInt(BYTE);
+                b ^= MASK & nextInt(rand, BYTE);
                 dos.writeByte(b);
                 onebyte = src.read();
             }
             for (int i = count; i < dataSize; i++)
             {
-                int b = MASK & rand.nextInt(BYTE);
+                int b = MASK & nextInt(rand, BYTE);
                 dos.writeByte(b);
             }
             dos.writeInt(count);
@@ -151,12 +166,12 @@ public final class Crypto
             for (int i = dataSize; i < memory.length; i++)
             {
                 int b = MASK & (int)memory[i];
-                b ^= MASK & rand.nextInt(BYTE);
+                b ^= MASK & nextInt(rand, BYTE);
                 memory[i] = (byte)b;
             }
             for (int i = 0; i < memory.length; i++)
             {
-                int j = rand.nextInt(memory.length - i) + i;
+                int j = nextInt(rand, memory.length - i) + i;
                 byte tmp = memory[i];
                 memory[i] = memory[j];
                 memory[j] = tmp;
