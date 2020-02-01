@@ -141,7 +141,7 @@ public final class Base64
             {
                 rem = (0xFF & (int)src[i]) | (rem << 8);
                 bits += 8;
-                while (bits > 6)
+                while (bits >= 6)
                 {
                     bits -= 6;
                     ret[p] = code[rem >> bits];
