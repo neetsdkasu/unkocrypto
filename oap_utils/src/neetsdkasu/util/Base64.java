@@ -5,42 +5,106 @@ public final class Base64
     private static final int    DEFAULT_LINE_LENGTH = 76;
     private static final byte[] DEFAULT_LINE_SEPARATOR = { '\r', '\n' };
     private static final byte   PAD = '=';
-    private static final byte[] RFC2045;
-    private static final byte[] RFC4648;
-    static
+    private static byte[] encodingTableRFC2045 = null;
+    private static byte[] encodingTableRFC4648 = null;
+    private static byte[] decodingTableRFC2045 = null;
+    private static byte[] decodingTableRFC4648 = null;
+
+    private static byte[] getEncodingTableRFC2045()
     {
-        String common = "";
-        for (int c = 'A'; c <= 'Z'; c++)
+        if (encodingTableRFC2045 == null)
         {
-            common += (char)c;
+            String common = "";
+            for (int c = 'A'; c <= 'Z'; c++)
+            {
+                common += (char)c;
+            }
+            for (int c = 'a'; c <= 'z'; c++)
+            {
+                common += (char)c;
+            }
+            for (int c = '0'; c <= '9'; c++)
+            {
+                common += (char)c;
+            }
+            encodingTableRFC2045 = (common + "+/").getBytes();
         }
-        for (int c = 'a'; c <= 'z'; c++)
+        return encodingTableRFC2045;
+    }
+
+    private static byte[] getEncodingTableRFC4648()
+    {
+        if (encodingTableRFC4648 == null)
         {
-            common += (char)c;
+            String common = "";
+            for (int c = 'A'; c <= 'Z'; c++)
+            {
+                common += (char)c;
+            }
+            for (int c = 'a'; c <= 'z'; c++)
+            {
+                common += (char)c;
+            }
+            for (int c = '0'; c <= '9'; c++)
+            {
+                common += (char)c;
+            }
+            encodingTableRFC4648 = (common + "-_").getBytes();
         }
-        for (int c = '0'; c <= '9'; c++)
+        return encodingTableRFC4648;
+    }
+
+    private static byte[] getDecodingTableRFC2045()
+    {
+        if (decodingTableRFC2045 == null)
         {
-            common += (char)c;
+            decodingTableRFC2045 = new byte[256];
+            for (int i = 0; i < decodingTableRFC2045.length; i++)
+            {
+                decodingTableRFC2045[i] = (byte)0xFF;
+            }
+            byte[] et = getEncodingTableRFC2045();
+            for (int i = 0; i < et.length; i++)
+            {
+                decodingTableRFC2045[0xFF & (int)et[i]] = (byte)i;
+            }
         }
-        RFC2045 = (common + "+/").getBytes();
-        RFC4648 = (common + "-_").getBytes();
+        return decodingTableRFC2045;
+    }
+
+    private static byte[] getDecodingTableRFC4648()
+    {
+        if (decodingTableRFC4648 == null)
+        {
+            decodingTableRFC4648 = new byte[256];
+            for (int i = 0; i < decodingTableRFC4648.length; i++)
+            {
+                decodingTableRFC4648[i] = (byte)0xFF;
+            }
+            byte[] et = getEncodingTableRFC4648();
+            for (int i = 0; i < et.length; i++)
+            {
+                decodingTableRFC4648[0xFF & (int)et[i]] = (byte)i;
+            }
+        }
+        return decodingTableRFC4648;
     }
 
     private Base64() {}
 
     public static Encoder getEncoder()
     {
-        return new Encoder(RFC2045, true);
+        return new Encoder(getEncodingTableRFC2045(), true);
     }
 
     public static Decoder getDecoder()
     {
-        return new Decoder(RFC2045, false);
+        return new Decoder(getDecodingTableRFC2045(), false);
     }
 
     public static Encoder getMimeEncoder(int lineLength, byte[] lineSeparator)
     {
-        return new Encoder(RFC2045, true, lineLength, lineSeparator);
+        return new Encoder(getEncodingTableRFC2045(), true, lineLength, lineSeparator);
     }
 
     public static Encoder getMimeEncoder()
@@ -50,17 +114,17 @@ public final class Base64
 
     public static Decoder getMimeDecoder()
     {
-        return new Decoder(RFC2045, true);
+        return new Decoder(getDecodingTableRFC2045(), true);
     }
 
     public static Encoder getUrlEncoder()
     {
-        return new Encoder(RFC4648, true);
+        return new Encoder(getEncodingTableRFC4648(), true);
     }
 
     public static Decoder getUrlDecoder()
     {
-        return new Decoder(RFC4648, false);
+        return new Decoder(getDecodingTableRFC4648(), false);
     }
 
     public static final class Encoder
@@ -96,7 +160,7 @@ public final class Base64
             for (int j = 0; j < lineSeparator.length; j++)
             {
                 byte sep = lineSeparator[j];
-                if (sep == PAD)
+                if (sep == Base64.PAD)
                 {
                     throw new IllegalArgumentException("lineSeparator: " + sep);
                 }
@@ -174,11 +238,11 @@ public final class Base64
 
     public static final class Decoder
     {
-        private final byte[] code;
+        private final byte[] table;
         private final boolean mime;
-        private Decoder(byte[] code, boolean mime)
+        private Decoder(byte[] table, boolean mime)
         {
-            this.code = code;
+            this.table = table;
             this.mime = mime;
         }
     }
