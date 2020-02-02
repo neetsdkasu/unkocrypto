@@ -178,6 +178,249 @@ class UtilTest
     @Test
     static void testBase64Decoder()
     {
-        neetsdkasu.util.Base64.getDecoder();
+        Random rand = new Random();
+
+        java.util.Base64.Encoder enc = java.util.Base64.getEncoder();
+        java.util.Base64.Decoder dec1 = java.util.Base64.getDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            byte[] buf = enc.encode(src);
+
+            byte[] rec1 = dec1.decode(buf);
+            byte[] rec2 = dec2.decode(buf);
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                throw new RuntimeException("unmatch");
+            }
+        }
     }
+
+    @Test
+    static void testBase64UrlDecoder()
+    {
+        Random rand = new Random();
+
+        java.util.Base64.Encoder enc = java.util.Base64.getUrlEncoder();
+        java.util.Base64.Decoder dec1 = java.util.Base64.getUrlDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getUrlDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            byte[] buf = enc.encode(src);
+
+            byte[] rec1 = dec1.decode(buf);
+            byte[] rec2 = dec2.decode(buf);
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
+    @Test
+    static void testBase64MimeDecoder()
+    {
+        Random rand = new Random();
+
+        java.util.Base64.Encoder enc = java.util.Base64.getMimeEncoder();
+        java.util.Base64.Decoder dec1 = java.util.Base64.getMimeDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getMimeDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            byte[] buf = enc.encode(src);
+
+            byte[] rec1 = dec1.decode(buf);
+            byte[] rec2 = dec2.decode(buf);
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
+    @Test
+    static void testBase64MimeDecoderWithLineParam()
+    {
+        Random rand = new Random();
+        byte[] sepChars = ",._;:@[](){}!#$%&'~^-*?\"\t\r\n".getBytes();
+
+        java.util.Base64.Decoder dec1 = java.util.Base64.getMimeDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getMimeDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            int lineLength = rand.nextInt(300);
+            int sepLength = rand.nextInt(5) + rand.nextInt(3);
+            byte[] lineSeperator = new byte[sepLength];
+            for (int j = 0; j < sepLength; j++)
+            {
+                lineSeperator[j] = sepChars[rand.nextInt(sepChars.length)];
+            }
+
+            java.util.Base64.Encoder enc = java.util.Base64.getMimeEncoder(lineLength, lineSeperator);
+
+            byte[] buf = enc.encode(src);
+
+            byte[] rec1 = dec1.decode(buf);
+            byte[] rec2 = dec2.decode(buf);
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
+    @Test
+    static void testBase64DecoderWithoutPadding()
+    {
+        Random rand = new Random();
+
+        java.util.Base64.Encoder enc = java.util.Base64.getEncoder().withoutPadding();
+        java.util.Base64.Decoder dec1 = java.util.Base64.getDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            byte[] buf = enc.encode(src);
+
+            byte[] rec1 = dec1.decode(buf);
+            byte[] rec2 = dec2.decode(buf);
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
+    @Test
+    static void testBase64MimeDecoderWithLineParamWithoutPadding()
+    {
+        Random rand = new Random();
+        byte[] sepChars = ",._;:@[](){}!#$%&'~^-*?\"\t\r\n".getBytes();
+
+        java.util.Base64.Decoder dec1 = java.util.Base64.getMimeDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getMimeDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            int lineLength = rand.nextInt(300);
+            int sepLength = rand.nextInt(5) + rand.nextInt(3);
+            byte[] lineSeperator = new byte[sepLength];
+            for (int j = 0; j < sepLength; j++)
+            {
+                lineSeperator[j] = sepChars[rand.nextInt(sepChars.length)];
+            }
+
+            java.util.Base64.Encoder enc = java.util.Base64.getMimeEncoder(lineLength, lineSeperator).withoutPadding();
+
+            byte[] buf = enc.encode(src);
+
+            byte[] rec1 = dec1.decode(buf);
+            byte[] rec2 = dec2.decode(buf);
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
+
+    @Test
+    static void testBase64DecoderInvalidInput()
+    {
+        Random rand = new Random();
+
+        java.util.Base64.Encoder enc = java.util.Base64.getEncoder();
+        java.util.Base64.Decoder dec1 = java.util.Base64.getDecoder();
+        neetsdkasu.util.Base64.Decoder dec2 = neetsdkasu.util.Base64.getDecoder();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int size = rand.nextInt(2048) + 1;
+            byte[] src = new byte[size];
+            rand.nextBytes(src);
+
+            byte[] buf = enc.encode(src);
+
+            if ((i & 1) == 0)
+            {
+                for (int j = rand.nextInt(5); j >= 0; j--)
+                {
+                    buf[rand.nextInt(buf.length)] = (byte)rand.nextInt(256);
+                }
+            }
+            else
+            {
+                buf = Arrays.copyOf(buf, buf.length / 2 + rand.nextInt(buf.length));
+            }
+
+            byte[] rec1, rec2;
+            Exception ex1 = null, ex2 = null;
+
+            try
+            {
+                rec1 = dec1.decode(buf);
+            }
+            catch (Exception ex)
+            {
+                ex1 = ex;
+                rec1 = null;
+            }
+
+            try
+            {
+                rec2 = dec2.decode(buf);
+            }
+            catch (Exception ex)
+            {
+                ex2 = ex;
+                rec2 = null;
+            }
+
+            if (!Arrays.equals(rec1, rec2))
+            {
+                System.out.println(Arrays.toString(buf));
+                System.out.println(Arrays.toString(rec1));
+                System.out.println(Arrays.toString(rec2));
+                System.out.println(i);
+                System.out.println(ex1);
+                System.out.println(ex2);
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
 }

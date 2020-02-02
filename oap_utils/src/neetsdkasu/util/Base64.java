@@ -5,6 +5,7 @@ public final class Base64
     private static final int    DEFAULT_LINE_LENGTH = 76;
     private static final byte[] DEFAULT_LINE_SEPARATOR = { '\r', '\n' };
     private static final byte   PAD = '=';
+    private static final byte   NO_CODE = (byte)0xFF;
     private static byte[] encodingTableRFC2045 = null;
     private static byte[] encodingTableRFC4648 = null;
     private static byte[] decodingTableRFC2045 = null;
@@ -61,7 +62,7 @@ public final class Base64
             decodingTableRFC2045 = new byte[256];
             for (int i = 0; i < decodingTableRFC2045.length; i++)
             {
-                decodingTableRFC2045[i] = (byte)0xFF;
+                decodingTableRFC2045[i] = NO_CODE;
             }
             byte[] et = getEncodingTableRFC2045();
             for (int i = 0; i < et.length; i++)
@@ -79,7 +80,7 @@ public final class Base64
             decodingTableRFC4648 = new byte[256];
             for (int i = 0; i < decodingTableRFC4648.length; i++)
             {
-                decodingTableRFC4648[i] = (byte)0xFF;
+                decodingTableRFC4648[i] = NO_CODE;
             }
             byte[] et = getEncodingTableRFC4648();
             for (int i = 0; i < et.length; i++)
@@ -127,7 +128,7 @@ public final class Base64
         return new Decoder(getDecodingTableRFC4648(), false);
     }
 
-    public static final class Encoder
+    public static class Encoder
     {
         private final byte[]  code;
         private final boolean padding;
@@ -236,7 +237,7 @@ public final class Base64
         }
     }
 
-    public static final class Decoder
+    public static class Decoder
     {
         private final byte[] table;
         private final boolean mime;
@@ -244,6 +245,82 @@ public final class Base64
         {
             this.table = table;
             this.mime = mime;
+        }
+
+        public byte[] decode(String src)
+        {
+            return decode(src.getBytes());
+        }
+
+        public byte[] decode(byte[] src)
+        {
+            byte[] ret = new byte[(src.length * 6) / 8];
+            int rem = 0, bits = 0, pos = 0;
+            int size = 0;
+            int srcpos = src.length;
+            for (int i = 0; i < src.length; i++)
+            {
+                byte code = table[(int)src[i]];
+                if (code != Base64.NO_CODE)
+                {
+                    rem = (int)code | (rem << 6);
+                    bits += 6;
+                    while (bits >= 8)
+                    {
+                        bits -= 8;
+                        ret[pos] = (byte)(rem >> bits);
+                        rem &= (1 << bits) - 1;
+                        pos++;
+                    }
+                    size++;
+                    continue;
+                }
+                if (src[i] == Base64.PAD)
+                {
+                    srcpos = i;
+                    break;
+                }
+                if (!mime || (size & 3) != 0)
+                {
+                    throw new IllegalArgumentException("invalid char: pos: " + i + ", code: " + src[i]);
+                }
+            }
+            if (pos != (size * 6) / 8 || bits >= 6)
+            {
+                throw new IllegalArgumentException("invalid src length");
+            }
+            int paddingSize = size;
+            for (int i = srcpos; i < src.length; i++)
+            {
+                if (table[(int)src[i]] != Base64.NO_CODE)
+                {
+                    throw new IllegalArgumentException("invalid char: pos: " + i + ", code: " + src[i]);
+                }
+                if (src[i] == Base64.PAD)
+                {
+                    paddingSize++;
+                    if (paddingSize <= (((size + 3) >> 2) << 2))
+                    {
+                        continue;
+                    }
+                    throw new IllegalArgumentException("invalid char: pos: " + i + ", code: " + src[i]);
+                }
+                if (!mime || paddingSize < (((size + 3) >> 2) << 2))
+                {
+                    throw new IllegalArgumentException("invalid char: pos: " + i + ", code: " + src[i]);
+                }
+            }
+            if (size != paddingSize && paddingSize != (((size + 3) >> 2) << 2))
+            {
+                throw new IllegalArgumentException("invalid padding length");
+            }
+            if (ret.length == pos)
+            {
+                return ret;
+            }
+            byte[] tmp = new byte[pos];
+            System.arraycopy(ret, 0, tmp, 0, tmp.length);
+            return tmp;
         }
     }
 }
