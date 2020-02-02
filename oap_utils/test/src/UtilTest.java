@@ -384,7 +384,7 @@ class UtilTest
             }
             else
             {
-                buf = Arrays.copyOf(buf, buf.length / 2 + rand.nextInt(buf.length));
+                buf = Arrays.copyOf(buf, rand.nextInt(buf.length + buf.length / 10 + 8));
             }
 
             byte[] rec1, rec2;
