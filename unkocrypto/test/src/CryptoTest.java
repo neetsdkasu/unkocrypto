@@ -505,6 +505,77 @@ class CryptoTest
         }
     }
 
+    @Test
+    static void testInvalidSrcCallDecrypt() throws Exception
+    {
+        Random rand = new Random();
+        Checksum cs = new CRC32();
+    testLoop:
+        for (int cy = 0; cy < 10000; cy++)
+        {
+            int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE) + Crypto.MIN_BLOCKSIZE;
+            byte[] data = new byte[(rand.nextInt(99) + 1) * blockSize / 100 + 5 * rand.nextInt(2) * blockSize];
+            if ((cy & 1) == 0)
+            {
+                rand.nextBytes(data);
+            }
+            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            String cause = "";
+            try
+            {
+                Crypto.decrypt(blockSize, cs, rand, in, out);
+                cause = "passed decryption";
+            }
+            catch (CryptoException ex)
+            {
+                switch (ex.getType())
+                {
+                case CryptoException.TYPE_INVALID_COUNT:
+                    if (data.length >= blockSize)
+                    {
+                        // ok
+                        continue testLoop;
+                    }
+                    cause = "over read with invalid count";
+                    break;
+                case CryptoException.TYPE_INVALID_DATA:
+                    if (data.length >= blockSize)
+                    {
+                        // ok
+                        continue testLoop;
+                    }
+                    cause = "over read with invalid data";
+                    break;
+                case CryptoException.TYPE_INVALID_CHECKSUM:
+                    if (data.length >= blockSize)
+                    {
+                        // ok
+                        continue testLoop;
+                    }
+                    cause = "over read with invalid checksum";
+                    break;
+                case CryptoException.TYPE_INVALID_DATASIZE:
+                    if (data.length < blockSize)
+                    {
+                        // ok
+                        continue testLoop;
+                    }
+                    cause = "test code bug??? invalid datasize";
+                    break;
+                default:
+                    cause = "unknown CryptoException: " + ex.getType();
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                cause = "unknown Exception( " + ex.getMessage() + " )";
+            }
+            throw new RuntimeException("invalid decryption ( cause: " + cause + " )");
+        }
+    }
+
     static void demo() throws Exception
     {
         byte[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
