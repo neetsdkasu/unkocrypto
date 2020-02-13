@@ -511,10 +511,10 @@ class CryptoTest
         Random rand = new Random();
         Checksum cs = new CRC32();
     testLoop:
-        for (int cy = 0; cy < 10000; cy++)
+        for (int cy = 0; cy < 100000; cy++)
         {
             int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE) + Crypto.MIN_BLOCKSIZE;
-            byte[] data = new byte[(rand.nextInt(99) + 1) * blockSize / 100 + 5 * rand.nextInt(2) * blockSize];
+            byte[] data = new byte[rand.nextInt(100) * blockSize / 100 + 5 * rand.nextInt(2) * blockSize];
             if ((cy & 1) == 0)
             {
                 rand.nextBytes(data);
@@ -572,7 +572,9 @@ class CryptoTest
             {
                 cause = "unknown Exception( " + ex.getMessage() + " )";
             }
-            throw new RuntimeException("invalid decryption ( cause: " + cause + " )");
+            throw new RuntimeException("invalid decryption ( cy: " + cy 
+                + ", cause: '" + cause
+                + "', data.length: " + data.length + ", blockSize: " + blockSize + " )");
         }
     }
 
