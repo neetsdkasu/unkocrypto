@@ -73,6 +73,10 @@ public final class Crypto
         byte[] data = new byte[blockSize];
         int len = 0;
         int onebyte = src.read();
+        if (onebyte < 0)
+        {
+            throw new CryptoException(CryptoException.TYPE_INVALID_DATASIZE);
+        }
         while (onebyte >= 0)
         {
             for (int i = 0; i < blockSize; i++)
@@ -89,6 +93,10 @@ public final class Crypto
             }
             for (int i = 0; i < blockSize; i++)
             {
+                if (onebyte < 0)
+                {
+                    throw new CryptoException(CryptoException.TYPE_INVALID_DATASIZE);
+                }
                 int j = indexes[i];
                 int b = MASK & onebyte;
                 b ^= MASK & mask[j];
