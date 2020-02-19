@@ -6,16 +6,16 @@ import java.io.IOException;
 final class Value
 {
     // Value Types
-    static final byte SERVICE_NAME      = 0;
-    static final byte SERVICE_URL       = 1;
-    static final byte ID                = 1 << 3; // lower 3 bits (8 Ids) for difference of some purpose IDs (login ID, user ID, user number , user name, etc...)
-    static final byte PASSWORD          = 2 << 3; // lower 3 bits (8 passwords) for multiple passwords (2nd password, secret number, etc...)
-    static final byte MAIL              = 3 << 3; // one or more mail addresses registered to the service
-    static final byte REMINDER_QUESTION = 4 << 3;
-    static final byte REMINDER_ANSWER   = 5 << 3;
-    static final byte DESCTIPTION       = 6 << 3;
+    static final int SERVICE_NAME      = 0;
+    static final int SERVICE_URL       = 1;
+    static final int ID                = 2;
+    static final int PASSWORD          = 3;
+    static final int EMAIL             = 4;
+    static final int REMINDER_QUESTION = 5;
+    static final int REMINDER_ANSWER   = 6;
+    static final int DESCTIPTION       = 7;
 
-    String typeName()
+    static String typeName(int type)
     {
         switch (type)
         {
@@ -27,8 +27,8 @@ final class Value
             return "id";
         case PASSWORD:
             return "password";
-        case MAIL:
-            return "mail";
+        case EMAIL:
+            return "email";
         case REMINDER_QUESTION:
             return "reminder question";
         case REMINDER_ANSWER:
@@ -40,12 +40,17 @@ final class Value
         }
     }
     
+    String getTypeName()
+    {
+        return typeName((int)type);
+    }
+    
     void setDefaultVisible()
     {
-        switch (type)
+        switch ((int)type)
         {
         case PASSWORD:
-        case MAIL:
+        case EMAIL:
         case REMINDER_QUESTION:
         case REMINDER_ANSWER:
             visible = false;

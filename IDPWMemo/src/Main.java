@@ -1,4 +1,5 @@
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
@@ -7,9 +8,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -30,33 +33,82 @@ class Main extends JFrame
 
     public static void main(String[] args) throws Exception
     {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run()
-            {
-                (new Main()).setVisible(true);
-            }
-        });
+        SwingUtilities.invokeLater( () -> (new Main()).setVisible(true) );
+    }
+    
+    static class ItemType
+    {
+        final int type;
+        ItemType(int type)
+        {
+            this.type = type;
+        }
+        @Override
+        public String toString()
+        {
+            return Value.typeName(type);
+        }
+    }
+
+    static final ItemType[] itemTypes;
+    static
+    {
+        ItemType[] types = new ItemType[8];
+        types[Value.SERVICE_NAME]      = new ItemType(Value.SERVICE_NAME);
+        types[Value.SERVICE_URL]       = new ItemType(Value.SERVICE_URL);
+        types[Value.ID]                = new ItemType(Value.ID);
+        types[Value.PASSWORD]          = new ItemType(Value.PASSWORD);
+        types[Value.EMAIL]             = new ItemType(Value.EMAIL);
+        types[Value.REMINDER_QUESTION] = new ItemType(Value.REMINDER_QUESTION);
+        types[Value.REMINDER_ANSWER]   = new ItemType(Value.REMINDER_ANSWER);
+        types[Value.DESCTIPTION]       = new ItemType(Value.DESCTIPTION);
+        itemTypes = types;
     }
 
     static final Object[] columnNames = { "type", "value" };
+    
+    static DefaultTableModel getEmptyTableModel()
+    {
+        return new DefaultTableModel(new Object[0][], columnNames);
+    }
+    
+    static DefaultTableModel getTableModel(Value[] values, ArrayList<ItemType> types)
+    {
+        types.clear();
+        Object[][] field = new Object[values.length][2];
+        for (int i = 0; i < values.length; i++)
+        {
+            ItemType itemType = itemTypes[(int)values[i].type];
+            field[i][0] = itemType;
+            field[i][1] = values[i].value;
+            types.add(itemType);
+        }
+        return new DefaultTableModel(field, columnNames);
+    }
 
     JComboBox<String> memoComboBox;
+    JComboBox<ItemType> publicItemTypeComboBox;
+    JComboBox<ItemType> hiddenItemTypeComboBox;
     JList<String> serviceList;
     JTable detailTable, secretTable;
     DefaultListModel<String> list;
     DefaultTableModel details, secrets;
 
     JButton openMemoButton;
-    JButton newServiceButton;
+    JButton addServiceButton;
+    JButton editServiceButton;
     JButton addPublicItemButton;
     JButton addHiddenItemButton;
     JButton saveMemoButton;
     JButton showHiddenItemsButton;
-    JButton hideHiddenItemsButton;
 
     Path memoFile = null;
 
     Memo memo = null;
+    Service secretService = null;
+    int serviceIndex = -1;
+    ArrayList<ItemType> detailTypes = new ArrayList<>();
+    ArrayList<ItemType> secretTypes = new ArrayList<>();
 
     Main()
     {
@@ -69,6 +121,7 @@ class Main extends JFrame
         Box box = Box.createVerticalBox();
         add(box);
 
+        // Memo選択パネル
         Box panel = Box.createHorizontalBox();
         {
             JLabel label = new JLabel("memo", SwingConstants.LEFT);
@@ -84,6 +137,7 @@ class Main extends JFrame
             box.add(panel);
         }
 
+        // Service選択パネル
         panel = Box.createVerticalBox();
         {
             JLabel label = new JLabel("services", SwingConstants.LEFT);
@@ -91,15 +145,19 @@ class Main extends JFrame
             p.add(label);
             panel.add(p);
 
-            list = new DefaultListModel<>();
-            serviceList = new JList<>(list);
+            serviceList = new JList<>(list = new DefaultListModel<>());
             serviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
             panel.add(new JScrollPane(serviceList));
 
-            box.add(panel);
+            Box buttons = Box.createHorizontalBox();
+            buttons.add(addServiceButton = new JButton("ADD"));
+            buttons.add(editServiceButton = new JButton("EDIT"));
+            panel.add(buttons);
         }
+        box.add(panel);
 
+        // 常時表示アイテムパネル
         panel = Box.createVerticalBox();
         {
             JLabel label = new JLabel("detail", SwingConstants.LEFT);
@@ -107,18 +165,20 @@ class Main extends JFrame
             p.add(label);
             panel.add(p);
 
-            detailTable = new JTable(new Object[0][], columnNames);
+            detailTable = new JTable(details = getEmptyTableModel());
             panel.add(new JScrollPane(detailTable));
 
             Box buttons = Box.createHorizontalBox();
-            buttons.add(newServiceButton = new JButton("NEW"));
             buttons.add(saveMemoButton = new JButton("SAVE"));
             buttons.add(addPublicItemButton = new JButton("ADD"));
+            publicItemTypeComboBox = new JComboBox<>(itemTypes);
+            publicItemTypeComboBox.setEditable(false);
+            buttons.add(publicItemTypeComboBox);
             panel.add(buttons);
-
-            box.add(panel);
         }
+        box.add(panel);
 
+        // 要パスワードアイテムパネル
         panel = Box.createVerticalBox();
         {
             JLabel label = new JLabel("secrets", SwingConstants.LEFT);
@@ -127,24 +187,25 @@ class Main extends JFrame
             panel.add(p);
 
 
-            secretTable = new JTable(new Object[0][], columnNames);
+            secretTable = new JTable(secrets = getEmptyTableModel());
             panel.add(new JScrollPane(secretTable));
 
             Box buttons = Box.createHorizontalBox();
             buttons.add(showHiddenItemsButton = new JButton("SHOW"));
-            buttons.add(hideHiddenItemsButton = new JButton("HIDE"));
             buttons.add(addHiddenItemButton = new JButton("ADD"));
+            hiddenItemTypeComboBox = new JComboBox<>(itemTypes);
+            hiddenItemTypeComboBox.setEditable(false);
+            buttons.add(hiddenItemTypeComboBox);
             panel.add(buttons);
-
-            box.add(panel);
         }
+        box.add(panel);
 
         openMemoButton.addActionListener( e -> openMemo() );
-        newServiceButton.addActionListener( e -> newService() );
+        addServiceButton.addActionListener( e -> addService() );
+        editServiceButton.addActionListener( e -> editService() );
         saveMemoButton.addActionListener( e ->  saveMemo() );
         addPublicItemButton.addActionListener( e -> addPublicItem() );
         showHiddenItemsButton.addActionListener( e -> showHiddenItems() );
-        hideHiddenItemsButton.addActionListener( e -> hideHiddenItems() );
         addHiddenItemButton.addActionListener( e -> addHiddenItem() );
 
         setMemoEditorEnabled(false);
@@ -153,23 +214,36 @@ class Main extends JFrame
 
     void setMemoEditorEnabled(boolean enable)
     {
-        serviceList.setEnabled(enable);
-
-        newServiceButton.setEnabled(enable);
+        final Component[] targets = { // final指定はちょっとやばいか？(各インスタンス生成前に呼び出されると…ぬるぽ)
+            serviceList,
+            addServiceButton,
+            editServiceButton
+        };
+        
+        for (Component c : targets)
+        {
+            c.setEnabled(enable);
+        }
     }
 
     void setServiceEditorEnabled(boolean enable)
     {
-        detailTable.setEnabled(enable);
-        secretTable.setEnabled(enable);
-
-        saveMemoButton.setEnabled(enable);
-        addPublicItemButton.setEnabled(enable);
-        showHiddenItemsButton.setEnabled(enable);
-        hideHiddenItemsButton.setEnabled(enable);
-        addHiddenItemButton.setEnabled(enable);
+        final Component[] targets = { // 同上
+                detailTable,
+                secretTable,
+                saveMemoButton,
+                addPublicItemButton,
+                showHiddenItemsButton,
+                publicItemTypeComboBox,
+                hiddenItemTypeComboBox
+        };
+        
+        for (Component c : targets)
+        {
+            c.setEnabled(enable);
+        }
     }
-
+    
 
     void openMemo()
     {
@@ -203,6 +277,7 @@ class Main extends JFrame
             memo = new Memo();
             setMemoEditorEnabled(true);
             setServiceEditorEnabled(false);
+            list.clear();
             return;
         }
         try
@@ -217,6 +292,10 @@ class Main extends JFrame
             memo = Memo.load(new DataInputStream(new ByteArrayInputStream(data)));
             setMemoEditorEnabled(true);
             setServiceEditorEnabled(false);
+            for (int i = 0; i < memo.services.length; i++)
+            {
+                list.addElement(memo.services[i].getServiceName());
+            }
         }
         catch (IOException ex)
         {
@@ -226,7 +305,7 @@ class Main extends JFrame
     }
 
 
-    void newService()
+    void addService()
     {
         String serviceName = JOptionPane.showInputDialog(this, "service name");
         if (serviceName == null || (serviceName = serviceName.trim()).length() == 0)
@@ -238,9 +317,50 @@ class Main extends JFrame
     }
 
 
-    void saveMemo() {}
-    void addPublicItem() {}
-    void showHiddenItems() {}
-    void hideHiddenItems() {}
-    void addHiddenItem() {}
+    void editService()
+    {
+        int sel = serviceList.getSelectedIndex();
+        if (sel < 0)
+        {
+            return;
+        }
+        serviceIndex = sel;
+        Service service = memo.services[sel];
+        detailTable.setModel(details = getTableModel(service.values, detailTypes));
+        detailTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox<ItemType>(itemTypes)));
+        secretTable.setModel(secrets = getEmptyTableModel());
+        setServiceEditorEnabled(true);
+    }
+    
+    void saveMemo() 
+    {
+        // TODO: 
+        for (int i = 0; i < details.getRowCount(); i++)
+        {
+            Object obj = details.getValueAt(i, 0);
+            System.err.println("index: " + i + ", class: " + obj.getClass());
+        }
+    }
+    
+    void addPublicItem() 
+    {
+        ItemType itemType = publicItemTypeComboBox.getItemAt(publicItemTypeComboBox.getSelectedIndex());
+        String itemValue = JOptionPane.showInputDialog(this, itemType.toString());
+        if (itemValue == null || (itemValue = itemValue.trim()).length() == 0)
+        {
+            return;
+        }
+        details.addRow(new Object[]{itemType, itemValue});
+        detailTypes.add(itemType);
+    }
+    
+    void showHiddenItems() 
+    {
+        // TODO: 
+    }
+    
+    void addHiddenItem() 
+    {
+        // TODO:
+    }
 }
