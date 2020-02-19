@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -33,9 +34,17 @@ class Main extends JFrame
 
     public static void main(String[] args) throws Exception
     {
+        {
+            String pdir = System.getProperty("user.home");
+            if (pdir == null)
+            {
+                pdir = "";
+            }
+            baseDir = Files.createDirectories(Paths.get(pdir, ".idpwmemo"));
+        }
         SwingUtilities.invokeLater( () -> (new Main()).setVisible(true) );
     }
-    
+
     static class ItemType
     {
         final int type;
@@ -66,22 +75,19 @@ class Main extends JFrame
     }
 
     static final Object[] columnNames = { "type", "value" };
-    
+
     static DefaultTableModel getEmptyTableModel()
     {
         return new DefaultTableModel(new Object[0][], columnNames);
     }
-    
-    static DefaultTableModel getTableModel(Value[] values, ArrayList<ItemType> types)
+
+    static DefaultTableModel getTableModel(Value[] values)
     {
-        types.clear();
         Object[][] field = new Object[values.length][2];
         for (int i = 0; i < values.length; i++)
         {
-            ItemType itemType = itemTypes[(int)values[i].type];
-            field[i][0] = itemType;
+            field[i][0] = itemTypes[(int)values[i].type];
             field[i][1] = values[i].value;
-            types.add(itemType);
         }
         return new DefaultTableModel(field, columnNames);
     }
@@ -102,13 +108,12 @@ class Main extends JFrame
     JButton saveMemoButton;
     JButton showHiddenItemsButton;
 
+    static Path baseDir = null;
     Path memoFile = null;
 
     Memo memo = null;
     Service secretService = null;
     int serviceIndex = -1;
-    ArrayList<ItemType> detailTypes = new ArrayList<>();
-    ArrayList<ItemType> secretTypes = new ArrayList<>();
 
     Main()
     {
@@ -210,6 +215,7 @@ class Main extends JFrame
 
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
+        setHiddenItemEditorEnabled(false);
     }
 
     void setMemoEditorEnabled(boolean enable)
@@ -219,7 +225,7 @@ class Main extends JFrame
             addServiceButton,
             editServiceButton
         };
-        
+
         for (Component c : targets)
         {
             c.setEnabled(enable);
@@ -230,20 +236,31 @@ class Main extends JFrame
     {
         final Component[] targets = { // 同上
                 detailTable,
-                secretTable,
                 saveMemoButton,
                 addPublicItemButton,
                 showHiddenItemsButton,
-                publicItemTypeComboBox,
-                hiddenItemTypeComboBox
+                publicItemTypeComboBox
         };
-        
+
         for (Component c : targets)
         {
             c.setEnabled(enable);
         }
     }
-    
+
+    void setHiddenItemEditorEnabled(boolean enable)
+    {
+        final Component[] targets = { // 同上
+                secretTable,
+                addHiddenItemButton,
+                hiddenItemTypeComboBox
+        };
+
+        for (Component c : targets)
+        {
+            c.setEnabled(enable);
+        }
+    }
 
     void openMemo()
     {
@@ -261,7 +278,7 @@ class Main extends JFrame
             }
             memoComboBox.addItem(memoName);
         }
-        String password = JOptionPane.showInputDialog(this, "open memo( " + memoName +  " ). input password.");
+        String password = JOptionPane.showInputDialog(this, "open memo( " + memoName +  " ). input master-password.");
         if (password == null)
         {
             return;
@@ -271,13 +288,10 @@ class Main extends JFrame
         {
             pdir = "";
         }
-        memoFile = Paths.get(pdir, ".idpwmemo", memoName + ".memo");
+        memoFile = baseDir.resolve(memoName + ".memo");
         if (!Files.exists(memoFile))
         {
-            memo = new Memo();
-            setMemoEditorEnabled(true);
-            setServiceEditorEnabled(false);
-            list.clear();
+            setMemo(new Memo());
             return;
         }
         try
@@ -289,13 +303,7 @@ class Main extends JFrame
                 JOptionPane.showMessageDialog(this, "wrong password");
                 return;
             }
-            memo = Memo.load(new DataInputStream(new ByteArrayInputStream(data)));
-            setMemoEditorEnabled(true);
-            setServiceEditorEnabled(false);
-            for (int i = 0; i < memo.services.length; i++)
-            {
-                list.addElement(memo.services[i].getServiceName());
-            }
+            setMemo(Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
         }
         catch (IOException ex)
         {
@@ -304,6 +312,18 @@ class Main extends JFrame
         }
     }
 
+    void setMemo(Memo memo)
+    {
+        this.memo = memo;
+        setMemoEditorEnabled(true);
+        setServiceEditorEnabled(false);
+        setHiddenItemEditorEnabled(false);
+        list.clear();
+        for (int i = 0; i < memo.services.length; i++)
+        {
+            list.addElement(memo.services[i].getServiceName());
+        }
+    }
 
     void addService()
     {
@@ -326,23 +346,19 @@ class Main extends JFrame
         }
         serviceIndex = sel;
         Service service = memo.services[sel];
-        detailTable.setModel(details = getTableModel(service.values, detailTypes));
+        detailTable.setModel(details = getTableModel(service.values));
         detailTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox<ItemType>(itemTypes)));
         secretTable.setModel(secrets = getEmptyTableModel());
         setServiceEditorEnabled(true);
+        setHiddenItemEditorEnabled(false);
     }
-    
-    void saveMemo() 
+
+    void saveMemo()
     {
-        // TODO: 
-        for (int i = 0; i < details.getRowCount(); i++)
-        {
-            Object obj = details.getValueAt(i, 0);
-            System.err.println("index: " + i + ", class: " + obj.getClass());
-        }
+        // TODO:
     }
-    
-    void addPublicItem() 
+
+    void addPublicItem()
     {
         ItemType itemType = publicItemTypeComboBox.getItemAt(publicItemTypeComboBox.getSelectedIndex());
         String itemValue = JOptionPane.showInputDialog(this, itemType.toString());
@@ -351,16 +367,57 @@ class Main extends JFrame
             return;
         }
         details.addRow(new Object[]{itemType, itemValue});
-        detailTypes.add(itemType);
     }
-    
-    void showHiddenItems() 
+
+    void showHiddenItems()
     {
-        // TODO: 
+        if (addHiddenItemButton.isEnabled())
+        {
+            return;
+        }
+        byte[] secretsBuffer = memo.services[serviceIndex].secrets;
+        Value[] values = null;
+        if (secretsBuffer != null && secretsBuffer.length > 0)
+        {
+            String password = JOptionPane.showInputDialog(this, "input master-password.");
+            if (password == null)
+            {
+                return;
+            }
+            try
+            {
+                byte[] data = Cryptor.instance.decrypt(password.getBytes(), secretsBuffer);
+                if (data == null)
+                {
+                    JOptionPane.showMessageDialog(this, "wrong password");
+                    return;
+                }
+                values = Service.readSecrets(new DataInputStream(new ByteArrayInputStream(data)));
+            }
+            catch (IOException ex)
+            {
+                Logger.getGlobal().log(Level.FINER, "failed to read secrets.", ex);
+                JOptionPane.showMessageDialog(this, "failed to read secrets.");
+                return;
+            }
+        }
+        else
+        {
+            values = new Value[0];
+        }
+        setHiddenItemEditorEnabled(true);
+        secretTable.setModel(secrets = getTableModel(values));
+        secretTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox<ItemType>(itemTypes)));
     }
-    
-    void addHiddenItem() 
+
+    void addHiddenItem()
     {
-        // TODO:
+        ItemType itemType = hiddenItemTypeComboBox.getItemAt(hiddenItemTypeComboBox.getSelectedIndex());
+        String itemValue = JOptionPane.showInputDialog(this, itemType.toString());
+        if (itemValue == null || (itemValue = itemValue.trim()).length() == 0)
+        {
+            return;
+        }
+        secrets.addRow(new Object[]{itemType, itemValue});
     }
 }

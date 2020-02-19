@@ -6,19 +6,19 @@ import java.io.IOException;
 class Memo
 {
     static final int VERSION = 1;
-    
+
     Service[] services;
-    
+
     Memo()
     {
         services = new Service[0];
     }
-    
+
     Memo(Service[] services)
     {
         this.services = services;
     }
-    
+
     void addService(Service newService)
     {
         Service[] tmp = new Service[services.length + 1];
@@ -26,14 +26,14 @@ class Memo
         tmp[tmp.length - 1] = newService;
         services = tmp;
     }
-    
+
     static Memo load(DataInput in) throws IOException
     {
         int version = in.readInt();
         if (version > VERSION)
         {
             throw new IOException("invalid version");
-        }    
+        }
         int count = in.readInt();
         Service[] services = new Service[count];
         for (int i = 0; i < count; i++)
@@ -42,7 +42,7 @@ class Memo
         }
         return new Memo(services);
     }
-    
+
     void save(DataOutput out) throws IOException
     {
         out.writeInt(VERSION);
@@ -51,5 +51,5 @@ class Memo
         {
             services[i].save(out);
         }
-    }   
+    }
 }

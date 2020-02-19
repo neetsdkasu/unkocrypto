@@ -39,12 +39,12 @@ final class Value
             return "unknown";
         }
     }
-    
+
     String getTypeName()
     {
         return typeName((int)type);
     }
-    
+
     void setDefaultVisible()
     {
         switch ((int)type)
@@ -63,39 +63,39 @@ final class Value
             visible = true;
         }
     }
-    
+
     byte    type;
     boolean visible;
     String  value;
-    
+
     Value(int type, String value)
     {
         set((byte)type, value);
     }
-    
+
     Value(byte type, String value)
     {
         set(type, value);
     }
-    
+
     void set(int type, String value)
     {
         set((byte)type, value);
     }
-    
+
     void set(byte type, String value)
     {
         this.type = type;
         this.value = value;
     }
-    
+
     static Value load(DataInput in) throws IOException
     {
         byte type = in.readByte();
         String value = in.readUTF();
         return new Value(type, value);
     }
-    
+
     void save(DataOutput out) throws IOException
     {
         out.writeByte(type);
