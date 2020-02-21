@@ -31,6 +31,7 @@ import javax.swing.table.DefaultTableModel;
 
 class Main extends JFrame
 {
+    static final String APP_TITLE = "IDPWMemo";
 
     public static void main(String[] args) throws Exception
     {
@@ -92,6 +93,14 @@ class Main extends JFrame
         return new DefaultTableModel(field, columnNames);
     }
 
+    static void lockColumn(JTable table, int column)
+    {
+        JComboBox<ItemType> cb = new JComboBox<>(itemTypes);
+        DefaultCellEditor dce = new DefaultCellEditor(cb);
+        dce.setClickCountToStart(Integer.MAX_VALUE >> 1);
+        table.getColumnModel().getColumn(column).setCellEditor(dce);
+    }
+
     JComboBox<String> memoComboBox;
     JComboBox<ItemType> publicItemTypeComboBox;
     JComboBox<ItemType> hiddenItemTypeComboBox;
@@ -110,14 +119,14 @@ class Main extends JFrame
 
     static Path baseDir = null;
     Path memoFile = null;
-
+    String memoName = null;
     Memo memo = null;
     Service secretService = null;
     int serviceIndex = -1;
 
     Main()
     {
-        super("IDPWMemo");
+        super(APP_TITLE);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300, 600);
@@ -291,7 +300,7 @@ class Main extends JFrame
         memoFile = baseDir.resolve(memoName + ".memo");
         if (!Files.exists(memoFile))
         {
-            setMemo(new Memo());
+            setMemo(memoName, new Memo());
             return;
         }
         try
@@ -303,7 +312,7 @@ class Main extends JFrame
                 JOptionPane.showMessageDialog(this, "wrong password");
                 return;
             }
-            setMemo(Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
+            setMemo(memoName, Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
         }
         catch (IOException ex)
         {
@@ -312,9 +321,11 @@ class Main extends JFrame
         }
     }
 
-    void setMemo(Memo memo)
+    void setMemo(String memoName, Memo memo)
     {
+        this.memoName = memoName;
         this.memo = memo;
+        setTitle(APP_TITLE + " (" + memoName + ")");
         setMemoEditorEnabled(true);
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
@@ -323,6 +334,8 @@ class Main extends JFrame
         {
             list.addElement(memo.services[i].getServiceName());
         }
+        detailTable.setModel(details = getEmptyTableModel());
+        secretTable.setModel(secrets = getEmptyTableModel());
     }
 
     void addService()
@@ -347,8 +360,9 @@ class Main extends JFrame
         serviceIndex = sel;
         Service service = memo.services[sel];
         detailTable.setModel(details = getTableModel(service.values));
-        detailTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox<ItemType>(itemTypes)));
+        lockColumn(detailTable, 0);
         secretTable.setModel(secrets = getEmptyTableModel());
+        setTitle(APP_TITLE + " " + service.getServiceName() + " (" + memoName + ")");
         setServiceEditorEnabled(true);
         setHiddenItemEditorEnabled(false);
     }
@@ -356,6 +370,12 @@ class Main extends JFrame
     void saveMemo()
     {
         // TODO:
+        for (int i = 0; i < details.getRowCount(); i++)
+        {
+            System.err.print(details.getValueAt(i, 0).getClass());
+            System.err.print(", ");
+            System.err.println(details.getValueAt(i, 1));
+        }
     }
 
     void addPublicItem()
@@ -407,7 +427,7 @@ class Main extends JFrame
         }
         setHiddenItemEditorEnabled(true);
         secretTable.setModel(secrets = getTableModel(values));
-        secretTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox<ItemType>(itemTypes)));
+        lockColumn(secretTable, 0);
     }
 
     void addHiddenItem()
