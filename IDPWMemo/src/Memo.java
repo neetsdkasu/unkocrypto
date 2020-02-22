@@ -19,11 +19,37 @@ class Memo
         this.services = services;
     }
 
+    int getServiceCount()
+    {
+        return services.length;
+    }
+
     void addService(Service newService)
     {
         Service[] tmp = new Service[services.length + 1];
         System.arraycopy(services, 0, tmp, 0, services.length);
         tmp[tmp.length - 1] = newService;
+        services = tmp;
+    }
+
+    Service getService(int index)
+    {
+        return services[index];
+    }
+
+    void setService(int index, Service service)
+    {
+        services[index] = service;
+    }
+
+    void removeService(int index)
+    {
+        for (int i = index + 1; i < services.length; i++)
+        {
+            services[i - 1] = services[i];
+        }
+        Service[] tmp = new Service[services.length - 1];
+        System.arraycopy(services, 0, tmp, 0, tmp.length);
         services = tmp;
     }
 

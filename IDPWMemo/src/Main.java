@@ -331,9 +331,9 @@ class Main extends JFrame
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
         list.clear();
-        for (int i = 0; i < memo.services.length; i++)
+        for (int i = 0; i < memo.getServiceCount(); i++)
         {
-            list.addElement(memo.services[i].getServiceName());
+            list.addElement(memo.getService(i).getServiceName());
         }
         detailTable.setModel(details = getEmptyTableModel());
         secretTable.setModel(secrets = getEmptyTableModel());
@@ -359,7 +359,7 @@ class Main extends JFrame
             return;
         }
         serviceIndex = sel;
-        Service service = memo.services[sel];
+        Service service = memo.getService(sel);
         detailTable.setModel(details = getTableModel(service.values));
         lockColumn(detailTable, 0);
         secretTable.setModel(secrets = getEmptyTableModel());
@@ -392,7 +392,7 @@ class Main extends JFrame
             return;
         }
         Value[] items = getValues(details);
-        byte[] secretsBuffer = memo.services[serviceIndex].secrets;
+        byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
         if (secretTable.isEnabled())
         {
             Value[] secretItems = getValues(secrets);
@@ -409,12 +409,16 @@ class Main extends JFrame
                 return;
             }
         }
-        Service service = new Sevice(items, secretsBuffer);
+        Service service = new Service(items, secretsBuffer);
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
         {
-            // TODO: confirm delete this service
-
+            // TODO: confirm remove this service
+            memo.removeService(serviceIndex);
+        }
+        else
+        {
+            memo.setService(serviceIndex, service);
         }
         // TODO: save memo to file
     }
@@ -436,7 +440,7 @@ class Main extends JFrame
         {
             return;
         }
-        byte[] secretsBuffer = memo.services[serviceIndex].secrets;
+        byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
         Value[] values = null;
         if (secretsBuffer != null && secretsBuffer.length > 0)
         {

@@ -11,12 +11,12 @@ import neetsdkasu.crypto.CryptoException;
 final class Cryptor
 {
     static final Cryptor instance = new Cryptor();
-    
+
     private final MTRandom rand = new MTRandom();
     private final Checksum cs = new CRC32();
-    
+
     private Cryptor() {}
-    
+
     private static long[] genSeed(int size)
     {
         long[] seed = new long[size];
@@ -29,7 +29,7 @@ final class Cryptor
         }
         return seed;
     }
-    
+
     private static long[] genSeed(byte[] password)
     {
         if (password == null || password.length == 0)
@@ -53,7 +53,7 @@ final class Cryptor
         }
         return seed;
     }
-    
+
     private static int encryptBlockSize(int srclen)
     {
         int size = Math.max(Crypto.MIN_BLOCKSIZE, srclen + Crypto.META_SIZE);
@@ -75,7 +75,7 @@ final class Cryptor
         }
         return size;
     }
-    
+
     synchronized byte[] decrypt(byte[] password, byte[] src) throws IOException
     {
         ByteArrayInputStream in = new ByteArrayInputStream(src);
@@ -102,7 +102,7 @@ final class Cryptor
         }
         return null;
     }
-    
+
     synchronized byte[] encrypt(byte[] password, byte[] src) throws IOException
     {
         int blockSize = encryptBlockSize(src.length);
