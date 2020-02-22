@@ -3,7 +3,9 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -121,7 +123,6 @@ class Main extends JFrame
     Path memoFile = null;
     String memoName = null;
     Memo memo = null;
-    Service secretService = null;
     int serviceIndex = -1;
 
     Main()
@@ -367,15 +368,55 @@ class Main extends JFrame
         setHiddenItemEditorEnabled(false);
     }
 
+    static Value[] getValues(DefaultTableModel table)
+    {
+        ArrayList<Value> items = new ArrayList<>();
+        for (int i = 0; i < table.getRowCount(); i++)
+        {
+            ItemType itemType = (ItemType)table.getValueAt(i, 0);
+            String itemValue = ((String)table.getValueAt(i, 1)).trim();
+            if (itemValue.length() == 0)
+            {
+                continue;
+            }
+            items.add(new Value(itemType.type, itemValue));
+        }
+        return items.toArray(new Value[0]);
+    }
+
     void saveMemo()
     {
-        // TODO:
-        for (int i = 0; i < details.getRowCount(); i++)
+        String password = JOptionPane.showInputDialog(this, "save memo( " + memoName +  " ). input master-password.");
+        if (password == null)
         {
-            System.err.print(details.getValueAt(i, 0).getClass());
-            System.err.print(", ");
-            System.err.println(details.getValueAt(i, 1));
+            return;
         }
+        Value[] items = getValues(details);
+        byte[] secretsBuffer = memo.services[serviceIndex].secrets;
+        if (secretTable.isEnabled())
+        {
+            Value[] secretItems = getValues(secrets);
+            try
+            {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                Service.writeSecrets(new DataOutputStream(baos), secretItems);
+                secretsBuffer = Cryptor.instance.encrypt(password.getBytes(), baos.toByteArray());
+            }
+            catch (IOException ex)
+            {
+                Logger.getGlobal().log(Level.FINER, "failed to ecrypt secret items.", ex);
+                JOptionPane.showMessageDialog(this, "failed to ecrypt secret items.");
+                return;
+            }
+        }
+        Service service = new Sevice(items, secretsBuffer);
+        String serviceName = service.getServiceName();
+        if (serviceName == null || serviceName.length() == 0)
+        {
+            // TODO: confirm delete this service
+
+        }
+        // TODO: save memo to file
     }
 
     void addPublicItem()

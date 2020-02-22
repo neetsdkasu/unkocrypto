@@ -28,7 +28,7 @@ class Service
                 return values[i].value;
             }
         }
-        throw new RuntimeException("invalid instance");
+        return "";
     }
 
     static Value[] readSecrets(DataInput in) throws IOException
