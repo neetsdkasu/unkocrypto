@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,6 +35,7 @@ import javax.swing.table.DefaultTableModel;
 class Main extends JFrame
 {
     static final String APP_TITLE = "IDPWMemo";
+    static final String EXTENSION = ".memo";
 
     public static void main(String[] args) throws Exception
     {
@@ -124,6 +126,7 @@ class Main extends JFrame
     String memoName = null;
     Memo memo = null;
     int serviceIndex = -1;
+    byte[] password = null; // パスワードを平文でメモリ上に保持…だと？気は確かか？
 
     Main()
     {
@@ -226,6 +229,21 @@ class Main extends JFrame
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(baseDir, "*" + EXTENSION))
+        {
+            for (Path p : stream)
+            {
+                String memoName = p.toFile().getName();
+                memoName = memoName.substring(0, memoName.length() - EXTENSION.length());
+                memoComboBox.addItem(memoName);
+            }
+        }
+        catch (IOException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed to access memo files.", ex);
+            JOptionPane.showMessageDialog(null, "failed to access memo files.");
+        }
     }
 
     void setMemoEditorEnabled(boolean enable)
@@ -256,6 +274,7 @@ class Main extends JFrame
         {
             c.setEnabled(enable);
         }
+
     }
 
     void setHiddenItemEditorEnabled(boolean enable)
@@ -298,22 +317,25 @@ class Main extends JFrame
         {
             pdir = "";
         }
-        memoFile = baseDir.resolve(memoName + ".memo");
-        if (!Files.exists(memoFile))
-        {
-            setMemo(memoName, new Memo());
-            return;
-        }
         try
         {
-            byte[] data = Files.readAllBytes(memoFile);
-            data = Cryptor.instance.decrypt(password.getBytes(), data);
-            if (data == null)
+            memoFile = baseDir.resolve(memoName + EXTENSION);
+            if (!Files.exists(memoFile))
             {
-                JOptionPane.showMessageDialog(this, "wrong password");
-                return;
+                setMemo(memoName, new Memo());
             }
-            setMemo(memoName, Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
+            else
+            {
+                byte[] data = Files.readAllBytes(memoFile);
+                data = Cryptor.instance.decrypt(password.getBytes(), data);
+                if (data == null)
+                {
+                    JOptionPane.showMessageDialog(this, "wrong password");
+                    return;
+                }
+                setMemo(memoName, Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
+            }
+            this.password = Cryptor.instance.encrypt(null, password.getBytes());
         }
         catch (IOException ex)
         {
@@ -386,9 +408,15 @@ class Main extends JFrame
 
     void saveMemo()
     {
-        String password = JOptionPane.showInputDialog(this, "save memo( " + memoName +  " ). input master-password.");
-        if (password == null)
+        byte[] password = null;
+        try
         {
+            password = Cryptor.instance.decrypt(null, this.password);
+        }
+        catch (IOException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed to decrypt password.", ex);
+            JOptionPane.showMessageDialog(this, "failed with unknown error.");
             return;
         }
         Value[] items = getValues(details);
@@ -400,7 +428,7 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Service.writeSecrets(new DataOutputStream(baos), secretItems);
-                secretsBuffer = Cryptor.instance.encrypt(password.getBytes(), baos.toByteArray());
+                secretsBuffer = Cryptor.instance.encrypt(password, baos.toByteArray());
             }
             catch (IOException ex)
             {
@@ -413,14 +441,48 @@ class Main extends JFrame
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
         {
-            // TODO: confirm remove this service
+            serviceName = memo.getService(serviceIndex).getServiceName();
+            int ans = JOptionPane.showConfirmDialog(this, "delete '" + serviceName + "' from " + memoName, null, JOptionPane.OK_CANCEL_OPTION);
+            if (ans == JOptionPane.CANCEL_OPTION)
+            {
+                JOptionPane.showMessageDialog(this, "you must set service name");
+                return;
+            }
             memo.removeService(serviceIndex);
+            list.removeElementAt(serviceIndex);
+            setServiceEditorEnabled(false);
+            setHiddenItemEditorEnabled(false);
+            detailTable.setModel(details = getEmptyTableModel());
+            secretTable.setModel(secrets = getEmptyTableModel());
+            setTitle(APP_TITLE + "(" + memoName + ")");
         }
         else
         {
             memo.setService(serviceIndex, service);
         }
-        // TODO: save memo to file
+        try
+        {
+            if (memo.getServiceCount() == 0)
+            {
+                if (Files.deleteIfExists(memoFile))
+                {
+                    JOptionPane.showMessageDialog(this, "delete memo file");
+                }
+            }
+            else
+            {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                memo.save(new DataOutputStream(baos));
+                byte[] data = Cryptor.instance.encrypt(password, baos.toByteArray());
+                Files.write(memoFile, data);
+                JOptionPane.showMessageDialog(this, "saved");
+            }
+        }
+        catch (IOException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed to ecrypt secret items.", ex);
+            JOptionPane.showMessageDialog(this, "failed to ecrypt secret items.");
+        }
     }
 
     void addPublicItem()
@@ -444,14 +506,10 @@ class Main extends JFrame
         Value[] values = null;
         if (secretsBuffer != null && secretsBuffer.length > 0)
         {
-            String password = JOptionPane.showInputDialog(this, "input master-password.");
-            if (password == null)
-            {
-                return;
-            }
             try
             {
-                byte[] data = Cryptor.instance.decrypt(password.getBytes(), secretsBuffer);
+                byte[] password = Cryptor.instance.decrypt(null, this.password);
+                byte[] data = Cryptor.instance.decrypt(password, secretsBuffer);
                 if (data == null)
                 {
                     JOptionPane.showMessageDialog(this, "wrong password");
