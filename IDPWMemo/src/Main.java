@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
@@ -20,6 +21,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -27,7 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -135,6 +137,9 @@ class Main extends JFrame
     JButton addHiddenItemButton;
     JButton saveMemoButton;
     JButton showHiddenItemsButton;
+    JButton changePasswordButton;
+    JButton exportServiceButton;
+    JButton importServiceButton;
 
     static Path baseDir = null;
     Path memoFile = null;
@@ -184,9 +189,9 @@ class Main extends JFrame
             panel.add(new JScrollPane(serviceList));
 
             Box buttons = Box.createHorizontalBox();
-            buttons.add(new JButton("CHPW"));
-            buttons.add(new JButton("EXP"));
-            buttons.add(new JButton("INP"));
+            buttons.add(changePasswordButton = new JButton("CHPW"));
+            buttons.add(exportServiceButton = new JButton("EXP"));
+            buttons.add(importServiceButton = new JButton("INP"));
             buttons.add(addServiceButton = new JButton("ADD"));
             buttons.add(editServiceButton = new JButton("EDIT"));
             panel.add(buttons);
@@ -243,6 +248,9 @@ class Main extends JFrame
         addPublicItemButton.addActionListener( e -> addPublicItem() );
         showHiddenItemsButton.addActionListener( e -> showHiddenItems() );
         addHiddenItemButton.addActionListener( e -> addHiddenItem() );
+        changePasswordButton.addActionListener( e -> changePassword() );
+        exportServiceButton.addActionListener( e -> exportService() );
+        importServiceButton.addActionListener( e -> importService() );
 
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
@@ -269,7 +277,10 @@ class Main extends JFrame
         final Component[] targets = { // final指定はちょっとやばいか？(各インスタンス生成前に呼び出されると…ぬるぽ)
             serviceList,
             addServiceButton,
-            editServiceButton
+            editServiceButton,
+            changePasswordButton,
+            exportServiceButton,
+            importServiceButton
         };
 
         for (Component c : targets)
@@ -417,7 +428,7 @@ class Main extends JFrame
         Service service = memo.getService(sel);
         resetItemTable(detailTable, details = getTableModel(service.values));
         resetItemTable(secretTable, secrets = getEmptyTableModel());
-        setTitle(memoName, service.getServiceName());
+        setTitle(memoName, list.elementAt(sel));
         setServiceEditorEnabled(true);
         setHiddenItemEditorEnabled(false);
     }
@@ -462,7 +473,7 @@ class Main extends JFrame
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
         {
-            serviceName = memo.getService(serviceIndex).getServiceName();
+            serviceName = list.elementAt(serviceIndex);
             int ans = JOptionPane.showConfirmDialog(this, "delete '" + serviceName + "' from " + memoName, null, JOptionPane.OK_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION)
             {
@@ -563,4 +574,83 @@ class Main extends JFrame
         }
         secrets.addRow(new Object[]{itemType, itemValue});
     }
+
+    void changePassword()
+    {
+        // TODO:
+    }
+
+    void exportService()
+    {
+        int sel = serviceList.getSelectedIndex();
+        if (sel < 0)
+        {
+            return;
+        }
+        String serviceName = list.elementAt(sel);
+        String exPassword = JOptionPane.showInputDialog(this, "export ( " + serviceName +  " ). input export-password.");
+        if (exPassword == null)
+        {
+            return;
+        }
+        String exportText;
+        try
+        {
+            Service service = memo.getService(sel);
+            byte[] secrets = service.secrets;
+            if (secrets.length > 0)
+            {
+                secrets = Cryptor.instance.encrypt(
+                    exPassword.getBytes(CHARSET),
+                    Cryptor.instance.decrypt(
+                        Cryptor.instance.decrypt(null, password),
+                        secrets));
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            (new Memo(new Service[]{ new Service(service.values, secrets) })).save(new DataOutputStream(baos));
+            exportText = Base64.getEncoder().encodeToString(baos.toByteArray());
+        }
+        catch (IOException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
+            JOptionPane.showMessageDialog(this, "failed with unknown error.");
+            return;
+        }
+        final JDialog dialog = new JDialog(this, "", true);
+        final JLabel label = new JLabel();
+        final JTextArea text = new JTextArea();
+        if (dialog.getTitle() == null || dialog.getTitle().length() == 0)
+        {
+            dialog.setSize(400, 400);
+            dialog.setLocationRelativeTo(this);
+            dialog.setTitle("export");
+            label.setHorizontalAlignment(SwingConstants.LEFT);
+            JButton copyButton = new JButton("COPY");
+            text.setLineWrap(true);
+            text.setEditable(false);
+            Box box = Box.createVerticalBox();
+            box.add(label);
+            box.add(new JScrollPane(text));
+            box.add(copyButton);
+            dialog.add(box);
+            copyButton.addActionListener( e -> text.copy() );
+            addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e)
+                {
+                    dialog.dispose();
+                }
+            });
+        }
+        label.setText(serviceName + " (" + memoName + ") size: " + exportText.length());
+        text.setText(exportText);
+        text.selectAll();
+        dialog.setVisible(true);
+    }
+
+    void importService()
+    {
+        // TODO:
+    }
+
 }
