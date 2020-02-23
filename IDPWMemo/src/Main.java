@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
@@ -36,6 +37,7 @@ class Main extends JFrame
 {
     static final String APP_TITLE = "IDPWMemo";
     static final String EXTENSION = ".memo";
+    static final String CHARSET   = "UTF-8";
 
     public static void main(String[] args) throws Exception
     {
@@ -97,12 +99,25 @@ class Main extends JFrame
         return new DefaultTableModel(field, columnNames);
     }
 
-    static void lockColumn(JTable table, int column)
+    static void resetItemTable(JTable table, DefaultTableModel model)
     {
-        JComboBox<ItemType> cb = new JComboBox<>(itemTypes);
-        DefaultCellEditor dce = new DefaultCellEditor(cb);
+        final int ITEM_TYPE_COLUMN_INDEX = 0;
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+        table.setModel(model);
+        DefaultCellEditor dce = new DefaultCellEditor(new JComboBox<>(itemTypes));
         dce.setClickCountToStart(Integer.MAX_VALUE >> 1);
-        table.getColumnModel().getColumn(column).setCellEditor(dce);
+        table.getColumnModel().getColumn(ITEM_TYPE_COLUMN_INDEX).setCellEditor(dce);
+        table.doLayout();
+        int[] width = new int[table.getColumnCount()];
+        for (int i = 0; i < width.length; i++)
+        {
+            width[i] = table.getColumnModel().getColumn(i).getWidth();
+        }
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int i = 0; i < width.length; i++)
+        {
+            table.getColumnModel().getColumn(i).setPreferredWidth(width[i]);
+        }
     }
 
     JComboBox<String> memoComboBox;
@@ -126,14 +141,14 @@ class Main extends JFrame
     String memoName = null;
     Memo memo = null;
     int serviceIndex = -1;
-    byte[] password = null; // パスワードを平文でメモリ上に保持…だと？気は確かか？
+    byte[] password = null; // パスワードを平文でメモリ上に保持…だと？正気か？
 
     Main()
     {
         super(APP_TITLE);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 600);
+        setSize(310, 500);
         setLocationRelativeTo(null);
 
         Box box = Box.createVerticalBox();
@@ -169,6 +184,9 @@ class Main extends JFrame
             panel.add(new JScrollPane(serviceList));
 
             Box buttons = Box.createHorizontalBox();
+            buttons.add(new JButton("CHPW"));
+            buttons.add(new JButton("EXP"));
+            buttons.add(new JButton("INP"));
             buttons.add(addServiceButton = new JButton("ADD"));
             buttons.add(editServiceButton = new JButton("EDIT"));
             panel.add(buttons);
@@ -274,7 +292,6 @@ class Main extends JFrame
         {
             c.setEnabled(enable);
         }
-
     }
 
     void setHiddenItemEditorEnabled(boolean enable)
@@ -327,7 +344,7 @@ class Main extends JFrame
             else
             {
                 byte[] data = Files.readAllBytes(memoFile);
-                data = Cryptor.instance.decrypt(password.getBytes(), data);
+                data = Cryptor.instance.decrypt(password.getBytes(CHARSET), data);
                 if (data == null)
                 {
                     JOptionPane.showMessageDialog(this, "wrong password");
@@ -335,7 +352,7 @@ class Main extends JFrame
                 }
                 setMemo(memoName, Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
             }
-            this.password = Cryptor.instance.encrypt(null, password.getBytes());
+            this.password = Cryptor.instance.encrypt(null, password.getBytes(CHARSET));
         }
         catch (IOException ex)
         {
@@ -344,11 +361,27 @@ class Main extends JFrame
         }
     }
 
+    void setTitle(String memoName, String serviceName)
+    {
+        if (memoName == null)
+        {
+            setTitle(APP_TITLE);
+        }
+        else if (serviceName == null)
+        {
+            setTitle(APP_TITLE + " - (" + memoName + ")");
+        }
+        else
+        {
+            setTitle(APP_TITLE + " - " + serviceName + " (" + memoName + ")");
+        }
+    }
+
     void setMemo(String memoName, Memo memo)
     {
         this.memoName = memoName;
         this.memo = memo;
-        setTitle(APP_TITLE + " (" + memoName + ")");
+        setTitle(memoName, null);
         setMemoEditorEnabled(true);
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
@@ -357,8 +390,8 @@ class Main extends JFrame
         {
             list.addElement(memo.getService(i).getServiceName());
         }
-        detailTable.setModel(details = getEmptyTableModel());
-        secretTable.setModel(secrets = getEmptyTableModel());
+        resetItemTable(detailTable, details = getEmptyTableModel());
+        resetItemTable(secretTable, secrets = getEmptyTableModel());
     }
 
     void addService()
@@ -382,10 +415,9 @@ class Main extends JFrame
         }
         serviceIndex = sel;
         Service service = memo.getService(sel);
-        detailTable.setModel(details = getTableModel(service.values));
-        lockColumn(detailTable, 0);
-        secretTable.setModel(secrets = getEmptyTableModel());
-        setTitle(APP_TITLE + " " + service.getServiceName() + " (" + memoName + ")");
+        resetItemTable(detailTable, details = getTableModel(service.values));
+        resetItemTable(secretTable, secrets = getEmptyTableModel());
+        setTitle(memoName, service.getServiceName());
         setServiceEditorEnabled(true);
         setHiddenItemEditorEnabled(false);
     }
@@ -408,17 +440,6 @@ class Main extends JFrame
 
     void saveMemo()
     {
-        byte[] password = null;
-        try
-        {
-            password = Cryptor.instance.decrypt(null, this.password);
-        }
-        catch (IOException ex)
-        {
-            Logger.getGlobal().log(Level.FINER, "failed to decrypt password.", ex);
-            JOptionPane.showMessageDialog(this, "failed with unknown error.");
-            return;
-        }
         Value[] items = getValues(details);
         byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
         if (secretTable.isEnabled())
@@ -428,7 +449,7 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Service.writeSecrets(new DataOutputStream(baos), secretItems);
-                secretsBuffer = Cryptor.instance.encrypt(password, baos.toByteArray());
+                secretsBuffer = Cryptor.instance.encrypt(Cryptor.instance.decrypt(null, password), baos.toByteArray());
             }
             catch (IOException ex)
             {
@@ -452,9 +473,9 @@ class Main extends JFrame
             list.removeElementAt(serviceIndex);
             setServiceEditorEnabled(false);
             setHiddenItemEditorEnabled(false);
-            detailTable.setModel(details = getEmptyTableModel());
-            secretTable.setModel(secrets = getEmptyTableModel());
-            setTitle(APP_TITLE + "(" + memoName + ")");
+            resetItemTable(detailTable, details = getEmptyTableModel());
+            resetItemTable(secretTable, secrets = getEmptyTableModel());
+            setTitle(memoName, null);
         }
         else
         {
@@ -473,7 +494,7 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 memo.save(new DataOutputStream(baos));
-                byte[] data = Cryptor.instance.encrypt(password, baos.toByteArray());
+                byte[] data = Cryptor.instance.encrypt(Cryptor.instance.decrypt(null, password), baos.toByteArray());
                 Files.write(memoFile, data);
                 JOptionPane.showMessageDialog(this, "saved");
             }
@@ -529,8 +550,7 @@ class Main extends JFrame
             values = new Value[0];
         }
         setHiddenItemEditorEnabled(true);
-        secretTable.setModel(secrets = getTableModel(values));
-        lockColumn(secretTable, 0);
+        resetItemTable(secretTable, secrets = getTableModel(values));
     }
 
     void addHiddenItem()
