@@ -1,6 +1,7 @@
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.zip.Checksum;
 import java.util.zip.CRC32;
 
@@ -10,6 +11,13 @@ import neetsdkasu.crypto.CryptoException;
 
 final class Cryptor
 {
+    static final String CHARSET = "UTF-8";
+
+    public static byte[] getBytes(String s) throws UnsupportedEncodingException
+    {
+        return s.getBytes(CHARSET);
+    }
+
     static final Cryptor instance = new Cryptor();
 
     private final MTRandom rand = new MTRandom();
@@ -76,6 +84,11 @@ final class Cryptor
         return size;
     }
 
+    byte[] decrypt(String password, byte[] src) throws IOException
+    {
+        return decrypt(getBytes(password), src);
+    }
+
     synchronized byte[] decrypt(byte[] password, byte[] src) throws IOException
     {
         ByteArrayInputStream in = new ByteArrayInputStream(src);
@@ -101,6 +114,11 @@ final class Cryptor
             }
         }
         return null;
+    }
+
+    byte[] encrypt(String password, byte[] src) throws IOException
+    {
+        return encrypt(getBytes(password), src);
     }
 
     synchronized byte[] encrypt(byte[] password, byte[] src) throws IOException

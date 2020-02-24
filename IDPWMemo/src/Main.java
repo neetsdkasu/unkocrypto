@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
@@ -39,8 +40,8 @@ import javax.swing.table.DefaultTableModel;
 class Main extends JFrame
 {
     static final String APP_TITLE = "IDPWMemo";
+    static final String APP_DATA_DIR = ".idpwmemo";
     static final String EXTENSION = ".memo";
-    static final String CHARSET   = "UTF-8";
 
     public static void main(String[] args) throws Exception
     {
@@ -50,8 +51,9 @@ class Main extends JFrame
             {
                 pdir = "";
             }
-            baseDir = Files.createDirectories(Paths.get(pdir, ".idpwmemo"));
+            baseDir = Files.createDirectories(Paths.get(pdir, APP_DATA_DIR));
         }
+        Logger.getGlobal().addHandler(new FileHandler("%h/" + APP_DATA_DIR + "/error%u.log"));
         SwingUtilities.invokeLater( () -> (new Main()).setVisible(true) );
     }
 
@@ -245,7 +247,7 @@ class Main extends JFrame
         openMemoButton.addActionListener( e -> openMemo() );
         addServiceButton.addActionListener( e -> addService() );
         editServiceButton.addActionListener( e -> editService() );
-        saveMemoButton.addActionListener( e ->  saveMemo() );
+        saveMemoButton.addActionListener( e ->  updateService() );
         addPublicItemButton.addActionListener( e -> addPublicItem() );
         showHiddenItemsButton.addActionListener( e -> showHiddenItems() );
         addHiddenItemButton.addActionListener( e -> addHiddenItem() );
@@ -331,7 +333,7 @@ class Main extends JFrame
         {
             if (!memoName.matches("^[_0-9A-Za-z\\-\\(\\)\\[\\]]+$"))
             {
-                JOptionPane.showMessageDialog(this, "wrong name");
+                JOptionPane.showMessageDialog(this, "wrong name ( valid characters: A-Z a-z 0-9 () [] _ - )");
                 return;
             }
             memoComboBox.addItem(memoName);
@@ -340,11 +342,6 @@ class Main extends JFrame
         if (password == null)
         {
             return;
-        }
-        String pdir = System.getProperty("user.home");
-        if (pdir == null)
-        {
-            pdir = "";
         }
         try
         {
@@ -356,7 +353,7 @@ class Main extends JFrame
             else
             {
                 byte[] data = Files.readAllBytes(memoFile);
-                data = Cryptor.instance.decrypt(password.getBytes(CHARSET), data);
+                data = Cryptor.instance.decrypt(password, data);
                 if (data == null)
                 {
                     JOptionPane.showMessageDialog(this, "wrong password");
@@ -364,7 +361,7 @@ class Main extends JFrame
                 }
                 setMemo(memoName, Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
             }
-            this.password = Cryptor.instance.encrypt(null, password.getBytes(CHARSET));
+            this.password = Cryptor.instance.encrypt("", Cryptor.getBytes(password));
         }
         catch (IOException ex)
         {
@@ -423,6 +420,7 @@ class Main extends JFrame
         int sel = serviceList.getSelectedIndex();
         if (sel < 0)
         {
+            JOptionPane.showMessageDialog(this, "not selected.");
             return;
         }
         serviceIndex = sel;
@@ -450,7 +448,7 @@ class Main extends JFrame
         return items.toArray(new Value[0]);
     }
 
-    void saveMemo()
+    void updateService()
     {
         Value[] items = getValues(details);
         byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
@@ -461,7 +459,7 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Service.writeSecrets(new DataOutputStream(baos), secretItems);
-                secretsBuffer = Cryptor.instance.encrypt(Cryptor.instance.decrypt(null, password), baos.toByteArray());
+                secretsBuffer = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password), baos.toByteArray());
             }
             catch (IOException ex)
             {
@@ -491,8 +489,14 @@ class Main extends JFrame
         }
         else
         {
+            list.setElementAt(serviceName, serviceIndex);
             memo.setService(serviceIndex, service);
         }
+        saveMemo();
+    }
+
+    void saveMemo()
+    {
         try
         {
             if (memo.getServiceCount() == 0)
@@ -506,7 +510,7 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 memo.save(new DataOutputStream(baos));
-                byte[] data = Cryptor.instance.encrypt(Cryptor.instance.decrypt(null, password), baos.toByteArray());
+                byte[] data = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password), baos.toByteArray());
                 Files.write(memoFile, data);
                 JOptionPane.showMessageDialog(this, "saved");
             }
@@ -541,7 +545,7 @@ class Main extends JFrame
         {
             try
             {
-                byte[] password = Cryptor.instance.decrypt(null, this.password);
+                byte[] password = Cryptor.instance.decrypt("", this.password);
                 byte[] data = Cryptor.instance.decrypt(password, secretsBuffer);
                 if (data == null)
                 {
@@ -579,6 +583,7 @@ class Main extends JFrame
     void changePassword()
     {
         // TODO:
+        
     }
 
     void exportService()
@@ -586,6 +591,7 @@ class Main extends JFrame
         int sel = serviceList.getSelectedIndex();
         if (sel < 0)
         {
+            JOptionPane.showMessageDialog(this, "not selected.");
             return;
         }
         String serviceName = list.elementAt(sel);
@@ -601,17 +607,15 @@ class Main extends JFrame
             byte[] secrets = service.secrets;
             if (secrets.length > 0)
             {
-                secrets = Cryptor.instance.encrypt(
-                    exPassword.getBytes(CHARSET),
-                    Cryptor.instance.decrypt(
-                        Cryptor.instance.decrypt(null, password),
-                        secrets));
+                secrets = Cryptor.instance.encrypt(exPassword,
+                    Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secrets));
             }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             (new Memo(new Service[]{ new Service(service.values, secrets) })).save(new DataOutputStream(baos));
-            exportText = Base64.getEncoder().encodeToString(baos.toByteArray());
+            exportText = Base64.getMimeEncoder().encodeToString(
+                Cryptor.instance.encrypt(exPassword, baos.toByteArray()));
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
             JOptionPane.showMessageDialog(this, "failed with unknown error.");
@@ -693,8 +697,134 @@ class Main extends JFrame
         }
         text.setText(null);
         dialog.setVisible(true);
-        // TODO:
-        System.err.println(String.valueOf(text.getText()));
+        String code = text.getText();
+        if (code == null || (code = code.trim()).length() == 0)
+        {
+            return;
+        }
+        byte[] buf;
+        try
+        {
+            buf = Base64.getMimeDecoder().decode(code);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "illegal base64 encoded.", ex);
+            JOptionPane.showMessageDialog(this, "illegal base64 encoded.");
+            return;
+        }
+        String imPassword = JOptionPane.showInputDialog(this, "input import-password.");
+        if (imPassword == null)
+        {
+            JOptionPane.showMessageDialog(this, "cancel import.");
+            return;
+        }
+        try
+        {
+            buf = Cryptor.instance.decrypt(imPassword, buf);
+        }
+        catch (Exception ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
+            JOptionPane.showMessageDialog(this, "failed with unknown error.");
+            return;
+        }
+        if (buf == null)
+        {
+            JOptionPane.showMessageDialog(this, "wrong password.");
+            return;
+        }
+        Memo importData;
+        try
+        {
+            importData = Memo.load(new DataInputStream(new ByteArrayInputStream(buf)));
+        }
+        catch (Exception ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed with wrong data format.", ex);
+            JOptionPane.showMessageDialog(this, "failed with wrong data format.");
+            return;
+        }
+        boolean change = false;
+        for (int j = 0; j < importData.getServiceCount(); j++)
+        {
+            Service service = importData.getService(j);
+            String serviceName = service.getServiceName();
+            if (serviceName == null || serviceName.length() == 0)
+            {
+                Logger.getGlobal().log(Level.FINER, "invalid service data.");
+                JOptionPane.showMessageDialog(this, "invalid service data.");
+                return;
+            }
+            Object[] options = new Object[memo.getServiceCount() + 1];
+            options[0] = "<add new>";
+            for (int i = 0; i < memo.getServiceCount(); i++)
+            {
+                options[i + 1] = memo.getService(i);
+            }
+            Box box = Box.createVerticalBox();
+            DefaultTableModel model = getTableModel(service.values);
+            JTable table = new JTable(model);
+            box.add(new JScrollPane(table));
+            box.add(new JLabel("SELECT <add new> OR replace <service>"));
+            box.setSize(box.getSize().width, 100);
+            Object ans = JOptionPane.showInputDialog(
+                this,
+                box,
+                "import",
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]
+            );
+            if (ans == null)
+            {
+                continue;
+            }
+            change = true;
+            if (service.secrets != null && service.secrets.length > 0)
+            {
+                try
+                {
+                    service.secrets = Cryptor.instance.encrypt(
+                        Cryptor.instance.decrypt("", password),
+                        Cryptor.instance.decrypt(imPassword, service.secrets));
+                    if (service.secrets == null)
+                    {
+                        throw new RuntimeException("CryptoError");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
+                    JOptionPane.showMessageDialog(this, "failed with unknown error.");
+                    return;
+                }
+            }
+            int pos = Arrays.asList(options).indexOf(ans);
+            if (pos == 0)
+            {
+                // add new
+                memo.addService(service);
+                list.addElement(serviceName);
+            }
+            else if (pos > 0)
+            {
+                // replace
+                memo.setService(pos - 1, service);
+                list.setElementAt(serviceName, pos);
+            }
+            else
+            {
+                Logger.getGlobal().log(Level.FINER, "failed with unknown error.");
+                JOptionPane.showMessageDialog(this, "failed with unknown error.");
+                return;
+            }
+        }
+        if (change)
+        {
+            saveMemo();
+        }
     }
 
 }

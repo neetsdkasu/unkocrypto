@@ -31,6 +31,11 @@ class Service
         return "";
     }
 
+    public String toString()
+    {
+        return getServiceName();
+    }
+
     static Value[] readSecrets(DataInput in) throws IOException
     {
         Value[] values;
