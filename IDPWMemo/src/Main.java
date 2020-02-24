@@ -2,6 +2,8 @@
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -31,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
@@ -162,7 +163,7 @@ class Main extends JFrame
         // Memo選択パネル
         Box panel = Box.createHorizontalBox();
         {
-            JLabel label = new JLabel("memo", SwingConstants.LEFT);
+            JLabel label = new JLabel("memo", JLabel.LEFT);
             panel.add(label);
 
             memoComboBox = new JComboBox<>();
@@ -178,7 +179,7 @@ class Main extends JFrame
         // Service選択パネル
         panel = Box.createVerticalBox();
         {
-            JLabel label = new JLabel("services", SwingConstants.LEFT);
+            JLabel label = new JLabel("services", JLabel.LEFT);
             JPanel p = new JPanel(false);
             p.add(label);
             panel.add(p);
@@ -201,7 +202,7 @@ class Main extends JFrame
         // 常時表示アイテムパネル
         panel = Box.createVerticalBox();
         {
-            JLabel label = new JLabel("detail", SwingConstants.LEFT);
+            JLabel label = new JLabel("detail", JLabel.LEFT);
             JPanel p = new JPanel(false);
             p.add(label);
             panel.add(p);
@@ -222,7 +223,7 @@ class Main extends JFrame
         // 要パスワードアイテムパネル
         panel = Box.createVerticalBox();
         {
-            JLabel label = new JLabel("secrets", SwingConstants.LEFT);
+            JLabel label = new JLabel("secrets", JLabel.LEFT);
             JPanel p = new JPanel(false);
             p.add(label);
             panel.add(p);
@@ -624,7 +625,7 @@ class Main extends JFrame
             dialog.setSize(400, 400);
             dialog.setLocationRelativeTo(this);
             dialog.setTitle("export");
-            label.setHorizontalAlignment(SwingConstants.LEFT);
+            label.setHorizontalAlignment(JLabel.LEFT);
             JButton copyButton = new JButton("COPY");
             text.setLineWrap(true);
             text.setEditable(false);
@@ -634,9 +635,9 @@ class Main extends JFrame
             box.add(copyButton);
             dialog.add(box);
             copyButton.addActionListener( e -> text.copy() );
-            addWindowListener(new java.awt.event.WindowAdapter() {
+            addWindowListener(new WindowAdapter() {
                 @Override
-                public void windowClosing(java.awt.event.WindowEvent e)
+                public void windowClosing(WindowEvent e)
                 {
                     dialog.dispose();
                 }
@@ -650,7 +651,50 @@ class Main extends JFrame
 
     void importService()
     {
+        final JDialog dialog = new JDialog(this, "", true);
+        final JTextArea text = new JTextArea();
+        if (dialog.getTitle() == null || dialog.getTitle().length() == 0)
+        {
+            dialog.setSize(400, 400);
+            dialog.setLocationRelativeTo(this);
+            dialog.setTitle("import");
+            Box bbox = Box.createHorizontalBox();
+            JButton pasteButton = new JButton("paste");
+            JButton importButton = new JButton("import");
+            JButton cancelButton = new JButton("cancel");
+            bbox.add(pasteButton);
+            bbox.add(importButton);
+            bbox.add(cancelButton);
+            text.setLineWrap(true);
+            Box box = Box.createVerticalBox();
+            box.add(new JScrollPane(text));
+            box.add(bbox);
+            dialog.add(box);
+            pasteButton.addActionListener( e -> text.paste() );
+            importButton.addActionListener( e -> dialog.setVisible(false) );
+            cancelButton.addActionListener( e -> {
+                text.setText(null);
+                dialog.setVisible(false);
+            });
+            dialog.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e)
+                {
+                    text.setText(null);
+                }
+            });
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e)
+                {
+                    dialog.dispose();
+                }
+            });
+        }
+        text.setText(null);
+        dialog.setVisible(true);
         // TODO:
+        System.err.println(String.valueOf(text.getText()));
     }
 
 }
