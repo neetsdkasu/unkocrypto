@@ -816,7 +816,19 @@ class Main extends JFrame
             {
                 continue;
             }
-            change = true;
+            int pos = Arrays.asList(options).indexOf(ans);
+            if (pos > 0)
+            {
+                // replace
+                int res = JOptionPane.showConfirmDialog(this,
+                    "replace <" + list.elementAt(pos - 1) + "> for <" + serviceName + ">",
+                    "import", JOptionPane.OK_CANCEL_OPTION);
+                if (res == JOptionPane.CANCEL_OPTION)
+                {
+                    j--;
+                    continue;
+                }
+            }
             if (service.secrets != null && service.secrets.length > 0)
             {
                 try
@@ -836,7 +848,6 @@ class Main extends JFrame
                     return;
                 }
             }
-            int pos = Arrays.asList(options).indexOf(ans);
             if (pos == 0)
             {
                 // add new
@@ -855,6 +866,7 @@ class Main extends JFrame
                 JOptionPane.showMessageDialog(this, "failed with unknown error.");
                 return;
             }
+            change = true;
         }
         if (change)
         {
