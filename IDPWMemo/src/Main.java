@@ -156,7 +156,7 @@ class Main extends JFrame
         super(APP_TITLE);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(310, 500);
+        setSize(310, 700);
         setLocationRelativeTo(null);
 
         Box box = Box.createVerticalBox();
@@ -582,8 +582,34 @@ class Main extends JFrame
 
     void changePassword()
     {
-        // TODO:
-        
+        String newPassword = JOptionPane.showInputDialog(this, "memo ( " + memoName +  " ). input new master-password.");
+        if (newPassword == null)
+        {
+            return;
+        }
+        Service[] services = new Service[memo.getServiceCount()];
+        try
+        {
+            for (int i = 0; i < services.length; i++)
+            {
+                byte[] secrets = memo.getService(i).secrets;
+                if (secrets != null && secrets.length > 0)
+                {
+                    secrets = Cryptor.instance.encrypt(
+                        newPassword, Cryptor.instance.decrypt(
+                            Cryptor.instance.decrypt("", password), secrets));
+                }
+                services[i] = new Service(memo.getService(i).values, secrets);
+            }
+            password = Cryptor.instance.encrypt("", Cryptor.getBytes(newPassword));
+            memo = new Memo(services);
+            saveMemo();
+        }
+        catch (Exception ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
+            JOptionPane.showMessageDialog(this, "failed with unknown error.");
+        }
     }
 
     void exportService()
