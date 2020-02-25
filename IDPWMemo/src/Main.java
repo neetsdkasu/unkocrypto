@@ -847,7 +847,7 @@ class Main extends JFrame
             {
                 // replace
                 memo.setService(pos - 1, service);
-                list.setElementAt(serviceName, pos);
+                list.setElementAt(serviceName, pos - 1);
             }
             else
             {
