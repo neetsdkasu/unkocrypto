@@ -31,6 +31,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
@@ -156,15 +157,15 @@ class Main extends JFrame
         super(APP_TITLE);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(310, 700);
+        setSize(310, 650);
         setLocationRelativeTo(null);
 
         Box box = Box.createVerticalBox();
-        add(box);
 
         // Memo選択パネル
-        Box panel = Box.createHorizontalBox();
         {
+            Box panel = Box.createHorizontalBox();
+
             JLabel label = new JLabel("memo", JLabel.LEFT);
             panel.add(label);
 
@@ -179,8 +180,9 @@ class Main extends JFrame
         }
 
         // Service選択パネル
-        panel = Box.createVerticalBox();
         {
+            Box panel = Box.createVerticalBox();
+
             JLabel label = new JLabel("services", JLabel.LEFT);
             JPanel p = new JPanel(false);
             p.add(label);
@@ -198,19 +200,20 @@ class Main extends JFrame
             buttons.add(addServiceButton = new JButton("ADD"));
             buttons.add(editServiceButton = new JButton("EDIT"));
             panel.add(buttons);
+
+            box.add(panel);
         }
-        box.add(panel);
 
         // 常時表示アイテムパネル
-        panel = Box.createVerticalBox();
+        Box panel1 = Box.createVerticalBox();
         {
             JLabel label = new JLabel("detail", JLabel.LEFT);
             JPanel p = new JPanel(false);
             p.add(label);
-            panel.add(p);
+            panel1.add(p);
 
             detailTable = new JTable(details = getEmptyTableModel());
-            panel.add(new JScrollPane(detailTable));
+            panel1.add(new JScrollPane(detailTable));
 
             Box buttons = Box.createHorizontalBox();
             buttons.add(saveMemoButton = new JButton("SAVE"));
@@ -218,21 +221,20 @@ class Main extends JFrame
             publicItemTypeComboBox = new JComboBox<>(itemTypes);
             publicItemTypeComboBox.setEditable(false);
             buttons.add(publicItemTypeComboBox);
-            panel.add(buttons);
+            panel1.add(buttons);
         }
-        box.add(panel);
 
         // 要パスワードアイテムパネル
-        panel = Box.createVerticalBox();
+        Box panel2 = Box.createVerticalBox();
         {
             JLabel label = new JLabel("secrets", JLabel.LEFT);
             JPanel p = new JPanel(false);
             p.add(label);
-            panel.add(p);
+            panel2.add(p);
 
 
             secretTable = new JTable(secrets = getEmptyTableModel());
-            panel.add(new JScrollPane(secretTable));
+            panel2.add(new JScrollPane(secretTable));
 
             Box buttons = Box.createHorizontalBox();
             buttons.add(showHiddenItemsButton = new JButton("SHOW"));
@@ -240,9 +242,16 @@ class Main extends JFrame
             hiddenItemTypeComboBox = new JComboBox<>(itemTypes);
             hiddenItemTypeComboBox.setEditable(false);
             buttons.add(hiddenItemTypeComboBox);
-            panel.add(buttons);
+            panel2.add(buttons);
         }
-        box.add(panel);
+
+        JSplitPane lower = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, panel1, panel2);
+        JSplitPane outer = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, box, lower);
+
+        add(outer);
+
+        outer.setDividerLocation(220);
+        lower.setDividerLocation(200);
 
         openMemoButton.addActionListener( e -> openMemo() );
         addServiceButton.addActionListener( e -> addService() );
