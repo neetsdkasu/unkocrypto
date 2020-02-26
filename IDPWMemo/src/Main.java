@@ -111,7 +111,7 @@ class Main extends JFrame
         table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         table.setModel(model);
         DefaultCellEditor dce = new DefaultCellEditor(new JComboBox<>(itemTypes));
-        dce.setClickCountToStart(Integer.MAX_VALUE >> 1);
+        dce.setClickCountToStart(10);
         table.getColumnModel().getColumn(ITEM_TYPE_COLUMN_INDEX).setCellEditor(dce);
         table.doLayout();
         int[] width = new int[table.getColumnCount()];
