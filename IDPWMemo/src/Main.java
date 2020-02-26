@@ -362,7 +362,7 @@ class Main extends JFrame
             else
             {
                 byte[] data = Files.readAllBytes(memoFile);
-                data = Cryptor.instance.decrypt(password, data);
+                data = Cryptor.instance.decrypt(password, Cryptor.instance.decrypt(password, data));
                 if (data == null)
                 {
                     JOptionPane.showMessageDialog(this, "wrong password");
@@ -468,7 +468,8 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Service.writeSecrets(new DataOutputStream(baos), secretItems);
-                secretsBuffer = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password), baos.toByteArray());
+                secretsBuffer = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password),
+                    Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password), baos.toByteArray()));
             }
             catch (IOException ex)
             {
@@ -519,7 +520,8 @@ class Main extends JFrame
             {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 memo.save(new DataOutputStream(baos));
-                byte[] data = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password), baos.toByteArray());
+                byte[] data = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password),
+                    Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password), baos.toByteArray()));
                 Files.write(memoFile, data);
                 JOptionPane.showMessageDialog(this, "saved");
             }
@@ -554,8 +556,8 @@ class Main extends JFrame
         {
             try
             {
-                byte[] password = Cryptor.instance.decrypt("", this.password);
-                byte[] data = Cryptor.instance.decrypt(password, secretsBuffer);
+                byte[] data = Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password),
+                    Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secretsBuffer));
                 if (data == null)
                 {
                     JOptionPane.showMessageDialog(this, "wrong password");
@@ -604,9 +606,10 @@ class Main extends JFrame
                 byte[] secrets = memo.getService(i).secrets;
                 if (secrets != null && secrets.length > 0)
                 {
-                    secrets = Cryptor.instance.encrypt(
-                        newPassword, Cryptor.instance.decrypt(
-                            Cryptor.instance.decrypt("", password), secrets));
+                    secrets = Cryptor.instance.encrypt(newPassword,
+                        Cryptor.instance.encrypt(newPassword,
+                            Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password),
+                                Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secrets))));
                 }
                 services[i] = new Service(memo.getService(i).values, secrets);
             }
@@ -643,12 +646,15 @@ class Main extends JFrame
             if (secrets.length > 0)
             {
                 secrets = Cryptor.instance.encrypt(exPassword,
-                    Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secrets));
+                    Cryptor.instance.encrypt(exPassword,
+                        Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password),
+                            Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secrets))));
             }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             (new Memo(new Service[]{ new Service(service.values, secrets) })).save(new DataOutputStream(baos));
             exportText = Base64.getMimeEncoder().encodeToString(
-                Cryptor.instance.encrypt(exPassword, baos.toByteArray()));
+                Cryptor.instance.encrypt(exPassword,
+                    Cryptor.instance.encrypt(exPassword, baos.toByteArray())));
         }
         catch (Exception ex)
         {
@@ -756,7 +762,8 @@ class Main extends JFrame
         }
         try
         {
-            buf = Cryptor.instance.decrypt(imPassword, buf);
+            buf = Cryptor.instance.decrypt(imPassword,
+                Cryptor.instance.decrypt(imPassword, buf));
         }
         catch (Exception ex)
         {
@@ -833,9 +840,10 @@ class Main extends JFrame
             {
                 try
                 {
-                    service.secrets = Cryptor.instance.encrypt(
-                        Cryptor.instance.decrypt("", password),
-                        Cryptor.instance.decrypt(imPassword, service.secrets));
+                    service.secrets = Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password),
+                        Cryptor.instance.encrypt(Cryptor.instance.decrypt("", password),
+                            Cryptor.instance.decrypt(imPassword,
+                                Cryptor.instance.decrypt(imPassword, service.secrets))));
                     if (service.secrets == null)
                     {
                         throw new RuntimeException("CryptoError");
