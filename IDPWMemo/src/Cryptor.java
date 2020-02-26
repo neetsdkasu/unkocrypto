@@ -28,12 +28,12 @@ final class Cryptor
     private static long[] genSeed(int size)
     {
         long[] seed = new long[size];
-        seed[0] = 0x9876_5432L;
-        seed[1] = 0xF1E2_D3C4L;
+        seed[0] = 0x98765432L;
+        seed[1] = 0xF1E2D3C4L;
         for (int i = 2; i < seed.length; i++)
         {
             seed[i] = seed[i - 2] ^ (seed[i - 1] >> ((i - 1) & 0xF)) ^ (seed[i - 1] << ((i + i + 1) & 0xF));
-            seed[i] &= 0xFFFF_FFFFL;
+            seed[i] &= 0xFFFFFFFFL;
         }
         return seed;
     }
