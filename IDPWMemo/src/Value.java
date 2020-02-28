@@ -45,27 +45,7 @@ final class Value
         return typeName((int)type);
     }
 
-    void setDefaultVisible()
-    {
-        switch ((int)type)
-        {
-        case PASSWORD:
-        case EMAIL:
-        case REMINDER_QUESTION:
-        case REMINDER_ANSWER:
-            visible = false;
-            break;
-        // case SERVICE_NAME:
-        // case SERVICE_URL:
-        // case ID:
-        // case DESCTIPTION:
-        default:
-            visible = true;
-        }
-    }
-
     byte    type;
-    boolean visible;
     String  value;
 
     Value(int type, String value)
