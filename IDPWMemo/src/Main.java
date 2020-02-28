@@ -196,7 +196,7 @@ class Main extends JFrame
             Box buttons = Box.createHorizontalBox();
             buttons.add(changePasswordButton = new JButton("CHPW"));
             buttons.add(exportServiceButton = new JButton("EXP"));
-            buttons.add(importServiceButton = new JButton("INP"));
+            buttons.add(importServiceButton = new JButton("IMP"));
             buttons.add(addServiceButton = new JButton("ADD"));
             buttons.add(editServiceButton = new JButton("EDIT"));
             panel.add(buttons);
