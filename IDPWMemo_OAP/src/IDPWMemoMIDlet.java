@@ -77,6 +77,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnDetailsForm(cmd);
         }
+        else if (disp == secretsForm)
+        {
+            commandActionOnSecretsForm(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -98,6 +102,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void setDisplay(Displayable disp)
     {
+        if (disp == null)
+        {
+            return;
+        }
         disp.setCommandListener(this);
         Display.getDisplay(this).setCurrent(disp);
     }
@@ -424,6 +432,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void commandActionOnDetailsForm(Command cmd)
     {
+        setTicker(null);
         if (cmd.getCommandType() == Command.BACK)
         {
             setDisplay(serviceList);
@@ -439,15 +448,88 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             TextField tf = new TextField(null, "", 200, TextField.ANY);
             tf.setLayout(TextField.LAYOUT_LEFT | TextField.LAYOUT_NEWLINE_AFTER);
             detailsForm.append(tf);
-            return;
         }
         else if (priority == 2)
         {
             // SECRET
+            setDisplay(getSecretsForm(true));
         }
         else if (priority == 3)
         {
             // SAVE
         }
     }
+
+    Form secretsForm = null;
+    Form getSecretsForm(boolean reset)
+    {
+        if (secretsForm == null)
+        {
+            secretsForm = new Form("");
+            secretsForm.addCommand(new Command("BACK", Command.BACK, 1));
+            secretsForm.addCommand(new Command("ADD", Command.SCREEN, 1));
+        }
+        if (reset && !showedSecrets)
+        {
+            showedSecrets = true;
+            Service service = memo.getService(serviceIndex);
+            secretsForm.setTitle(service.getServiceName() + " secrets");
+            secretsForm.deleteAll();
+            Value[] values;
+            try
+            {
+                byte[] buf = memo.getService(serviceIndex).secrets;
+                if (buf == null || buf.length == 0)
+                {
+                    return secretsForm;
+                }
+                for (int i = 0; i < 2; i++)
+                {
+                    buf = Cryptor.instance.decrypt(password, buf);
+                    if (buf == null)
+                    {
+                        showedSecrets = false;
+                        setTicker("wrong password");
+                        return null;
+                    }
+                }
+                values = Service.readSecrets(new DataInputStream(new ByteArrayInputStream(buf)));
+            }
+            catch (IOException ex)
+            {
+                showedSecrets = false;
+                setTicker("wrong format");
+                return null;
+            }
+            for (int i = 0; i < values.length; i++)
+            {
+                Value v = values[i];
+                ChoiceGroup cg = new ChoiceGroup(null, ChoiceGroup.POPUP, itemTypes, null);
+                cg.setSelectedIndex((int)v.type, true);
+                cg.setLayout(ChoiceGroup.LAYOUT_LEFT | ChoiceGroup.LAYOUT_NEWLINE_AFTER);
+                secretsForm.append(cg);
+                TextField tf = new TextField(null, v.value, 200, TextField.ANY);
+                tf.setLayout(TextField.LAYOUT_LEFT | TextField.LAYOUT_NEWLINE_AFTER);
+                secretsForm.append(tf);
+            }
+        }
+        return secretsForm;
+    }
+
+    void commandActionOnSecretsForm(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.BACK)
+        {
+            setDisplay(detailsForm);
+            return;
+        }
+        // ADD
+        ChoiceGroup cg = new ChoiceGroup(null, ChoiceGroup.POPUP, itemTypes, null);
+        cg.setLayout(ChoiceGroup.LAYOUT_LEFT | ChoiceGroup.LAYOUT_NEWLINE_AFTER);
+        secretsForm.append(cg);
+        TextField tf = new TextField(null, "", 200, TextField.ANY);
+        tf.setLayout(TextField.LAYOUT_LEFT | TextField.LAYOUT_NEWLINE_AFTER);
+        secretsForm.append(tf);
+    }
+
 }
