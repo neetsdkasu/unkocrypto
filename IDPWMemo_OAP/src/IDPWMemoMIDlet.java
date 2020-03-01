@@ -1,9 +1,13 @@
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 import javax.microedition.midlet.*;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -81,6 +85,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnSecretsForm(cmd);
         }
+        else if (disp == confirmDelete)
+        {
+            commandActionOnConfirmDelete(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -90,7 +98,6 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             try
             {
                 memoRecordStore.closeRecordStore();
-                memoRecordStore = null;
             }
             catch (RecordStoreException ex)
             {
@@ -111,14 +118,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
     }
 
     Ticker ticker = null;
-    void setTicker(String text)
+    Ticker getTicker(String text)
     {
-        Displayable disp = Display.getDisplay(this).getCurrent();
-        if (text == null)
-        {
-            disp.setTicker(null);
-            return;
-        }
         if (ticker == null)
         {
             ticker = new Ticker(text);
@@ -127,7 +128,18 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             ticker.setString(text);
         }
-        disp.setTicker(ticker);
+        return ticker;
+    }
+
+    void setTicker(String text)
+    {
+        Displayable disp = Display.getDisplay(this).getCurrent();
+        if (text == null)
+        {
+            disp.setTicker(null);
+            return;
+        }
+        disp.setTicker(getTicker(text));
     }
 
     List memoList = null;
@@ -140,6 +152,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         memoList = new List("IDPWMemo", Choice.IMPLICIT);
         memoList.addCommand(new Command("EXIT", Command.EXIT, 1));
         memoList.addCommand(new Command("NEW", Command.SCREEN, 1));
+        memoList.addCommand(new Command("HTTP", Command.SCREEN, 2));
         String[] list = RecordStore.listRecordStores();
         if (list != null)
         {
@@ -174,8 +187,16 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             notifyDestroyed();
             return;
         }
-        // NEW
-        setDisplay(getMemoTitleEditor(""));
+        int priority = cmd.getPriority();
+        if (priority == 1)
+        {
+            // NEW
+            setDisplay(getMemoTitleEditor(""));
+        }
+        else if (priority == 2)
+        {
+            // HTTP
+        }
     }
 
     TextBox memoTitleEditor = null;
@@ -303,6 +324,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             serviceList.addCommand(new Command("BACK", Command.BACK, 1));
             serviceList.addCommand(new Command("ADD", Command.SCREEN, 1));
             serviceList.addCommand(new Command("IMPORT", Command.SCREEN, 2));
+            serviceList.addCommand(new Command("CHPW", Command.SCREEN, 3));
             serviceList.addCommand(new Command("EXPORT", Command.ITEM, 1));
         }
         if (reset)
@@ -319,6 +341,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void commandActionOnServiceList(Command cmd)
     {
+        setTicker(null);
         if (cmd == List.SELECT_COMMAND)
         {
             serviceIndex = serviceList.getSelectedIndex();
@@ -345,11 +368,13 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         else if (priority == 2 && type == Command.SCREEN)
         {
-            // IMP
+            // IMPORT
+            // TODO:
         }
         else if (priority == 1 && type == Command.ITEM)
         {
-            // EXP
+            // EXPORT
+            // TODO:
         }
     }
 
@@ -457,7 +482,152 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (priority == 3)
         {
             // SAVE
+            updateService(detailsForm);
         }
+    }
+
+    Value[] getValues(Form valueForm)
+    {
+        Value[] values = new Value[valueForm.size() / 2];
+        int count = 0;
+        for (int i = 0; i < valueForm.size(); i+= 2)
+        {
+            String value = ((TextField)valueForm.get(i + 1)).getString();
+            if (value == null || (value = value.trim()).length() == 0)
+            {
+                continue;
+            }
+            int type = ((ChoiceGroup)valueForm.get(i)).getSelectedIndex();
+            values[count] = new Value(type, value);
+            count++;
+        }
+        Value[] ret = new Value[count];
+        System.arraycopy(values, 0, ret, 0, count);
+        return ret;
+    }
+
+    void updateService(Displayable ret)
+    {
+        String serviceName = null;
+        Value[] values = getValues(detailsForm);
+        for (int i = 0; i < values.length; i++)
+        {
+            if (values[i].type == 0)
+            {
+                serviceName = values[i].value;
+                break;
+            }
+        }
+        if (serviceName == null)
+        {
+            returnDisplay = ret;
+            serviceName = serviceList.getString(serviceIndex);
+            setDisplay(getConfirmDelete(serviceName));
+            return;
+        }
+        byte[] secrets = memo.getService(serviceIndex).secrets;
+        if (showedSecrets)
+        {
+            try
+            {
+                Value[] tmpValues = getValues(secretsForm);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                Service.writeSecrets(new DataOutputStream(baos), tmpValues);
+                secrets = Cryptor.instance.encrypt(password,
+                    Cryptor.instance.encrypt(password, baos.toByteArray()));
+            }
+            catch (IOException ex)
+            {
+                setTicker("unknown error to update service");
+                return;
+            }
+        }
+        memo.setService(serviceIndex, new Service(values, secrets));
+        serviceList.set(serviceIndex, serviceName, null);
+        detailsForm.setTitle(serviceName + " details");
+        if (showedSecrets)
+        {
+            secretsForm.setTitle(serviceName + " secrets");
+        }
+        saveMemo(ret);
+    }
+
+    void saveMemo(Displayable ret)
+    {
+        try
+        {
+            if (memoRecordStore == null)
+            {
+                memoRecordStore = RecordStore.openRecordStore(memoRecordName, true);
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            memo.save(new DataOutputStream(baos));
+            byte[] buf = Cryptor.instance.encrypt(password,
+                Cryptor.instance.encrypt(password, baos.toByteArray()));
+            if (memoRecordStore.getNumRecords() == 0)
+            {
+                memoRecordStore.addRecord(buf, 0, buf.length);
+            }
+            else
+            {
+                memoRecordStore.setRecord(1, buf, 0, buf.length);
+            }
+            setDisplay(ret);
+            ret.setTicker(getTicker("saved!"));
+        }
+        catch (Exception ex)
+        {
+            setDisplay(ret);
+            ret.setTicker(getTicker("unknown error to save"));
+            // ex.printStackTrace();
+        }
+    }
+
+    Displayable returnDisplay = null;
+    Alert confirmDelete = null;
+    Alert getConfirmDelete(String target)
+    {
+        if (confirmDelete != null)
+        {
+            if (target != null)
+            {
+                confirmDelete.setString("delete " + target + " ?");
+            }
+            return confirmDelete;
+        }
+        confirmDelete = new Alert("confrim", "delete " + target + " ?", null, null);
+        confirmDelete.addCommand(new Command("DELETE", Command.OK, 1));
+        confirmDelete.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return confirmDelete;
+    }
+
+    void commandActionOnConfirmDelete(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(returnDisplay);
+            return;
+        }
+        memo.removeService(serviceIndex);
+        serviceList.delete(serviceIndex);
+        if (memo.getServiceCount() > 0)
+        {
+            saveMemo(serviceList);
+            serviceList.setTicker(getTicker("deleted!"));
+            return;
+        }
+        closeMemoRecordStore();
+        try
+        {
+            RecordStore.deleteRecordStore(memoRecordName);
+        }
+        catch (RecordStoreException ex)
+        {
+            // no code
+            // ex.printStackTrace();
+        }
+        setDisplay(serviceList);
+        serviceList.setTicker(getTicker("deleted!"));
     }
 
     Form secretsForm = null;
