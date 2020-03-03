@@ -23,16 +23,39 @@ import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 import javax.microedition.rms.RecordStoreNotFoundException;
 
+import neetsdkasu.util.Base64;
+
 public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 {
     static final String RECORD_SUFFIX = ".memo";
+    
+    static Base64.Encoder encoder = null;
+    static Base64.Decoder decoder = null;
+
+    static Base64.Encoder getEncoder()
+    {
+        if (encoder == null)
+        {
+            encoder = Base64.getMimeEncoder();
+        }
+        return encoder;
+    }
+    
+    static Base64.Decoder getDecoder()
+    {
+        if (decoder == null)
+        {
+            decoder = Base64.getMimeDecoder();
+        }
+        return decoder;
+    }
 
     String memoName = null;
     String memoRecordName = null;
     RecordStore memoRecordStore = null;
     Memo memo = null;
     String password = null;
-    int serviceIndex = -1;
+    int serviceIndex = -1;    
 
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException
     {
@@ -57,7 +80,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // what happened?
             return;
         }
-        else if (disp == memoList)
+        
+        if (disp == memoList)
         {
             commandActionOnMemoList(cmd);
         }
@@ -89,6 +113,18 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnConfirmDelete(cmd);
         }
+        else if (disp == importTextBox)
+        {
+            commandActionOnImportTextBox(cmd);
+        }
+        else if (disp == importPasswordInputBox)
+        {
+            commandActionOnImportPasswordInputBox(cmd);
+        }
+        else if (disp == importForm)
+        {
+            commandActionOnImportForm(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -101,7 +137,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             }
             catch (RecordStoreException ex)
             {
-                // error
+                // dicard
             }
             memoRecordStore = null;
         }
@@ -196,6 +232,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (priority == 2)
         {
             // HTTP
+            // TODO:
         }
     }
 
@@ -369,6 +406,11 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (priority == 2 && type == Command.SCREEN)
         {
             // IMPORT
+            setDisplay(getImportTextBox(true));
+        }
+        else if (priority == 3 && type == Command.SCREEN)
+        {
+            // CHPW
             // TODO:
         }
         else if (priority == 1 && type == Command.ITEM)
@@ -377,7 +419,110 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // TODO:
         }
     }
+    
+    TextBox importTextBox = null;
+    TextBox getImportTextBox(boolean clear)
+    {
+        if (importTextBox != null)
+        {
+            if (clear)
+            {
+                importTextBox.setString("");
+            }
+            return importTextBox;
+        }
+        importTextBox = new TextBox("import", "", 5000, TextField.ANY);
+        importTextBox.addCommand(new Command("OK", Command.OK, 1));
+        importTextBox.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return importTextBox;
+    }
+    
+    void commandActionOnImportTextBox(Command cmd)
+    {
+        setTicker(null);
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(serviceList);
+            return;
+        }
+        try
+        {
+            byte[] buf = getDecoder().decode(importTextBox.getString());
+            if (buf.length == 0)
+            {
+                setTicker("do not empty");
+                return;
+            }
+            if (buf.length < neetsdkasu.crypto.oap.Crypto.MIN_BLOCKSIZE)
+            {
+                setTicker("wrong size");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            setTicker("wrong format");
+            return;
+        }
+        setDisplay(getImportPasswordInputBox(true));
+    }
 
+    TextBox importPasswordInputBox = null;
+    TextBox getImportPasswordInputBox(boolean clear)
+    {
+        if (importPasswordInputBox != null)
+        {
+            if (clear)
+            {
+                importPasswordInputBox.setString("");
+            }
+            return importPasswordInputBox;
+        }
+        importPasswordInputBox = new TextBox("input import password", "", 500, TextField.ANY);
+        importPasswordInputBox.addCommand(new Command("OK", Command.OK, 1));
+        importPasswordInputBox.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return importPasswordInputBox;
+    }
+    
+    void commandActionOnImportPasswordInputBox(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(importTextBox);
+            return;
+        }
+        setDisplay(getImportForm());
+    }
+    
+    Form importForm = null;
+    Form getImportForm()
+    {
+        if (importForm == null)
+        {
+            importForm = new Form("import");
+            importForm.addCommand(new Command("OK", Command.OK, 1));
+            importForm.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        }
+        String password = importPasswordInputBox.getString();
+        if (password == null)
+        {
+            password = "";
+        }
+        byte[] buf = getDecoder().decode(importTextBox.getString());
+        // TODO:
+        return importForm;
+    }
+    
+    void commandActionOnImportForm(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(serviceList);
+            return;
+        }
+        // TODO:
+    }
+    
     TextBox newServiceNameInputBox = null;
     TextBox getNewServiceNameInputBox(boolean clear)
     {
@@ -403,7 +548,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             String serviceName = newServiceNameInputBox.getString();
             if (serviceName == null || (serviceName = serviceName.trim()).length() == 0)
             {
-                setTicker("no empty!");
+                setTicker("do not empty");
                 return;
             }
             serviceList.append(serviceName, null);
