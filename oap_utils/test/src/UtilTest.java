@@ -423,4 +423,113 @@ class UtilTest
         }
     }
 
+    @Test
+    static void testEncodeWithEmptyInput()
+    {
+        java.util.Base64.Encoder[] encoders1 = {
+            java.util.Base64.getEncoder(),
+            java.util.Base64.getUrlEncoder(),
+            java.util.Base64.getMimeEncoder()
+        };
+        neetsdkasu.util.Base64.Encoder[] encoders2 = {
+            neetsdkasu.util.Base64.getEncoder(),
+            neetsdkasu.util.Base64.getUrlEncoder(),
+            neetsdkasu.util.Base64.getMimeEncoder()
+        };
+
+        for (int i = 0; i < encoders1.length; i++)
+        {
+            java.util.Base64.Encoder enc1 = encoders1[i];
+            neetsdkasu.util.Base64.Encoder enc2 = encoders2[i];
+
+            byte[] src = new byte[0];
+            byte[] buf1, buf2;
+            Exception ex1 = null, ex2 = null;
+
+            try
+            {
+                buf1 = enc1.encode(src);
+            }
+            catch (Exception ex)
+            {
+                ex1 = ex;
+                buf1 = null;
+            }
+
+            try
+            {
+                buf2 = enc2.encode(src);
+            }
+            catch (Exception ex)
+            {
+                ex2 = ex;
+                buf2 = null;
+            }
+
+            if (!Arrays.equals(buf1, buf2))
+            {
+                System.out.println(Arrays.toString(buf1));
+                System.out.println(Arrays.toString(buf2));
+                System.out.println(i);
+                System.out.println(ex1);
+                System.out.println(ex2);
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
+
+    @Test
+    static void testDecodeWithEmptyInput()
+    {
+        java.util.Base64.Decoder[] decoders1 = {
+            java.util.Base64.getDecoder(),
+            java.util.Base64.getUrlDecoder(),
+            java.util.Base64.getMimeDecoder()
+        };
+        neetsdkasu.util.Base64.Decoder[] decoders2 = {
+            neetsdkasu.util.Base64.getDecoder(),
+            neetsdkasu.util.Base64.getUrlDecoder(),
+            neetsdkasu.util.Base64.getMimeDecoder()
+        };
+
+        for (int i = 0; i < decoders1.length; i++)
+        {
+            java.util.Base64.Decoder dec1 = decoders1[i];
+            neetsdkasu.util.Base64.Decoder dec2 = decoders2[i];
+
+            byte[] src = new byte[0];
+            byte[] buf1, buf2;
+            Exception ex1 = null, ex2 = null;
+
+            try
+            {
+                buf1 = dec1.decode(src);
+            }
+            catch (Exception ex)
+            {
+                ex1 = ex;
+                buf1 = null;
+            }
+
+            try
+            {
+                buf2 = dec2.decode(src);
+            }
+            catch (Exception ex)
+            {
+                ex2 = ex;
+                buf2 = null;
+            }
+
+            if (!Arrays.equals(buf1, buf2))
+            {
+                System.out.println(Arrays.toString(buf1));
+                System.out.println(Arrays.toString(buf2));
+                System.out.println(i);
+                System.out.println(ex1);
+                System.out.println(ex2);
+                throw new RuntimeException("unmatch");
+            }
+        }
+    }
 }
