@@ -362,11 +362,14 @@ class Main extends JFrame
             else
             {
                 byte[] data = Files.readAllBytes(memoFile);
-                data = Cryptor.instance.decrypt(password, Cryptor.instance.decrypt(password, data));
-                if (data == null)
+                for (int i = 0; i < 2; i++)
                 {
-                    JOptionPane.showMessageDialog(this, "wrong password");
-                    return;
+                    data = Cryptor.instance.decrypt(password, data);
+                    if (data == null)
+                    {
+                        JOptionPane.showMessageDialog(this, "wrong password");
+                        return;
+                    }
                 }
                 setMemo(memoName, Memo.load(new DataInputStream(new ByteArrayInputStream(data))));
             }
