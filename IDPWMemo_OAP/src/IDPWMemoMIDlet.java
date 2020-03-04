@@ -126,6 +126,18 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnImportForm(cmd);
         }
+        else if (disp == selectExportList)
+        {
+            commandActionOnSelectExportList(cmd);
+        }
+        else if (disp == exportPasswordInputBox)
+        {
+            commandActionOnExportPasswordInputBox(cmd);
+        }
+        else if (disp == exportTextBox)
+        {
+            commandActionOnExportTextBox(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -417,7 +429,151 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (priority == 1 && type == Command.ITEM)
         {
             // EXPORT
-            // TODO:
+            if (serviceList.size() == 0)
+            {
+                setTicker("cannot export");
+            }
+            else
+            {
+                setDisplay(getSelectExportList());
+            }
+        }
+    }
+
+    List selectExportList = null;
+    List getSelectExportList()
+    {
+        if (selectExportList == null)
+        {
+            selectExportList = new List("export", List.MULTIPLE);
+            selectExportList.addCommand(new Command("OK", Command.OK, 1));
+            selectExportList.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        }
+        selectExportList.deleteAll();
+        for (int i = 0; i < serviceList.size(); i++)
+        {
+            selectExportList.append(serviceList.getString(i), null);
+        }
+        return selectExportList;
+    }
+
+    void commandActionOnSelectExportList(Command cmd)
+    {
+        setTicker(null);
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(serviceList);
+            return;
+        }
+        for (int i = 0; i < selectExportList.size(); i++)
+        {
+            if (selectExportList.isSelected(i))
+            {
+                setDisplay(getExportPasswordInputBox(false));
+                return;
+            }
+        }
+        setTicker("select any service");
+    }
+
+    TextBox exportPasswordInputBox = null;
+    TextBox getExportPasswordInputBox(boolean clear)
+    {
+        if (exportPasswordInputBox != null)
+        {
+            if (clear)
+            {
+                exportPasswordInputBox.setString("");
+            }
+            return exportPasswordInputBox;
+        }
+        exportPasswordInputBox = new TextBox("input export password", "", 500, TextField.ANY);
+        exportPasswordInputBox.addCommand(new Command("OK", Command.OK, 1));
+        exportPasswordInputBox.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return exportPasswordInputBox;
+    }
+
+    void commandActionOnExportPasswordInputBox(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(selectExportList);
+            return;
+        }
+        setDisplay(getExportTextBox());
+    }
+
+    TextBox exportTextBox = null;
+    TextBox getExportTextBox()
+    {
+        if (exportTextBox == null)
+        {
+            exportTextBox = new TextBox("export", "", 5000, TextField.ANY);
+            exportTextBox.addCommand(new Command("BACK", Command.BACK, 1));
+        }
+        String exPassword = exportPasswordInputBox.getString();
+        if (exPassword == null)
+        {
+            exPassword = "";
+        }
+        int count = 0;
+        for (int i = 0; i < selectExportList.size(); i++)
+        {
+            if (selectExportList.isSelected(i))
+            {
+                count++;
+            }
+        }
+        Service[] services = new Service[count];
+        for (int i = 0, index = 0; i < selectExportList.size(); i++)
+        {
+            if (!selectExportList.isSelected(i))
+            {
+                continue;
+            }
+            Service service = memo.getService(i);
+            try
+            {
+                byte[] secrets = Cryptor.instance.encrypt(exPassword,
+                    Cryptor.instance.encrypt(exPassword,
+                        Cryptor.instance.decrypt(password,
+                            Cryptor.instance.decrypt(password, service.secrets))));
+                services[index] = new Service(service.values, secrets);
+                index++;
+            }
+            catch (Exception ex)
+            {
+                setTicker("unknown error");
+                return null;
+            }
+        }
+        try
+        {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            (new Memo(services)).save(new DataOutputStream(baos));
+            byte[] buf = Cryptor.instance.encrypt(exPassword,
+                Cryptor.instance.encrypt(exPassword, baos.toByteArray()));
+            String code = getEncoder().encodeToString(buf);
+            if (code.length() > exportTextBox.getMaxSize())
+            {
+                setTicker("too big data size");
+                return null;
+            }
+            exportTextBox.setString(code);
+        }
+        catch (Exception ex)
+        {
+            setTicker("unknown error");
+            return null;
+        }
+        return exportTextBox;
+    }
+
+    void commandActionOnExportTextBox(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.BACK)
+        {
+            setDisplay(selectExportList);
         }
     }
 
