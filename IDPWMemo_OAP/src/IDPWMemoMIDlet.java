@@ -16,6 +16,7 @@ import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.Ticker;
@@ -28,7 +29,7 @@ import neetsdkasu.util.Base64;
 public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 {
     static final String RECORD_SUFFIX = ".memo";
-    
+
     static Base64.Encoder encoder = null;
     static Base64.Decoder decoder = null;
 
@@ -40,7 +41,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         return encoder;
     }
-    
+
     static Base64.Decoder getDecoder()
     {
         if (decoder == null)
@@ -55,7 +56,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
     RecordStore memoRecordStore = null;
     Memo memo = null;
     String password = null;
-    int serviceIndex = -1;    
+    int serviceIndex = -1;
 
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException
     {
@@ -80,7 +81,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // what happened?
             return;
         }
-        
+
         if (disp == memoList)
         {
             commandActionOnMemoList(cmd);
@@ -419,7 +420,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // TODO:
         }
     }
-    
+
     TextBox importTextBox = null;
     TextBox getImportTextBox(boolean clear)
     {
@@ -436,7 +437,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         importTextBox.addCommand(new Command("CANCEL", Command.CANCEL, 1));
         return importTextBox;
     }
-    
+
     void commandActionOnImportTextBox(Command cmd)
     {
         setTicker(null);
@@ -483,19 +484,22 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         importPasswordInputBox.addCommand(new Command("CANCEL", Command.CANCEL, 1));
         return importPasswordInputBox;
     }
-    
+
     void commandActionOnImportPasswordInputBox(Command cmd)
     {
+        setTicker(null);
         if (cmd.getCommandType() == Command.CANCEL)
         {
             setDisplay(importTextBox);
             return;
         }
-        setDisplay(getImportForm());
+        setDisplay(getImportForm(0));
     }
-    
+
+    Memo importMemo = null;
+    int importServiceIndex = 0;
     Form importForm = null;
-    Form getImportForm()
+    Form getImportForm(int importServiceIndex)
     {
         if (importForm == null)
         {
@@ -503,26 +507,128 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             importForm.addCommand(new Command("OK", Command.OK, 1));
             importForm.addCommand(new Command("CANCEL", Command.CANCEL, 1));
         }
-        String password = importPasswordInputBox.getString();
-        if (password == null)
+        if (importMemo == null)
         {
-            password = "";
+            String imPassword = importPasswordInputBox.getString();
+            if (imPassword == null)
+            {
+                imPassword = "";
+            }
+            try
+            {
+                byte[] buf = getDecoder().decode(importTextBox.getString());
+                for (int i = 0; i < 2; i++)
+                {
+                    buf = Cryptor.instance.decrypt(imPassword, buf);
+                    if (buf == null)
+                    {
+                        setTicker("wrong password");
+                        return null;
+                    }
+                }
+                importMemo = Memo.load(new DataInputStream(new ByteArrayInputStream(buf)));
+            }
+            catch (IOException ex)
+            {
+                setTicker("wrong format");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                setTicker("unknown error");
+                return null;
+            }
         }
-        byte[] buf = getDecoder().decode(importTextBox.getString());
-        // TODO:
+        this.importServiceIndex = importServiceIndex;
+        if (importServiceIndex >= importMemo.getServiceCount())
+        {
+            setTicker("no data");
+            return null;
+        }
+        importForm.deleteAll();
+        final String[] actions = {"<add new>", "replace <service>", "skip"};
+        ChoiceGroup actionChoice = new ChoiceGroup("action", ChoiceGroup.EXCLUSIVE, actions, null);
+        actionChoice.setSelectedIndex(0, true);
+        importForm.append(actionChoice);
+        ChoiceGroup replaceServiceNameChoice = new ChoiceGroup("replace target", ChoiceGroup.POPUP);
+        for (int i = 0; i < serviceList.size(); i++)
+        {
+            replaceServiceNameChoice.append(serviceList.getString(i), null);
+        }
+        importForm.append(replaceServiceNameChoice);
+        Value[] values = importMemo.getService(importServiceIndex).values;
+        for (int i = 0; i < values.length; i++)
+        {
+            StringItem si = new StringItem(values[i].getTypeName(), values[i].value);
+            si.setLayout(StringItem.LAYOUT_NEWLINE_BEFORE);
+            importForm.append(si);
+        }
         return importForm;
     }
-    
+
     void commandActionOnImportForm(Command cmd)
     {
+        setTicker(null);
         if (cmd.getCommandType() == Command.CANCEL)
         {
+            importMemo = null;
             setDisplay(serviceList);
             return;
         }
-        // TODO:
+        int action = ((ChoiceGroup)importForm.get(0)).getSelectedIndex();
+        if (action < 2)
+        {
+            Service service;
+            String imPassword = importPasswordInputBox.getString();
+            if (imPassword == null)
+            {
+                imPassword = "";
+            }
+            try
+            {
+                service = importMemo.getService(importServiceIndex);
+                byte[] secrets = Cryptor.instance.encrypt(password,
+                    Cryptor.instance.encrypt(password,
+                        Cryptor.instance.decrypt(imPassword,
+                            Cryptor.instance.decrypt(imPassword, service.secrets))));
+                service = new Service(service.values, secrets);
+            }
+            catch (Exception ex)
+            {
+                setTicker("unknown error");
+                return;
+            }
+            if (action == 0)
+            {
+                // add new
+                memo.addService(service);
+                serviceList.append(service.getServiceName(), null);
+            }
+            else if (action == 1)
+            {
+                // replace
+                ChoiceGroup cg = (ChoiceGroup)importForm.get(1);
+                if (cg.size() == 0)
+                {
+                    setTicker("cannot replace");
+                    return;
+                }
+                int replace = cg.getSelectedIndex();
+                memo.setService(replace, service);
+                serviceList.set(replace, service.getServiceName(), null);
+            }
+        }
+        if (importServiceIndex + 1 < importMemo.getServiceCount())
+        {
+            getImportForm(importServiceIndex + 1);
+        }
+        else
+        {
+            importMemo = null;
+            saveMemo(serviceList);
+        }
     }
-    
+
     TextBox newServiceNameInputBox = null;
     TextBox getNewServiceNameInputBox(boolean clear)
     {
