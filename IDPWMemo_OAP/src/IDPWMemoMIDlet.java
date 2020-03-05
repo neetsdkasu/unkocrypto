@@ -138,6 +138,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnExportTextBox(cmd);
         }
+        else if (disp == newPasswordInputBox)
+        {
+            commandActionOnNewPasswordInputBox(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -424,7 +428,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (priority == 3 && type == Command.SCREEN)
         {
             // CHPW
-            // TODO:
+            setDisplay(getNewPasswordInputBox(true));
         }
         else if (priority == 1 && type == Command.ITEM)
         {
@@ -439,6 +443,62 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             }
         }
     }
+
+    TextBox newPasswordInputBox = null;
+    TextBox getNewPasswordInputBox(boolean clear)
+    {
+        if (newPasswordInputBox != null)
+        {
+            if (clear)
+            {
+                newPasswordInputBox.setString("");
+            }
+            return newPasswordInputBox;
+        }
+        newPasswordInputBox = new TextBox("input new master password", "", 500, TextField.ANY);
+        newPasswordInputBox.addCommand(new Command("OK", Command.OK, 1));
+        newPasswordInputBox.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return newPasswordInputBox;
+    }
+
+    void commandActionOnNewPasswordInputBox(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(serviceList);
+            return;
+        }
+        String newPassword = newPasswordInputBox.getString();
+        if (newPassword == null)
+        {
+            newPassword = "";
+        }
+        try
+        {
+            Service[] services = new Service[memo.getServiceCount()];
+            for (int i = 0; i < services.length; i++)
+            {
+                Service old = memo.getService(i);
+                byte[] secrets = old.secrets;
+                if (secrets != null && secrets.length > 0)
+                {
+                    secrets = Cryptor.instance.encrypt(newPassword,
+                        Cryptor.instance.encrypt(newPassword,
+                            Cryptor.instance.decrypt(password,
+                                Cryptor.instance.decrypt(password, secrets))));
+                }
+                services[i] = new Service(old.values, secrets);
+            }
+            memo = new Memo(services);
+            password = newPassword;
+            saveMemo(serviceList);
+        }
+        catch (Exception ex)
+        {
+            setTicker("unknown error");
+        }
+    }
+
 
     List selectExportList = null;
     List getSelectExportList()
