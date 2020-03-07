@@ -3,8 +3,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Vector;
+import javax.microedition.io.Connector;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
@@ -142,6 +144,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnNewPasswordInputBox(cmd);
         }
+        else if (disp == downloadForm)
+        {
+            commandActionOnDownloadForm(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -223,6 +229,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void commandActionOnMemoList(Command cmd)
     {
+        setTicker(null);
         if (cmd == List.SELECT_COMMAND)
         {
             if (memoList.getSelectedIndex() < 0)
@@ -249,8 +256,144 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (priority == 2)
         {
             // HTTP
-            // TODO:
+            setDisplay(getDownloadForm());
         }
+    }
+
+    Form downloadForm = null;
+    Form getDownloadForm()
+    {
+        if (downloadForm != null)
+        {
+            ((TextField)downloadForm.get(0)).setString("");
+            ((TextField)downloadForm.get(1)).setString("");
+            return downloadForm;
+        }
+        downloadForm = new Form("download");
+        downloadForm.addCommand(new Command("OK", Command.OK, 1));
+        downloadForm.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        downloadForm.append(new TextField("memo title", "", 20, TextField.ANY));
+        downloadForm.append(new TextField("url", "", 500, TextField.ANY));
+        // final String[] fileTypes = { "raw data", "base64" };
+        // downloadForm.append(new ChoiceGroup("type", ChoiceGroup.EXCLUSIVE, fileTypes, null));
+        return downloadForm;
+    }
+
+    void commandActionOnDownloadForm(Command cmd)
+    {
+        setTicker(null);
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(memoList);
+            return;
+        }
+        String title = ((TextField)downloadForm.get(0)).getString();
+        if (!isValidMemoTitle(title))
+        {
+            return;
+        }
+        final Runnable runner = new Runnable() {
+            public void run()
+            {
+                String title = ((TextField)downloadForm.get(0)).getString();
+                String url = ((TextField)downloadForm.get(1)).getString();
+                InputStream in = null;
+                byte[] raw;
+                try
+                {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    in = Connector.openInputStream(url);
+                    byte[] buf = new byte[256];
+                    int len;
+                    while ((len = in.read(buf)) >= 0)
+                    {
+                        baos.write(buf, 0, len);
+                    }
+                    raw = baos.toByteArray();
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                    setDisplay(downloadForm);
+                    downloadForm.setTicker(getTicker("network error"));
+                    return;
+                }
+                finally
+                {
+                    if (in != null)
+                    {
+                        try
+                        {
+                            in.close();
+                        }
+                        catch (Exception ex)
+                        {
+                            // discard
+                        }
+                        in = null;
+                    }
+                }
+                RecordStore rs = null;
+                try
+                {
+                    String rsName = title + RECORD_SUFFIX;
+                    rs = RecordStore.openRecordStore(rsName, true);
+                    if (rs.getNumRecords() == 0)
+                    {
+                        rs.addRecord(raw, 0, raw.length);
+                    }
+                    else
+                    {
+                        rs.setRecord(1, raw, 0, raw.length);
+                    }
+                    memoList.append(title, null);
+                    setDisplay(memoList);
+                    memoList.setTicker(getTicker("success!"));
+                }
+                catch (Exception ex)
+                {
+                    setDisplay(downloadForm);
+                    downloadForm.setTicker(getTicker("unknown error"));
+                }
+                finally
+                {
+                    if (rs != null)
+                    {
+                        try
+                        {
+                            rs.closeRecordStore();
+                        }
+                        catch (Exception ex)
+                        {
+                            // discard
+                        }
+                        rs = null;
+                    }
+                }
+            }
+        };
+        final Alert alert = new Alert("download", "waiting...", null, AlertType.INFO);
+        alert.setTimeout(Alert.FOREVER);
+        setDisplay(alert);
+        (new Thread(runner)).start();
+    }
+
+    boolean isValidMemoTitle(String title)
+    {
+        if (title == null || (title = title.trim()).length() == 0)
+        {
+            setTicker("no empty!");
+            return false;
+        }
+        for (int i = 0; i < memoList.size(); i++)
+        {
+            if (title.equals(memoList.getString(i)))
+            {
+                setTicker("duplicate!");
+                return false;
+            }
+        }
+        return true;
     }
 
     TextBox memoTitleEditor = null;
@@ -272,25 +415,16 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void commandActionOnMemoTitleEdtitor(Command cmd)
     {
+        setTicker(null);
         if (cmd.getCommandType() == Command.OK)
         {
             String title = memoTitleEditor.getString();
-            if (title == null || (title = title.trim()).length() == 0)
+            if (!isValidMemoTitle(title))
             {
-                setTicker("no empty!");
                 return;
-            }
-            for (int i = 0; i < memoList.size(); i++)
-            {
-                if (title.equals(memoList.getString(i)))
-                {
-                    setTicker("duplicate!");
-                    return;
-                }
             }
             memoList.append(title, null);
         }
-        setTicker(null);
         setDisplay(memoList);
     }
 
@@ -1090,11 +1224,11 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         catch (RecordStoreException ex)
         {
-            // no code
+            // discard
             // ex.printStackTrace();
         }
         setDisplay(serviceList);
-        serviceList.setTicker(getTicker("deleted!"));
+        serviceList.setTicker(getTicker("deleted all!"));
     }
 
     Form secretsForm = null;
