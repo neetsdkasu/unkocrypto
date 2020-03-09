@@ -148,6 +148,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnDownloadForm(cmd);
         }
+        else if (disp == deleteMemoForm)
+        {
+            commandActionOnDeleteMemoForm(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -212,6 +216,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         memoList.addCommand(new Command("EXIT", Command.EXIT, 1));
         memoList.addCommand(new Command("NEW", Command.SCREEN, 1));
         memoList.addCommand(new Command("HTTP", Command.SCREEN, 2));
+        memoList.addCommand(new Command("DELETE", Command.SCREEN, 3));
         String[] list = RecordStore.listRecordStores();
         if (list != null)
         {
@@ -258,6 +263,46 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // HTTP
             setDisplay(getDownloadForm());
         }
+        else if (priority == 3)
+        {
+            // DELETE MEMO
+            setDisplay(getDeleteMemoForm(true));
+        }
+
+    }
+
+    Form deleteMemoForm = null;
+    Form getDeleteMemoForm(boolean reset)
+    {
+        if (deleteMemoForm == null)
+        {
+            deleteMemoForm = new Form("DELETE MEMO");
+            deleteMemoForm.addCommand(new Command("DELETE", Command.OK, 1));
+            deleteMemoForm.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+            deleteMemoForm.append(new ChoiceGroup("memo title", ChoiceGroup.POPUP));
+            deleteMemoForm.append(new TextField("memo title", "", 20, TextField.ANY));
+        }
+        if (reset)
+        {
+            ChoiceGroup cg = (ChoiceGroup)deleteMemoForm.get(0);
+            cg.deleteAll();
+            for (int i = 0; i < memoList.size(); i++)
+            {
+                cg.append(memoList.getString(i), null);
+            }
+            ((TextField)deleteMemoForm.get(1)).setString("");
+        }
+        return deleteMemoForm;
+    }
+
+    void commandActionOnDeleteMemoForm(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(memoList);
+            return;
+        }
+        //  TODO:
     }
 
     Form downloadForm = null;
