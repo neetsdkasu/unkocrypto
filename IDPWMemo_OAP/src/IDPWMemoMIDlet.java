@@ -151,6 +151,11 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         else if (disp == deleteMemoForm)
         {
             commandActionOnDeleteMemoForm(cmd);
+
+        }
+        else if (disp == confirmDeleteMemo)
+        {
+            commandActionOnConfirmDeleteMemo(cmd);
         }
     }
 
@@ -297,12 +302,68 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void commandActionOnDeleteMemoForm(Command cmd)
     {
+        setTicker(null);
         if (cmd.getCommandType() == Command.CANCEL)
         {
             setDisplay(memoList);
             return;
         }
-        //  TODO:
+        ChoiceGroup cg = (ChoiceGroup)deleteMemoForm.get(0);
+        int sel = cg.getSelectedIndex();
+        if (sel < 0)
+        {
+            return;
+        }
+        String name = cg.getString(sel);
+        if (!name.equals(((TextField)deleteMemoForm.get(1)).getString()))
+        {
+            setTicker("unmatch memo name");
+            return;
+        }
+        setDisplay(getConfirmDeleteMemo(name));
+    }
+
+    Alert confirmDeleteMemo = null;
+    Alert getConfirmDeleteMemo(String target)
+    {
+        if (confirmDeleteMemo != null)
+        {
+            if (target != null)
+            {
+                confirmDeleteMemo.setString("delete " + target + " ?");
+            }
+            return confirmDeleteMemo;
+        }
+        confirmDeleteMemo = new Alert("confrim", "delete " + target + " ?", null, null);
+        confirmDeleteMemo.addCommand(new Command("DELETE", Command.OK, 1));
+        confirmDeleteMemo.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return confirmDeleteMemo;
+    }
+
+    void commandActionOnConfirmDeleteMemo(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(deleteMemoForm);
+            return;
+        }
+        ChoiceGroup cg = (ChoiceGroup)deleteMemoForm.get(0);
+        int sel = cg.getSelectedIndex();
+        String name = cg.getString(sel);
+        try
+        {
+            RecordStore.deleteRecordStore(name + RECORD_SUFFIX);
+            memoList.delete(sel);
+            setDisplay(memoList);
+            memoList.setTicker(getTicker("deleted " + name));
+        }
+        catch (RecordStoreException ex)
+        {
+            // discard
+            // ex.printStackTrace();
+            setDisplay(deleteMemoForm);
+            deleteMemoForm.setTicker(getTicker("failed"));
+        }
     }
 
     Form downloadForm = null;
