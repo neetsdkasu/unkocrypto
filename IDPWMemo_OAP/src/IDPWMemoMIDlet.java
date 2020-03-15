@@ -1167,7 +1167,14 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         setTicker(null);
         if (cmd.getCommandType() == Command.BACK)
         {
-            setDisplay(serviceList);
+            if (hasChanges())
+            {
+                // TODO:
+            }
+            else
+            {
+                setDisplay(serviceList);
+            }
             return;
         }
         int priority = cmd.getPriority();
@@ -1208,9 +1215,74 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             values[count] = new Value(type, value);
             count++;
         }
+        if (values.length == count)
+        {
+            return values;
+        }
         Value[] ret = new Value[count];
         System.arraycopy(values, 0, ret, 0, count);
         return ret;
+    }
+
+    boolean hasChanges()
+    {
+        Service service = memo.getService(serviceIndex);
+        if (service.values.length != detailsForm.size() / 2)
+        {
+            return true;
+        }
+        Value[] values = getValues(detailsForm);
+        for (int i = 0; i < values.length; i++)
+        {
+            if (service.values[i].type != values[i].type)
+            {
+                return true;
+            }
+            if (!service.values[i].value.equals(values[i].value))
+            {
+                return true;
+            }
+        }
+        if (!showedSecrets)
+        {
+            return false;
+        }
+        if (service.secrets == null || service.secrets.length == 0)
+        {
+            if (secretsForm.size() > 0)
+            {
+                return true;
+            }
+        }
+        try
+        {
+            Value[] tmpValues = getValues(secretsForm);
+            if (tmpValues.length == 0)
+            {
+                return true;
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Service.writeSecrets(new DataOutputStream(baos), tmpValues);
+            byte[] secrets = Cryptor.instance.encrypt(password,
+                Cryptor.instance.encrypt(password, baos.toByteArray()));
+            if (service.secrets.length != secrets.length)
+            {
+                return true;
+            }
+            for (int i = 0; i < secrets.length; i++)
+            {
+                if (service.secrets[i] != secrets[i])
+                {
+                    return true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            setTicker("unknown error to check service");
+            return true;
+        }
+        return false;
     }
 
     void updateService(Displayable ret)
