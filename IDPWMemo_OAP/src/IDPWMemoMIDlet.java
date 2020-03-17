@@ -838,10 +838,14 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             Service service = memo.getService(i);
             try
             {
-                byte[] secrets = Cryptor.instance.encrypt(exPassword,
-                    Cryptor.instance.encrypt(exPassword,
-                        Cryptor.instance.decrypt(password,
-                            Cryptor.instance.decrypt(password, service.secrets))));
+                byte[] secrets = service.secrets;
+                if (secrets != null && secrets.length > 0)
+                {
+                    secrets = Cryptor.instance.encrypt(exPassword,
+                        Cryptor.instance.encrypt(exPassword,
+                            Cryptor.instance.decrypt(password,
+                                Cryptor.instance.decrypt(password, secrets))));
+                }
                 services[index] = new Service(service.values, secrets);
                 index++;
             }
@@ -1047,10 +1051,14 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             try
             {
                 service = importMemo.getService(importServiceIndex);
-                byte[] secrets = Cryptor.instance.encrypt(password,
-                    Cryptor.instance.encrypt(password,
-                        Cryptor.instance.decrypt(imPassword,
-                            Cryptor.instance.decrypt(imPassword, service.secrets))));
+                byte[] secrets = service.secrets;
+                if (secrets != null && secrets.length > 0)
+                {
+                    secrets = Cryptor.instance.encrypt(password,
+                        Cryptor.instance.encrypt(password,
+                            Cryptor.instance.decrypt(imPassword,
+                                Cryptor.instance.decrypt(imPassword, secrets))));
+                }
                 service = new Service(service.values, secrets);
             }
             catch (Exception ex)
