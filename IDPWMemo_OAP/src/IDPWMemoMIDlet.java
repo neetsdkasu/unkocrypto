@@ -157,6 +157,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnConfirmDeleteMemo(cmd);
         }
+        else if (disp == confirmNoSaveBack)
+        {
+            commandActionOnConfirmNoSaveBack(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -1169,7 +1173,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             if (hasChanges())
             {
-                // TODO:
+                setDisplay(getConfirmNoSaveBack());
             }
             else
             {
@@ -1199,6 +1203,30 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             updateService(detailsForm);
         }
     }
+
+    Alert confirmNoSaveBack = null;
+    Alert getConfirmNoSaveBack()
+    {
+        if (confirmNoSaveBack != null)
+        {
+            return confirmNoSaveBack;
+        }
+        confirmNoSaveBack = new Alert("confrim", "back to service list without saving", null, null);
+        confirmNoSaveBack.addCommand(new Command("OK", Command.OK, 1));
+        confirmNoSaveBack.addCommand(new Command("CANCEL", Command.CANCEL, 1));
+        return confirmNoSaveBack;
+    }
+
+    void commandActionOnConfirmNoSaveBack(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.CANCEL)
+        {
+            setDisplay(detailsForm);
+            return;
+        }
+        setDisplay(serviceList);
+    }
+
 
     Value[] getValues(Form valueForm)
     {
@@ -1249,10 +1277,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         if (service.secrets == null || service.secrets.length == 0)
         {
-            if (secretsForm.size() > 0)
-            {
-                return true;
-            }
+            return secretsForm.size() > 0;
         }
         try
         {
