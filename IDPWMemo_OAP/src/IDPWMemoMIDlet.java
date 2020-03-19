@@ -83,7 +83,18 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // what happened?
             return;
         }
+        try
+        {
+            commandActionByDisp(cmd, disp);
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 
+    public void commandActionByDisp(Command cmd, Displayable disp)
+    {
         if (disp == memoList)
         {
             commandActionOnMemoList(cmd);
@@ -464,6 +475,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 {
                     setDisplay(downloadForm);
                     downloadForm.setTicker(getTicker("unknown error"));
+                    ex.printStackTrace();
                 }
                 finally
                 {
@@ -601,6 +613,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             closeMemoRecordStore();
             memo = null;
             setTicker("unknown error");
+            ex.printStackTrace();
             return;
         }
         catch (IOException ex)
@@ -740,6 +753,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         catch (Exception ex)
         {
             setTicker("unknown error");
+            ex.printStackTrace();
         }
     }
 
@@ -852,6 +866,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             catch (Exception ex)
             {
                 setTicker("unknown error");
+                ex.printStackTrace();
                 return null;
             }
         }
@@ -872,6 +887,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         catch (Exception ex)
         {
             setTicker("unknown error");
+            ex.printStackTrace();
             return null;
         }
         return exportTextBox;
@@ -1000,6 +1016,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             catch (Exception ex)
             {
                 setTicker("unknown error");
+                ex.printStackTrace();
                 return null;
             }
         }
@@ -1064,6 +1081,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             catch (Exception ex)
             {
                 setTicker("unknown error");
+                ex.printStackTrace();
                 return;
             }
             if (action == 0)
@@ -1313,6 +1331,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         catch (Exception ex)
         {
             setTicker("unknown error to check service");
+            ex.printStackTrace();
             return true;
         }
         return false;
@@ -1351,6 +1370,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             catch (IOException ex)
             {
                 setTicker("unknown error to update service");
+                ex.printStackTrace();
                 return;
             }
         }
@@ -1391,7 +1411,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             setDisplay(ret);
             ret.setTicker(getTicker("unknown error to save"));
-            // ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 
