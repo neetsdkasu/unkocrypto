@@ -20,7 +20,12 @@ final class Cryptor
 
     static final Cryptor instance = new Cryptor();
 
-    private final MTRandom rand = new MTRandom();
+    private final MTRandom rand = new MTRandom() {
+        public int nextInt()
+        {
+            return next(32); // In OpenAppli-JavaMachine-java.util.Random, nextInt() method does not use next(int) method...
+        }
+    };
     private final Checksum cs = new CRC32();
 
     private Cryptor() {}
