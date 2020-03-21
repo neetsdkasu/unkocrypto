@@ -1040,7 +1040,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         Value[] values = importMemo.getService(importServiceIndex).values;
         for (int i = 0; i < values.length; i++)
         {
-            StringItem si = new StringItem(values[i].getTypeName(), values[i].value);
+            StringItem si = new StringItem(values[i].getTypeName() + ": ", values[i].value);
             si.setLayout(StringItem.LAYOUT_NEWLINE_BEFORE);
             importForm.append(si);
         }
