@@ -1212,6 +1212,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             // ADD
             ChoiceGroup cg = new ChoiceGroup(null, ChoiceGroup.POPUP, itemTypes, null);
+            cg.setSelectedIndex(Value.ID, true);
             cg.setLayout(ChoiceGroup.LAYOUT_LEFT | ChoiceGroup.LAYOUT_NEWLINE_AFTER);
             detailsForm.append(cg);
             TextField tf = new TextField(null, "", 200, TextField.ANY);
@@ -1527,6 +1528,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         // ADD
         ChoiceGroup cg = new ChoiceGroup(null, ChoiceGroup.POPUP, itemTypes, null);
+        cg.setSelectedIndex(Value.PASSWORD, true);
         cg.setLayout(ChoiceGroup.LAYOUT_LEFT | ChoiceGroup.LAYOUT_NEWLINE_AFTER);
         secretsForm.append(cg);
         TextField tf = new TextField(null, "", 200, TextField.ANY);
