@@ -364,7 +364,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                     }
                     String name = list[i].substring(0, list[i].length() - RECORD_SUFFIX.length());
                     si = new StringItem(name + ": ", Integer.toString(size));
-                    si.setLayout(StringItem. LAYOUT_NEWLINE_BEFORE);
+                    si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
                     memoryViewer.append(si);
                 }
                 si = new StringItem("available: ", Integer.toString(available));
