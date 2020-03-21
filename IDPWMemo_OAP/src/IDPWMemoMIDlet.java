@@ -172,6 +172,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             commandActionOnConfirmNoSaveBack(cmd);
         }
+        else if (disp == memoryViewer)
+        {
+            commandActionOnMemoryViewer(cmd);
+        }
     }
 
     void closeMemoRecordStore()
@@ -237,6 +241,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         memoList.addCommand(new Command("NEW", Command.SCREEN, 1));
         memoList.addCommand(new Command("HTTP", Command.SCREEN, 2));
         memoList.addCommand(new Command("DELETE", Command.SCREEN, 3));
+        memoList.addCommand(new Command("MEMORY", Command.SCREEN, 4));
         String[] list = RecordStore.listRecordStores();
         if (list != null)
         {
@@ -288,7 +293,94 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             // DELETE MEMO
             setDisplay(getDeleteMemoForm(true));
         }
+        else if (priority == 4)
+        {
+            // MEMORY
+            setDisplay(getMemoryViewer(true));
+        }
 
+    }
+
+    Form memoryViewer = null;
+    Form getMemoryViewer(boolean reset)
+    {
+        if (memoryViewer == null)
+        {
+            memoryViewer = new Form("MEMORY SIZE");
+            memoryViewer.addCommand(new Command("BACK", Command.BACK, 1));
+        }
+        if (reset)
+        {
+            memoryViewer.deleteAll();
+            String totalSize = getAppProperty("MIDlet-Data-Size");
+            if (totalSize == null)
+            {
+                totalSize = "0";
+            }
+            StringItem si = new StringItem("total: ", totalSize);
+            si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
+            memoryViewer.append(si);
+            String[] list = RecordStore.listRecordStores();
+            if (list == null || list.length == 0)
+            {
+                si = new StringItem("available: ", totalSize);
+                si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
+                memoryViewer.append(si);
+            }
+            else
+            {
+                int available = Integer.parseInt(totalSize);
+                for (int i = 0; i < list.length; i++)
+                {
+                    if (!list[i].endsWith(RECORD_SUFFIX))
+                    {
+                        continue;
+                    }
+                    RecordStore rs = null;
+                    int size = -1;
+                    try
+                    {
+                        rs = RecordStore.openRecordStore(list[i], false);
+                        size = rs.getSize();
+                        available = Math.min(available, rs.getSizeAvailable());
+                    }
+                    catch (Exception ex)
+                    {
+                        // discard
+                    }
+                    finally
+                    {
+                        if (rs != null)
+                        {
+                            try
+                            {
+                                rs.closeRecordStore();
+                            }
+                            catch (Exception ex)
+                            {
+                                // discard
+                            }
+                        }
+                    }
+                    String name = list[i].substring(0, list[i].length() - RECORD_SUFFIX.length());
+                    si = new StringItem(name + ": ", Integer.toString(size));
+                    si.setLayout(StringItem. LAYOUT_NEWLINE_BEFORE);
+                    memoryViewer.append(si);
+                }
+                si = new StringItem("available: ", Integer.toString(available));
+                si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
+                memoryViewer.append(si);
+            }
+        }
+        return memoryViewer;
+    }
+
+    void commandActionOnMemoryViewer(Command cmd)
+    {
+        if (cmd.getCommandType() == Command.BACK)
+        {
+            setDisplay(memoList);
+        }
     }
 
     Form deleteMemoForm = null;
