@@ -332,17 +332,13 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 int available = Integer.parseInt(totalSize);
                 for (int i = 0; i < list.length; i++)
                 {
-                    if (!list[i].endsWith(RECORD_SUFFIX))
-                    {
-                        continue;
-                    }
                     RecordStore rs = null;
                     int size = -1;
                     try
                     {
                         rs = RecordStore.openRecordStore(list[i], false);
-                        size = rs.getSize();
-                        available = Math.min(available, rs.getSizeAvailable());
+                        size =  rs.getSize();
+                        available -= size;
                     }
                     catch (Exception ex)
                     {
@@ -361,6 +357,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                                 // discard
                             }
                         }
+                    }
+                    if (!list[i].endsWith(RECORD_SUFFIX))
+                    {
+                        continue;
                     }
                     String name = list[i].substring(0, list[i].length() - RECORD_SUFFIX.length());
                     si = new StringItem(name + ": ", Integer.toString(size));
