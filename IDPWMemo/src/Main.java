@@ -2,6 +2,8 @@
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
@@ -263,6 +265,28 @@ class Main extends JFrame
         changePasswordButton.addActionListener( e -> changePassword() );
         exportServiceButton.addActionListener( e -> exportService() );
         importServiceButton.addActionListener( e -> importService() );
+
+        serviceList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                if (e.getClickCount() != 2)
+                {
+                    return;
+                }
+                int index = serviceList.locationToIndex(e.getPoint());
+                if (index < 0)
+                {
+                    return;
+                }
+                java.awt.Rectangle rect = serviceList.getCellBounds(index, index);
+                if (rect != null && rect.contains(e.getPoint()))
+                {
+                    serviceList.setSelectedIndex(index);
+                    editService();
+                }
+            }
+        });
 
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
