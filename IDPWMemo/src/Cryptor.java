@@ -51,7 +51,6 @@ final class Cryptor
             for (int j = 0; j < 4; j++)
             {
                 seed[i] |= (int)password[p] << (((j + i * i) & 3) << 3);
-                password[p] = 0; /* clear password */
                 p++;
                 if (p >= password.length)
                 {
