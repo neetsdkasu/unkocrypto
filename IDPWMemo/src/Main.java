@@ -559,12 +559,15 @@ class Main extends JFrame
         {
             try
             {
-                byte[] data = Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password),
-                    Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secretsBuffer));
-                if (data == null)
+                byte[] data = secretsBuffer;
+                for (int i = 0; i < 2; i++)
                 {
-                    JOptionPane.showMessageDialog(this, "wrong password");
-                    return;
+                    data = Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), data);
+                    if (data == null)
+                    {
+                        JOptionPane.showMessageDialog(this, "wrong password");
+                        return;
+                    }
                 }
                 values = Service.readSecrets(new DataInputStream(new ByteArrayInputStream(data)));
             }
@@ -765,18 +768,20 @@ class Main extends JFrame
         }
         try
         {
-            buf = Cryptor.instance.decrypt(imPassword,
-                Cryptor.instance.decrypt(imPassword, buf));
+            for (int i = 0; i < 2; i++)
+            {
+                buf = Cryptor.instance.decrypt(imPassword, buf);
+                if (buf == null)
+                {
+                    JOptionPane.showMessageDialog(this, "wrong password.");
+                    return;
+                }
+            }
         }
         catch (Exception ex)
         {
             Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
             JOptionPane.showMessageDialog(this, "failed with unknown error.");
-            return;
-        }
-        if (buf == null)
-        {
-            JOptionPane.showMessageDialog(this, "wrong password.");
             return;
         }
         Memo importData;
