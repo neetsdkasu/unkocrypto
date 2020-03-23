@@ -15,6 +15,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -190,6 +191,18 @@ class Main extends JFrame
             p.add(label);
             panel.add(p);
 
+            label.setToolTipText("double-click to sort");
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    if (e.getClickCount() == 2)
+                    {
+                        sortService();
+                    }
+                }
+            });
+
             serviceList = new JList<>(list = new DefaultListModel<>());
             serviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -353,6 +366,31 @@ class Main extends JFrame
         {
             c.setEnabled(enable);
         }
+    }
+
+    void sortService()
+    {
+        if (list.size() < 2)
+        {
+            return;
+        }
+        Integer[] indexes = new Integer[list.size()];
+        Arrays.setAll(indexes, Integer::valueOf);
+        final Collator col = Collator.getInstance();
+        col.setStrength(Collator.PRIMARY);
+        Arrays.sort(indexes, (a, b) -> col.compare(list.get(a), list.get(b)) );
+        Service[] services = new Service[memo.getServiceCount()];
+        for (int i = 0; i < services.length; i++)
+        {
+            services[i] = memo.getService(indexes[i]);
+            list.set(i, services[i].getServiceName());
+        }
+        memo = new Memo(services);
+        if (serviceIndex >= 0)
+        {
+            serviceIndex = Arrays.<Integer>asList(indexes).indexOf(serviceIndex);
+        }
+        saveMemo();
     }
 
     void openMemo()
