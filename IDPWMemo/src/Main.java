@@ -501,7 +501,7 @@ class Main extends JFrame
         Service service = memo.getService(sel);
         resetItemTable(detailTable, details = getTableModel(service.values));
         resetItemTable(secretTable, secrets = getEmptyTableModel());
-        setTitle(memoName, list.elementAt(sel));
+        setTitle(memoName, list.get(sel));
         setServiceEditorEnabled(true);
         setHiddenItemEditorEnabled(false);
     }
@@ -547,7 +547,7 @@ class Main extends JFrame
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
         {
-            serviceName = list.elementAt(serviceIndex);
+            serviceName = list.get(serviceIndex);
             int ans = JOptionPane.showConfirmDialog(this, "delete '" + serviceName + "' from " + memoName, null, JOptionPane.OK_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION)
             {
@@ -564,7 +564,7 @@ class Main extends JFrame
         }
         else
         {
-            list.setElementAt(serviceName, serviceIndex);
+            list.set(serviceIndex, serviceName);
             memo.setService(serviceIndex, service);
         }
         saveMemo();
@@ -700,7 +700,7 @@ class Main extends JFrame
             JOptionPane.showMessageDialog(this, "not selected.");
             return;
         }
-        String serviceName = list.elementAt(sel);
+        String serviceName = list.get(sel);
         String exPassword = JOptionPane.showInputDialog(this, "export ( " + serviceName +  " ). input export-password.");
         if (exPassword == null)
         {
@@ -898,7 +898,7 @@ class Main extends JFrame
             {
                 // replace
                 int res = JOptionPane.showConfirmDialog(this,
-                    "replace <" + list.elementAt(pos - 1) + "> for <" + serviceName + ">",
+                    "replace <" + list.get(pos - 1) + "> for <" + serviceName + ">",
                     "import", JOptionPane.OK_CANCEL_OPTION);
                 if (res == JOptionPane.CANCEL_OPTION)
                 {
@@ -936,7 +936,7 @@ class Main extends JFrame
             {
                 // replace
                 memo.setService(pos - 1, service);
-                list.setElementAt(serviceName, pos - 1);
+                list.set(pos - 1, serviceName);
             }
             else
             {
