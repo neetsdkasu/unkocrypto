@@ -501,6 +501,8 @@ class Main extends JFrame
         }
         memo.addService(new Service(serviceName));
         list.addElement(serviceName);
+        serviceList.setSelectedIndex(list.size() - 1);
+        editService();
     }
 
 
