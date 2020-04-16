@@ -261,7 +261,6 @@ class Main extends JFrame
             p.add(label);
             panel2.add(p);
 
-
             secretTable = new JTable(secrets = getEmptyTableModel());
             panel2.add(new JScrollPane(secretTable));
 
