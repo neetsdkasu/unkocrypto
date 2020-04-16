@@ -247,6 +247,7 @@ class Main extends JFrame
             buttons.add(saveMemoButton = new JButton("SAVE"));
             buttons.add(addPublicItemButton = new JButton("ADD"));
             publicItemTypeComboBox = new JComboBox<>(itemTypes);
+            publicItemTypeComboBox.setSelectedIndex(Value.ID);
             publicItemTypeComboBox.setEditable(false);
             buttons.add(publicItemTypeComboBox);
             panel1.add(buttons);
@@ -268,6 +269,7 @@ class Main extends JFrame
             buttons.add(showHiddenItemsButton = new JButton("SHOW"));
             buttons.add(addHiddenItemButton = new JButton("ADD"));
             hiddenItemTypeComboBox = new JComboBox<>(itemTypes);
+            hiddenItemTypeComboBox.setSelectedIndex(Value.PASSWORD);
             hiddenItemTypeComboBox.setEditable(false);
             buttons.add(hiddenItemTypeComboBox);
             panel2.add(buttons);
