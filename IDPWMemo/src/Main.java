@@ -40,6 +40,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 
 class Main extends JFrame
 {
@@ -538,8 +539,29 @@ class Main extends JFrame
         return items.toArray(new Value[0]);
     }
 
+    void commit()
+    {
+        if (detailTable.isEnabled() && detailTable.isEditing())
+        {
+            TableCellEditor tce = detailTable.getCellEditor();
+            if (tce != null)
+            {
+                tce.stopCellEditing();
+            }
+        }
+        if (secretTable.isEnabled() && secretTable.isEditing())
+        {
+            TableCellEditor tce = secretTable.getCellEditor();
+            if (tce != null)
+            {
+                tce.stopCellEditing();
+            }
+        }
+    }
+
     void updateService()
     {
+        commit();
         Value[] items = getValues(details);
         byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
         if (secretTable.isEnabled())
