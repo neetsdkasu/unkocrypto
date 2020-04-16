@@ -159,9 +159,22 @@ class Main extends JFrame
     {
         super(APP_TITLE);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(310, 650);
         setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e)
+            {
+                System.exit(0); // 無くても終了するけど念のため
+            }
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                dispose(); // 最後のWinodwが破棄されるとVMは終了する(VM実装次第らしいが)
+            }
+        });
 
         Box box = Box.createVerticalBox();
 
@@ -748,13 +761,6 @@ class Main extends JFrame
             box.add(copyButton);
             dialog.add(box);
             copyButton.addActionListener( e -> text.copy() );
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e)
-                {
-                    dialog.dispose();
-                }
-            });
         }
         label.setText(serviceName + " (" + memoName + ") size: " + exportText.length());
         text.setText(exportText);
@@ -794,13 +800,6 @@ class Main extends JFrame
                 public void windowClosing(WindowEvent e)
                 {
                     text.setText(null);
-                }
-            });
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e)
-                {
-                    dialog.dispose();
                 }
             });
         }
