@@ -2,6 +2,8 @@
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
@@ -13,6 +15,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -37,6 +40,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 
 class Main extends JFrame
 {
@@ -156,9 +160,25 @@ class Main extends JFrame
     {
         super(APP_TITLE);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(310, 650);
         setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e)
+            {
+                System.exit(0); // 無くても終了するけど念のため
+            }
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                if (canResetEditors())
+                {
+                    dispose(); // 最後のWinodwが破棄されるとVMは終了する(VM実装次第らしいが)
+                }
+            }
+        });
 
         Box box = Box.createVerticalBox();
 
@@ -187,6 +207,18 @@ class Main extends JFrame
             JPanel p = new JPanel(false);
             p.add(label);
             panel.add(p);
+
+            label.setToolTipText("double-click to sort");
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    if (e.getClickCount() == 2)
+                    {
+                        sortService();
+                    }
+                }
+            });
 
             serviceList = new JList<>(list = new DefaultListModel<>());
             serviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -219,6 +251,7 @@ class Main extends JFrame
             buttons.add(saveMemoButton = new JButton("SAVE"));
             buttons.add(addPublicItemButton = new JButton("ADD"));
             publicItemTypeComboBox = new JComboBox<>(itemTypes);
+            publicItemTypeComboBox.setSelectedIndex(Value.ID);
             publicItemTypeComboBox.setEditable(false);
             buttons.add(publicItemTypeComboBox);
             panel1.add(buttons);
@@ -232,7 +265,6 @@ class Main extends JFrame
             p.add(label);
             panel2.add(p);
 
-
             secretTable = new JTable(secrets = getEmptyTableModel());
             panel2.add(new JScrollPane(secretTable));
 
@@ -240,6 +272,7 @@ class Main extends JFrame
             buttons.add(showHiddenItemsButton = new JButton("SHOW"));
             buttons.add(addHiddenItemButton = new JButton("ADD"));
             hiddenItemTypeComboBox = new JComboBox<>(itemTypes);
+            hiddenItemTypeComboBox.setSelectedIndex(Value.PASSWORD);
             hiddenItemTypeComboBox.setEditable(false);
             buttons.add(hiddenItemTypeComboBox);
             panel2.add(buttons);
@@ -253,9 +286,9 @@ class Main extends JFrame
         outer.setDividerLocation(220);
         lower.setDividerLocation(200);
 
-        openMemoButton.addActionListener( e -> openMemo() );
-        addServiceButton.addActionListener( e -> addService() );
-        editServiceButton.addActionListener( e -> editService() );
+        openMemoButton.addActionListener( e -> { if (canResetEditors()) openMemo(); } );
+        addServiceButton.addActionListener( e -> { if (canResetEditors()) addService(); } );
+        editServiceButton.addActionListener( e -> { if (canResetEditors()) editService(); } );
         saveMemoButton.addActionListener( e ->  updateService() );
         addPublicItemButton.addActionListener( e -> addPublicItem() );
         showHiddenItemsButton.addActionListener( e -> showHiddenItems() );
@@ -263,6 +296,31 @@ class Main extends JFrame
         changePasswordButton.addActionListener( e -> changePassword() );
         exportServiceButton.addActionListener( e -> exportService() );
         importServiceButton.addActionListener( e -> importService() );
+
+        serviceList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                if (e.getClickCount() != 2)
+                {
+                    return;
+                }
+                int index = serviceList.locationToIndex(e.getPoint());
+                if (index < 0)
+                {
+                    return;
+                }
+                java.awt.Rectangle rect = serviceList.getCellBounds(index, index);
+                if (rect != null && rect.contains(e.getPoint()))
+                {
+                    serviceList.setSelectedIndex(index);
+                    if (canResetEditors())
+                    {
+                        editService();
+                    }
+                }
+            }
+        });
 
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
@@ -329,6 +387,31 @@ class Main extends JFrame
         {
             c.setEnabled(enable);
         }
+    }
+
+    void sortService()
+    {
+        if (list.size() < 2)
+        {
+            return;
+        }
+        Integer[] indexes = new Integer[list.size()];
+        Arrays.setAll(indexes, Integer::valueOf);
+        final Collator col = Collator.getInstance();
+        col.setStrength(Collator.PRIMARY);
+        Arrays.sort(indexes, (a, b) -> col.compare(list.get(a), list.get(b)) );
+        Service[] services = new Service[memo.getServiceCount()];
+        for (int i = 0; i < services.length; i++)
+        {
+            services[i] = memo.getService(indexes[i]);
+            list.set(i, services[i].getServiceName());
+        }
+        memo = new Memo(services);
+        if (serviceIndex >= 0)
+        {
+            serviceIndex = Arrays.<Integer>asList(indexes).indexOf(serviceIndex);
+        }
+        saveMemo();
     }
 
     void openMemo()
@@ -424,6 +507,8 @@ class Main extends JFrame
         }
         memo.addService(new Service(serviceName));
         list.addElement(serviceName);
+        serviceList.setSelectedIndex(list.size() - 1);
+        editService();
     }
 
 
@@ -439,7 +524,7 @@ class Main extends JFrame
         Service service = memo.getService(sel);
         resetItemTable(detailTable, details = getTableModel(service.values));
         resetItemTable(secretTable, secrets = getEmptyTableModel());
-        setTitle(memoName, list.elementAt(sel));
+        setTitle(memoName, list.get(sel));
         setServiceEditorEnabled(true);
         setHiddenItemEditorEnabled(false);
     }
@@ -460,8 +545,88 @@ class Main extends JFrame
         return items.toArray(new Value[0]);
     }
 
-    void updateService()
+    boolean canResetEditors()
     {
+        try
+        {
+            Service curService = getEditedService();
+            if (curService == null)
+            {
+                return true;
+            }
+            Service origService = memo.getService(serviceIndex);
+            ByteArrayOutputStream cur = new ByteArrayOutputStream();
+            ByteArrayOutputStream orig = new ByteArrayOutputStream();
+            curService.save(new DataOutputStream(cur));
+            origService.save(new DataOutputStream(orig));
+            if (Arrays.equals(cur.toByteArray(), orig.toByteArray()))
+            {
+                return true;
+            }
+        }
+        catch (IOException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed to do service.save method.", ex);
+            JOptionPane.showMessageDialog(this, "failed to do service.save method.");
+            return false;
+        }
+
+        final String saveAndContinue = "Save and Continue";
+        final String continueWithoutSaving = "Continue WITHOUT Saving";
+        final String cancel = "Cancel";
+        final Object[] options = {
+          saveAndContinue,
+          continueWithoutSaving,
+          cancel
+        };
+        int res = JOptionPane.showOptionDialog(
+            this,
+            "There's some unsaved data.",
+            "confirm",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            cancel);
+
+        if (res == JOptionPane.CLOSED_OPTION || options[res] == cancel)
+        {
+            return false;
+        }
+        if (options[res] == saveAndContinue)
+        {
+            return updateService();
+        }
+        return true;
+    }
+
+    void commit()
+    {
+        if (detailTable.isEnabled() && detailTable.isEditing())
+        {
+            TableCellEditor tce = detailTable.getCellEditor();
+            if (tce != null)
+            {
+                tce.stopCellEditing();
+            }
+        }
+        if (secretTable.isEnabled() && secretTable.isEditing())
+        {
+            TableCellEditor tce = secretTable.getCellEditor();
+            if (tce != null)
+            {
+                tce.stopCellEditing();
+            }
+        }
+    }
+
+    Service getEditedService()
+    {
+        if (serviceIndex < 0 || !detailTable.isEnabled())
+        {
+            return null;
+        }
+        commit();
         Value[] items = getValues(details);
         byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
         if (secretTable.isEnabled())
@@ -476,21 +641,31 @@ class Main extends JFrame
             }
             catch (IOException ex)
             {
+                // maybe unreachable
                 Logger.getGlobal().log(Level.FINER, "failed to ecrypt secret items.", ex);
                 JOptionPane.showMessageDialog(this, "failed to ecrypt secret items.");
-                return;
+                return null;
             }
         }
-        Service service = new Service(items, secretsBuffer);
+        return new Service(items, secretsBuffer);
+    }
+
+    boolean updateService()
+    {
+        Service service = getEditedService();
+        if (service == null)
+        {
+            return true;
+        }
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
         {
-            serviceName = list.elementAt(serviceIndex);
+            serviceName = list.get(serviceIndex);
             int ans = JOptionPane.showConfirmDialog(this, "delete '" + serviceName + "' from " + memoName, null, JOptionPane.OK_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION)
             {
                 JOptionPane.showMessageDialog(this, "you must set service name");
-                return;
+                return false;
             }
             memo.removeService(serviceIndex);
             list.removeElementAt(serviceIndex);
@@ -502,10 +677,11 @@ class Main extends JFrame
         }
         else
         {
-            list.setElementAt(serviceName, serviceIndex);
+            list.set(serviceIndex, serviceName);
             memo.setService(serviceIndex, service);
         }
         saveMemo();
+        return true;
     }
 
     void saveMemo()
@@ -559,12 +735,15 @@ class Main extends JFrame
         {
             try
             {
-                byte[] data = Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password),
-                    Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), secretsBuffer));
-                if (data == null)
+                byte[] data = secretsBuffer;
+                for (int i = 0; i < 2; i++)
                 {
-                    JOptionPane.showMessageDialog(this, "wrong password");
-                    return;
+                    data = Cryptor.instance.decrypt(Cryptor.instance.decrypt("", password), data);
+                    if (data == null)
+                    {
+                        JOptionPane.showMessageDialog(this, "wrong password");
+                        return;
+                    }
                 }
                 values = Service.readSecrets(new DataInputStream(new ByteArrayInputStream(data)));
             }
@@ -635,7 +814,7 @@ class Main extends JFrame
             JOptionPane.showMessageDialog(this, "not selected.");
             return;
         }
-        String serviceName = list.elementAt(sel);
+        String serviceName = list.get(sel);
         String exPassword = JOptionPane.showInputDialog(this, "export ( " + serviceName +  " ). input export-password.");
         if (exPassword == null)
         {
@@ -683,13 +862,6 @@ class Main extends JFrame
             box.add(copyButton);
             dialog.add(box);
             copyButton.addActionListener( e -> text.copy() );
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e)
-                {
-                    dialog.dispose();
-                }
-            });
         }
         label.setText(serviceName + " (" + memoName + ") size: " + exportText.length());
         text.setText(exportText);
@@ -731,13 +903,6 @@ class Main extends JFrame
                     text.setText(null);
                 }
             });
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e)
-                {
-                    dialog.dispose();
-                }
-            });
         }
         text.setText(null);
         dialog.setVisible(true);
@@ -765,18 +930,20 @@ class Main extends JFrame
         }
         try
         {
-            buf = Cryptor.instance.decrypt(imPassword,
-                Cryptor.instance.decrypt(imPassword, buf));
+            for (int i = 0; i < 2; i++)
+            {
+                buf = Cryptor.instance.decrypt(imPassword, buf);
+                if (buf == null)
+                {
+                    JOptionPane.showMessageDialog(this, "wrong password.");
+                    return;
+                }
+            }
         }
         catch (Exception ex)
         {
             Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
             JOptionPane.showMessageDialog(this, "failed with unknown error.");
-            return;
-        }
-        if (buf == null)
-        {
-            JOptionPane.showMessageDialog(this, "wrong password.");
             return;
         }
         Memo importData;
@@ -831,7 +998,7 @@ class Main extends JFrame
             {
                 // replace
                 int res = JOptionPane.showConfirmDialog(this,
-                    "replace <" + list.elementAt(pos - 1) + "> for <" + serviceName + ">",
+                    "replace <" + list.get(pos - 1) + "> for <" + serviceName + ">",
                     "import", JOptionPane.OK_CANCEL_OPTION);
                 if (res == JOptionPane.CANCEL_OPTION)
                 {
@@ -869,7 +1036,7 @@ class Main extends JFrame
             {
                 // replace
                 memo.setService(pos - 1, service);
-                list.setElementAt(serviceName, pos - 1);
+                list.set(pos - 1, serviceName);
             }
             else
             {
