@@ -173,7 +173,10 @@ class Main extends JFrame
             @Override
             public void windowClosing(WindowEvent e)
             {
-                dispose(); // 最後のWinodwが破棄されるとVMは終了する(VM実装次第らしいが)
+                if (canResetEditors())
+                {
+                    dispose(); // 最後のWinodwが破棄されるとVMは終了する(VM実装次第らしいが)
+                }
             }
         });
 
@@ -283,9 +286,9 @@ class Main extends JFrame
         outer.setDividerLocation(220);
         lower.setDividerLocation(200);
 
-        openMemoButton.addActionListener( e -> openMemo() );
-        addServiceButton.addActionListener( e -> addService() );
-        editServiceButton.addActionListener( e -> editService() );
+        openMemoButton.addActionListener( e -> { if (canResetEditors()) openMemo(); } );
+        addServiceButton.addActionListener( e -> { if (canResetEditors()) addService(); } );
+        editServiceButton.addActionListener( e -> { if (canResetEditors()) editService(); } );
         saveMemoButton.addActionListener( e ->  updateService() );
         addPublicItemButton.addActionListener( e -> addPublicItem() );
         showHiddenItemsButton.addActionListener( e -> showHiddenItems() );
@@ -311,7 +314,10 @@ class Main extends JFrame
                 if (rect != null && rect.contains(e.getPoint()))
                 {
                     serviceList.setSelectedIndex(index);
-                    editService();
+                    if (canResetEditors())
+                    {
+                        editService();
+                    }
                 }
             }
         });
@@ -539,6 +545,61 @@ class Main extends JFrame
         return items.toArray(new Value[0]);
     }
 
+    boolean canResetEditors()
+    {
+        try
+        {
+            Service curService = getEditedService();
+            if (curService == null)
+            {
+                return true;
+            }
+            Service origService = memo.getService(serviceIndex);
+            ByteArrayOutputStream cur = new ByteArrayOutputStream();
+            ByteArrayOutputStream orig = new ByteArrayOutputStream();
+            curService.save(new DataOutputStream(cur));
+            origService.save(new DataOutputStream(orig));
+            if (Arrays.equals(cur.toByteArray(), orig.toByteArray()))
+            {
+                return true;
+            }
+        }
+        catch (IOException ex)
+        {
+            Logger.getGlobal().log(Level.FINER, "failed to do service.save method.", ex);
+            JOptionPane.showMessageDialog(this, "failed to do service.save method.");
+            return false;
+        }
+
+        final String saveAndContinue = "Save and Continue";
+        final String continueWithoutSaving = "Continue WITHOUT Saving";
+        final String cancel = "Cancel";
+        final Object[] options = {
+          saveAndContinue,
+          continueWithoutSaving,
+          cancel
+        };
+        int res = JOptionPane.showOptionDialog(
+            this,
+            "There's some unsaved data.",
+            "confirm",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            cancel);
+
+        if (res == JOptionPane.CLOSED_OPTION || options[res] == cancel)
+        {
+            return false;
+        }
+        if (options[res] == saveAndContinue)
+        {
+            return updateService();
+        }
+        return true;
+    }
+
     void commit()
     {
         if (detailTable.isEnabled() && detailTable.isEditing())
@@ -561,7 +622,7 @@ class Main extends JFrame
 
     Service getEditedService()
     {
-        if (serviceIndex < 0)
+        if (serviceIndex < 0 || !detailTable.isEnabled())
         {
             return null;
         }
@@ -589,12 +650,12 @@ class Main extends JFrame
         return new Service(items, secretsBuffer);
     }
 
-    void updateService()
+    boolean updateService()
     {
         Service service = getEditedService();
         if (service == null)
         {
-            return;
+            return true;
         }
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
@@ -604,7 +665,7 @@ class Main extends JFrame
             if (ans == JOptionPane.CANCEL_OPTION)
             {
                 JOptionPane.showMessageDialog(this, "you must set service name");
-                return;
+                return false;
             }
             memo.removeService(serviceIndex);
             list.removeElementAt(serviceIndex);
@@ -620,6 +681,7 @@ class Main extends JFrame
             memo.setService(serviceIndex, service);
         }
         saveMemo();
+        return true;
     }
 
     void saveMemo()
