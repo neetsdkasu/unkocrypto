@@ -559,8 +559,12 @@ class Main extends JFrame
         }
     }
 
-    void updateService()
+    Service getEditedService()
     {
+        if (serviceIndex < 0)
+        {
+            return null;
+        }
         commit();
         Value[] items = getValues(details);
         byte[] secretsBuffer = memo.getService(serviceIndex).secrets;
@@ -576,12 +580,22 @@ class Main extends JFrame
             }
             catch (IOException ex)
             {
+                // maybe unreachable
                 Logger.getGlobal().log(Level.FINER, "failed to ecrypt secret items.", ex);
                 JOptionPane.showMessageDialog(this, "failed to ecrypt secret items.");
-                return;
+                return null;
             }
         }
-        Service service = new Service(items, secretsBuffer);
+        return new Service(items, secretsBuffer);
+    }
+
+    void updateService()
+    {
+        Service service = getEditedService();
+        if (service == null)
+        {
+            return;
+        }
         String serviceName = service.getServiceName();
         if (serviceName == null || serviceName.length() == 0)
         {
