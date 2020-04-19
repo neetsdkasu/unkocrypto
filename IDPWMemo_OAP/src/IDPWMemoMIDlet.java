@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Vector;
 import javax.microedition.io.Connector;
+import javax.microedition.io.HttpConnection;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
@@ -31,6 +32,17 @@ import neetsdkasu.util.Base64;
 public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 {
     static final String RECORD_SUFFIX = ".memo";
+
+    static Base64.Encoder authEncoder = null;
+
+    static Base64.Encoder getAuthEncoder()
+    {
+        if (authEncoder == null)
+        {
+            authEncoder = Base64.getEncoder();
+        }
+        return authEncoder;
+    }
 
     static Base64.Encoder encoder = null;
     static Base64.Decoder decoder = null;
@@ -479,7 +491,9 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         if (downloadForm != null)
         {
             ((TextField)downloadForm.get(0)).setString("");
-            ((TextField)downloadForm.get(1)).setString("");
+            // ((TextField)downloadForm.get(1)).setString("");
+            // ((TextField)downloadForm.get(3)).setString("");
+            // ((TextField)downloadForm.get(4)).setString("");
             return downloadForm;
         }
         downloadForm = new Form("download");
@@ -487,9 +501,22 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         downloadForm.addCommand(new Command("CANCEL", Command.CANCEL, 1));
         downloadForm.append(new TextField("memo title", "", 20, TextField.ANY));
         downloadForm.append(new TextField("url", "", 500, TextField.ANY));
+        StringItem si = new StringItem("option:", "Basic Authentication");
+        si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
+        downloadForm.append(si);
+        downloadForm.append(new TextField("user", "", 20, TextField.ANY));
+        downloadForm.append(new TextField("password", "", 50, TextField.ANY));
         // final String[] fileTypes = { "raw data", "base64" };
         // downloadForm.append(new ChoiceGroup("type", ChoiceGroup.EXCLUSIVE, fileTypes, null));
         return downloadForm;
+    }
+
+    boolean isValidAuthValues(String authUser, String authPassword)
+    {
+        authUser = authUser == null ? "" : authUser.trim();
+        authPassword = authPassword == null ? "" : authPassword.trim();
+        return (authUser.length() == 0 && authPassword.length() == 0)
+            || (authUser.length() > 0 && authPassword.length() > 0);
     }
 
     void commandActionOnDownloadForm(Command cmd)
@@ -505,24 +532,57 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             return;
         }
+        String authUser = ((TextField)downloadForm.get(3)).getString();
+        String authPassword = ((TextField)downloadForm.get(4)).getString();
+        if (!isValidAuthValues(authUser, authPassword))
+        {
+            setDisplay(downloadForm);
+            downloadForm.setTicker(getTicker("wrong auth values"));
+            return;
+        }
         final Runnable runner = new Runnable() {
             public void run()
             {
                 String title = ((TextField)downloadForm.get(0)).getString();
                 String url = ((TextField)downloadForm.get(1)).getString();
+                String authUser = ((TextField)downloadForm.get(3)).getString();
+                String authPassword = ((TextField)downloadForm.get(4)).getString();
+                authUser = authUser == null ? "" : authUser.trim();
+                authPassword = authPassword == null ? "" : authPassword.trim();
+                boolean reqAuth = authUser.length() > 0 && authPassword.length() > 0;
                 InputStream in = null;
-                byte[] raw;
+                HttpConnection conn = null;
+                boolean arrival = false;
+                String responseMessage = null;
+                byte[] raw = null;
                 try
                 {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    in = Connector.openInputStream(url);
-                    byte[] buf = new byte[256];
-                    int len;
-                    while ((len = in.read(buf)) >= 0)
+                    conn = (HttpConnection)Connector.open(url);
+                    if (reqAuth)
                     {
-                        baos.write(buf, 0, len);
+                        String credential = getAuthEncoder()
+                            .encodeToString(Cryptor.getBytes(authUser + ":" + authPassword));
+                        conn.setRequestProperty("Authorization", "Basic " + credential);
                     }
-                    raw = baos.toByteArray();
+                    int code = conn.getResponseCode();
+                    if (code != HttpConnection.HTTP_OK)
+                    {
+                        responseMessage = Integer.toString(code)
+                            + " " + conn.getResponseMessage();
+                    }
+                    else
+                    {
+                        in = conn.openInputStream();
+                        byte[] buf = new byte[256];
+                        int len;
+                        while ((len = in.read(buf)) >= 0)
+                        {
+                            baos.write(buf, 0, len);
+                        }
+                        raw = baos.toByteArray();
+                        arrival = true;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -545,6 +605,24 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                         }
                         in = null;
                     }
+                    if (conn != null)
+                    {
+                        try
+                        {
+                            conn.close();
+                        }
+                        catch (Exception ex)
+                        {
+                            // discard
+                        }
+                        conn = null;
+                    }
+                }
+                if (!arrival)
+                {
+                    setDisplay(downloadForm);
+                    downloadForm.setTicker(getTicker(responseMessage));
+                    return;
                 }
                 RecordStore rs = null;
                 try
