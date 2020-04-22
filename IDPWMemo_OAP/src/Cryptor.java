@@ -110,13 +110,18 @@ final class Cryptor
             try
             {
                 Crypto.decrypt(size, cs, rand, in, out);
-                return out.toByteArray();
+                byte[] ret = out.toByteArray();
+                in.close();
+                out.close();
+                return ret;
             }
             catch (CryptoException ex)
             {
                 // continue;
             }
         }
+        in.close();
+        out.close();
         return null;
     }
 
@@ -132,6 +137,9 @@ final class Cryptor
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         rand.setSeed(genSeed(password));
         Crypto.encrypt(blockSize, cs, rand, in, out);
-        return out.toByteArray();
+        byte[] ret = out.toByteArray();
+        in.close();
+        out.close();
+        return ret;
     }
 }

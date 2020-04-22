@@ -200,7 +200,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             }
             catch (RecordStoreException ex)
             {
-                // dicard
+                // discard
             }
             memoRecordStore = null;
         }
@@ -555,9 +555,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 boolean arrival = false;
                 String responseMessage = null;
                 byte[] raw = null;
+                ByteArrayOutputStream baos = null;
                 try
                 {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    baos = new ByteArrayOutputStream();
                     conn = (HttpConnection)Connector.open(url);
                     if (reqAuth)
                     {
@@ -616,6 +617,18 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                             // discard
                         }
                         conn = null;
+                    }
+                    if (baos != null)
+                    {
+                        try
+                        {
+                            baos.close();
+                        }
+                        catch (IOException ex)
+                        {
+                            // discard
+                        }
+                        baos = null;
                     }
                 }
                 if (!arrival)
@@ -750,6 +763,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             password = "";
         }
+        ByteArrayInputStream bis = null;
         try
         {
             memoRecordStore = RecordStore.openRecordStore(memoRecordName, false);
@@ -770,7 +784,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                         return;
                     }
                 }
-                memo = Memo.load(new DataInputStream(new ByteArrayInputStream(buf)));
+                bis = new ByteArrayInputStream(buf);
+                memo = Memo.load(new DataInputStream(bis));
             }
         }
         catch (RecordStoreNotFoundException ex)
@@ -792,6 +807,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             memo = null;
             setTicker("memo format error");
             return;
+        }
+        finally
+        {
+            if (bis != null)
+            {
+                try
+                {
+                    bis.close();
+                }
+                catch (IOException ex)
+                {
+                    // discard
+                }
+                bis = null;
+            }
         }
         setDisplay(getServiceList(true));
     }
@@ -1040,9 +1070,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 return null;
             }
         }
+        ByteArrayOutputStream baos = null;
         try
         {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            baos = new ByteArrayOutputStream();
             (new Memo(services)).save(new DataOutputStream(baos));
             byte[] buf = Cryptor.instance.encrypt(exPassword,
                 Cryptor.instance.encrypt(exPassword, baos.toByteArray()));
@@ -1059,6 +1090,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             setTicker("unknown error");
             ex.printStackTrace();
             return null;
+        }
+        finally
+        {
+            if (baos != null)
+            {
+                try
+                {
+                    baos.close();
+                }
+                catch (IOException ex)
+                {
+                    // discard
+                }
+                baos = null;
+            }
         }
         return exportTextBox;
     }
@@ -1164,6 +1210,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             {
                 imPassword = "";
             }
+            ByteArrayInputStream bis = null;
             try
             {
                 byte[] buf = getDecoder().decode(importTextBox.getString());
@@ -1176,7 +1223,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                         return null;
                     }
                 }
-                importMemo = Memo.load(new DataInputStream(new ByteArrayInputStream(buf)));
+                bis = new ByteArrayInputStream(buf);
+                importMemo = Memo.load(new DataInputStream(bis));
             }
             catch (IOException ex)
             {
@@ -1188,6 +1236,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 setTicker("unknown error");
                 ex.printStackTrace();
                 return null;
+            }
+            finally
+            {
+                if (bis != null)
+                {
+                    try
+                    {
+                        bis.close();
+                    }
+                    catch (IOException ex)
+                    {
+                        // discard
+                    }
+                    bis = null;
+                }
             }
         }
         this.importServiceIndex = importServiceIndex;
@@ -1476,6 +1539,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             return secretsForm.size() > 0;
         }
+        ByteArrayOutputStream baos = null;
         try
         {
             Value[] tmpValues = getValues(secretsForm);
@@ -1483,7 +1547,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             {
                 return true;
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            baos = new ByteArrayOutputStream();
             Service.writeSecrets(new DataOutputStream(baos), tmpValues);
             byte[] secrets = Cryptor.instance.encrypt(password,
                 Cryptor.instance.encrypt(password, baos.toByteArray()));
@@ -1504,6 +1568,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             setTicker("unknown error to check service");
             ex.printStackTrace();
             return true;
+        }
+        finally
+        {
+            if (baos != null)
+            {
+                try
+                {
+                    baos.close();
+                }
+                catch (IOException ex)
+                {
+                    // discard
+                }
+            }
+            baos = null;
         }
         return false;
     }
@@ -1530,10 +1609,11 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         byte[] secrets = memo.getService(serviceIndex).secrets;
         if (showedSecrets)
         {
+            ByteArrayOutputStream baos = null;
             try
             {
                 Value[] tmpValues = getValues(secretsForm);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                baos = new ByteArrayOutputStream();
                 Service.writeSecrets(new DataOutputStream(baos), tmpValues);
                 secrets = Cryptor.instance.encrypt(password,
                     Cryptor.instance.encrypt(password, baos.toByteArray()));
@@ -1543,6 +1623,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 setTicker("unknown error to update service");
                 ex.printStackTrace();
                 return;
+            }
+            finally
+            {
+                if (baos != null)
+                {
+                    try
+                    {
+                        baos.close();
+                    }
+                    catch (IOException ex)
+                    {
+                        // discard
+                    }
+                    baos = null;
+                }
             }
         }
         memo.setService(serviceIndex, new Service(values, secrets));
@@ -1557,13 +1652,14 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void saveMemo(Displayable ret)
     {
+        ByteArrayOutputStream baos = null;
         try
         {
             if (memoRecordStore == null)
             {
                 memoRecordStore = RecordStore.openRecordStore(memoRecordName, true);
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            baos = new ByteArrayOutputStream();
             memo.save(new DataOutputStream(baos));
             byte[] buf = Cryptor.instance.encrypt(password,
                 Cryptor.instance.encrypt(password, baos.toByteArray()));
@@ -1583,6 +1679,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             setDisplay(ret);
             ret.setTicker(getTicker("unknown error to save"));
             ex.printStackTrace();
+        }
+        finally
+        {
+            if (baos != null)
+            {
+                try
+                {
+                    baos.close();
+                }
+                catch (IOException ex)
+                {
+                    // discard
+                }
+                baos = null;
+            }
         }
     }
 
@@ -1649,6 +1760,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             secretsForm.setTitle(service.getServiceName() + " secrets");
             secretsForm.deleteAll();
             Value[] values;
+            ByteArrayInputStream bis = null;
             try
             {
                 byte[] buf = memo.getService(serviceIndex).secrets;
@@ -1666,13 +1778,29 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                         return null;
                     }
                 }
-                values = Service.readSecrets(new DataInputStream(new ByteArrayInputStream(buf)));
+                bis = new ByteArrayInputStream(buf);
+                values = Service.readSecrets(new DataInputStream(bis));
             }
             catch (IOException ex)
             {
                 showedSecrets = false;
                 setTicker("wrong format");
                 return null;
+            }
+            finally
+            {
+                if (bis != null)
+                {
+                    try
+                    {
+                        bis.close();
+                    }
+                    catch (IOException ex)
+                    {
+                        // discard
+                    }
+                    bis = null;
+                }
             }
             for (int i = 0; i < values.length; i++)
             {
