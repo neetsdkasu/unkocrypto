@@ -169,7 +169,6 @@ public final class Crypto
             dos.writeInt(count);
             dos.writeLong(checksum.getValue());
             byte[] memory = baos.toByteArray();
-            dos.close();
             for (int i = dataSize; i < memory.length; i++)
             {
                 int b = MASK & (int)memory[i];
@@ -185,6 +184,7 @@ public final class Crypto
             }
             dst.write(memory);
         } while (onebyte >= 0);
+        dos.close();
         return len;
     }
 }
