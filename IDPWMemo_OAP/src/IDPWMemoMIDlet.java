@@ -5,7 +5,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Vector;
+import java.util.TimeZone;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.midlet.*;
@@ -342,6 +345,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             else
             {
                 int available = Integer.parseInt(totalSize);
+                Calendar cal = Calendar.getInstance();
+                Date date = new Date();
                 for (int i = 0; i < list.length; i++)
                 {
                     RecordStore rs = null;
@@ -350,6 +355,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                     {
                         rs = RecordStore.openRecordStore(list[i], false);
                         size =  rs.getSize();
+                        date.setTime(rs.getLastModified());
+                        cal.setTime(date);
                         available -= size;
                     }
                     catch (Exception ex)
@@ -375,7 +382,18 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                         continue;
                     }
                     String name = list[i].substring(0, list[i].length() - RECORD_SUFFIX.length());
-                    si = new StringItem(name + ": ", Integer.toString(size));
+                    si = new StringItem(name + ": ", Integer.toString(size)
+                        + " ("
+                        + Integer.toString(cal.get(Calendar.YEAR)).substring(2)
+                        + "-"
+                        + Integer.toString(101+cal.get(Calendar.MONTH)).substring(1)
+                        + "-"
+                        + Integer.toString(100+cal.get(Calendar.DATE)).substring(1)
+                        + " "
+                        + Integer.toString(100+cal.get(Calendar.HOUR_OF_DAY)).substring(1)
+                        + ":"
+                        + Integer.toString(100+cal.get(Calendar.MINUTE)).substring(1)
+                        + ")");
                     si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
                     memoryViewer.append(si);
                 }
