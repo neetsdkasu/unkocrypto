@@ -13,7 +13,7 @@ import java.util.zip.Checksum;
 public final class Crypto
 {
     public static final int MIN_BLOCKSIZE = 32;
-    public static final int MAX_BLOCKSIZE = 1024;
+    public static final int MAX_BLOCKSIZE = 1 << 20;
     public static final int META_SIZE = (Integer.SIZE / 8) + (Long.SIZE / 8);
     private static final int BYTE = 0x100; // 256
     private static final int MASK = 0x0FF; // 255
