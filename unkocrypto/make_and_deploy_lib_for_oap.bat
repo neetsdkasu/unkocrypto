@@ -63,6 +63,8 @@ javac ^
 if errorlevel 1 goto endpoint
 @echo on
 
+@if not exist %deploydir% @mkdir %deploydir%
+
 jar cvf %deploydir%\%libname% -C %clsdir% .
 
 @echo off
