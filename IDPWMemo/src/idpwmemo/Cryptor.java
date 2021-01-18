@@ -1,7 +1,8 @@
+package idpwmemo;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.zip.Checksum;
 import java.util.zip.CRC32;
 
@@ -14,7 +15,7 @@ final class Cryptor
     static final int MAX_BLOCKSIZE = Math.min(1024, Crypto.MAX_BLOCKSIZE);
     static final String CHARSET = "UTF-8";
 
-    public static byte[] getBytes(String s) throws UnsupportedEncodingException
+    static byte[] getBytes(String s) throws IOException
     {
         return s.getBytes(CHARSET);
     }
@@ -24,7 +25,7 @@ final class Cryptor
     private final MTRandom rand = new MTRandom();
     private final Checksum cs = new CRC32();
 
-    private Cryptor() {}
+    Cryptor() {}
 
     private static long[] genSeed(int size)
     {
@@ -129,5 +130,37 @@ final class Cryptor
         rand.setSeed(genSeed(password));
         Crypto.encrypt(blockSize, cs, rand, in, out);
         return out.toByteArray();
+    }
+
+    byte[] decrypt_repeat(int times, String password, byte[] src) throws IOException
+    {
+        return decrypt_repeat(times, getBytes(password), src);
+    }
+
+    byte[] decrypt_repeat(int times, byte[] password, byte[] src) throws IOException
+    {
+        for (int i = 0; i < times; i++)
+        {
+            src = decrypt(password, src);
+            if (src == null)
+            {
+                return null;
+            }
+        }
+        return src;
+    }
+
+    byte[] encrypt_repeat(int times, String password, byte[] src) throws IOException
+    {
+        return encrypt_repeat(times, getBytes(password), src);
+    }
+
+    byte[] encrypt_repeat(int times, byte[] password, byte[] src) throws IOException
+    {
+        for (int i = 0; i < times; i++)
+        {
+            src = encrypt(password, src);
+        }
+        return src;
     }
 }

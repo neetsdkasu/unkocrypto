@@ -1,17 +1,20 @@
+package idpwmemo;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class Memo
+final class Memo
 {
     static final int VERSION = 1;
+
+    static final Service[] EMPTY_SERVICES = new Service[0];
 
     Service[] services;
 
     Memo()
     {
-        services = new Service[0];
+        services = EMPTY_SERVICES;
     }
 
     Memo(Service[] services)
@@ -24,12 +27,20 @@ class Memo
         return services.length;
     }
 
-    void addService(Service newService)
+    void setServices(Service[] services)
+    {
+        this.services = services == null
+                      ? Memo.EMPTY_SERVICES
+                      : services;
+    }
+
+    int addService(Service newService)
     {
         Service[] tmp = new Service[services.length + 1];
         System.arraycopy(services, 0, tmp, 0, services.length);
         tmp[tmp.length - 1] = newService;
         services = tmp;
+        return tmp.length - 1;
     }
 
     Service getService(int index)
@@ -69,13 +80,43 @@ class Memo
         return new Memo(services);
     }
 
+    Service[] getFilteredServices()
+    {
+        Service[] tmp = new Service[services.length];
+        int count = 0;
+        for (int i = 0; i < services.length; i++)
+        {
+            if (services[i].isValidState())
+            {
+                tmp[count] = services[i];
+                count++;
+            }
+        }
+        if (count == 0)
+        {
+            tmp = null;
+            return EMPTY_SERVICES;
+        }
+        if (count == services.length)
+        {
+            tmp = null;
+            return services;
+        }
+        Service[] ret = new Service[count];
+        System.arraycopy(tmp, 0, ret, 0, count);
+        tmp = null;
+        return ret;
+    }
+
     void save(DataOutput out) throws IOException
     {
         out.writeInt(VERSION);
-        out.writeInt(services.length);
-        for (int i = 0; i < services.length; i++)
+        Service[] filtered = getFilteredServices();
+        out.writeInt(filtered.length);
+        for (int i = 0; i < filtered.length; i++)
         {
-            services[i].save(out);
+            filtered[i].save(out);
         }
+        filtered = null;
     }
 }
