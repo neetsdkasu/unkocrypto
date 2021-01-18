@@ -87,7 +87,7 @@ class Main extends JFrame
         types[Value.EMAIL]             = new ItemType(Value.EMAIL);
         types[Value.REMINDER_QUESTION] = new ItemType(Value.REMINDER_QUESTION);
         types[Value.REMINDER_ANSWER]   = new ItemType(Value.REMINDER_ANSWER);
-        types[Value.DESCTIPTION]       = new ItemType(Value.DESCTIPTION);
+        types[Value.DESCRIPTION]       = new ItemType(Value.DESCRIPTION);
         itemTypes = types;
     }
 

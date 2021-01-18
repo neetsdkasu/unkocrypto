@@ -13,7 +13,7 @@ final class Value
     static final int EMAIL             = 4;
     static final int REMINDER_QUESTION = 5;
     static final int REMINDER_ANSWER   = 6;
-    static final int DESCTIPTION       = 7;
+    static final int DESCRIPTION       = 7;
 
     static String typeName(int type)
     {
@@ -33,7 +33,7 @@ final class Value
             return "reminder question";
         case REMINDER_ANSWER:
             return "reminder answer";
-        case DESCTIPTION:
+        case DESCRIPTION:
             return "description";
         default:
             return "unknown";
