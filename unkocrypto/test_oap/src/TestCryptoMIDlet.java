@@ -18,11 +18,20 @@ public class TestCryptoMIDlet extends MIDlet
     protected void startApp() throws MIDletStateChangeException
     {
 
+        {
+            Calendar cal = Calendar.getInstance();
+            System.out.print("[" + cal.getTime() + "]");
+            System.out.println(" start.");
+        }
+        
+        // System.out.flush() does not work.
+
         try
         {
             Calendar cal = Calendar.getInstance();
             System.out.print("[" + cal.getTime() + "] ");
             System.out.print("testRandomWithAdler32: ");
+            System.out.flush();
             testRandomWithAdler32();
             System.out.println("passed");
         }
@@ -39,6 +48,7 @@ public class TestCryptoMIDlet extends MIDlet
             Calendar cal = Calendar.getInstance();
             System.out.print("[" + cal.getTime() + "] ");
             System.out.print("testRandomWithCRC32: ");
+            System.out.flush();
             testRandomWithCRC32();
             System.out.println("passed");
         }
@@ -55,6 +65,7 @@ public class TestCryptoMIDlet extends MIDlet
             Calendar cal = Calendar.getInstance();
             System.out.print("[" + cal.getTime() + "] ");
             System.out.print("testMersenneTwisterWithAdler32: ");
+            System.out.flush();
             testMersenneTwisterWithAdler32();
             System.out.println("passed");
         }
@@ -71,6 +82,7 @@ public class TestCryptoMIDlet extends MIDlet
             Calendar cal = Calendar.getInstance();
             System.out.print("[" + cal.getTime() + "] ");
             System.out.print("testMersenneTwisterWithCRC32: ");
+            System.out.flush();
             testMersenneTwisterWithCRC32();
             System.out.println("passed");
         }
@@ -82,12 +94,17 @@ public class TestCryptoMIDlet extends MIDlet
             return;
         }
 
+        {
+            Calendar cal = Calendar.getInstance();
+            System.out.print("[" + cal.getTime() + "] ");
+            System.out.println("done.");
+        }
         notifyDestroyed();
     }
 
     static void testRandomWithAdler32() throws Exception
     {
-        run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+        run50CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
             Random rand = new Random();
             public Random getInstance(long seed)
             {
@@ -99,7 +116,7 @@ public class TestCryptoMIDlet extends MIDlet
 
     static void testRandomWithCRC32() throws Exception
     {
-        run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+        run50CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
             Random rand = new Random();
             public Random getInstance(long seed)
             {
@@ -111,7 +128,7 @@ public class TestCryptoMIDlet extends MIDlet
 
     static void testMersenneTwisterWithAdler32() throws Exception
     {
-        run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+        run50CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
             Random rand = new mt19937ar.MTRandom();
             public Random getInstance(long seed)
             {
@@ -123,7 +140,7 @@ public class TestCryptoMIDlet extends MIDlet
 
     static void testMersenneTwisterWithCRC32() throws Exception
     {
-        run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+        run50CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
             Random rand = new mt19937ar.MTRandom();
             public Random getInstance(long seed)
             {
@@ -138,18 +155,20 @@ public class TestCryptoMIDlet extends MIDlet
         Random getInstance(long seed);
     }
 
-    static void run100CycleAtRandom(Checksum cs, RandomInstanceProvider prov) throws Exception
+    static void run50CycleAtRandom(Checksum cs, RandomInstanceProvider prov) throws Exception
     {
+        final int MAX_BLOCKSIZE = Math.min(1 << 16, Crypto.MAX_BLOCKSIZE);
+
         Random rand = prov.getInstance(System.currentTimeMillis());
         long seed = 0;
-        for (int cy = 0; cy < 100; cy++)
+        for (int cy = 0; cy < 50; cy++)
         {
             seed = rand.nextLong();
 
-            byte[] originalBuffer = new byte[rand.nextInt(Crypto.MAX_BLOCKSIZE * 5)];
+            byte[] originalBuffer = new byte[rand.nextInt(MAX_BLOCKSIZE * 3)];
             nextBytes(rand, originalBuffer);
 
-            int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE + 1) + Crypto.MIN_BLOCKSIZE;
+            int blockSize = rand.nextInt(MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE + 1) + Crypto.MIN_BLOCKSIZE;
 
             ByteArrayInputStream originalData = new ByteArrayInputStream(originalBuffer);
             ByteArrayOutputStream secret = new ByteArrayOutputStream();
@@ -175,6 +194,14 @@ public class TestCryptoMIDlet extends MIDlet
             {
                 throw new RuntimeException("unmatch data");
             }
+
+            // Total Memory Limit 1MB?
+            secret.close();
+            recoverData.close();
+            originalBuffer = null;
+            secretBuffer = null;
+            recover = null;
+            System.gc();
         }
     }
 
