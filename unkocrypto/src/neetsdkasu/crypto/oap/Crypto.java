@@ -78,6 +78,7 @@ public final class Crypto
         {
             throw new CryptoException(CryptoException.TYPE_INVALID_DATASIZE);
         }
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
         while (onebyte >= 0)
         {
             for (int i = 0; i < blockSize; i++)
@@ -96,6 +97,7 @@ public final class Crypto
             {
                 if (onebyte < 0)
                 {
+                    dis.close();
                     throw new CryptoException(CryptoException.TYPE_INVALID_DATASIZE);
                 }
                 int j = indexes[i];
@@ -104,14 +106,14 @@ public final class Crypto
                 data[j] = (byte)b;
                 onebyte = src.read();
             }
-            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+            dis.reset();
             dis.skip(dataSize);
             int count = dis.readInt();
             long code = dis.readLong();
-            dis.close();
             if (count < 0 || (count == 0 && onebyte >= 0) || dataSize < count)
             {
                 // Invalid
+                dis.close();
                 throw new CryptoException(CryptoException.TYPE_INVALID_COUNT);
             }
             len += count;
@@ -125,14 +127,17 @@ public final class Crypto
                 }
                 else if (data[i] != 0) // これダメっしょ(data[i]==0のデータが誤復元されてる可能性を検出できてない)
                 {
+                    dis.close();
                     throw new CryptoException(CryptoException.TYPE_INVALID_DATA);
                 }
             }
             if (code != checksum.getValue())
             {
+                dis.close();
                 throw new CryptoException(CryptoException.TYPE_INVALID_CHECKSUM);
             }
         }
+        dis.close();
         return len;
     }
 
@@ -184,6 +189,7 @@ public final class Crypto
                 memory[j] = tmp;
             }
             dst.write(memory);
+            memory = null;
         } while (onebyte >= 0);
         dos.close();
         return len;
