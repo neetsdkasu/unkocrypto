@@ -37,6 +37,12 @@ class CryptoTest
             return;
         }
 
+        {
+            Calendar cal = Calendar.getInstance();
+            System.out.print("[" + cal.getTime() + "]");
+            System.out.println(" start.");
+        }
+
         for (Method m : CryptoTest.class.getDeclaredMethods())
         {
             if (m.isAnnotationPresent(Test.class))
@@ -48,6 +54,7 @@ class CryptoTest
                 Calendar cal = Calendar.getInstance();
                 System.out.print("[" + cal.getTime() + "]");
                 System.out.print(" " + m.getName() + ": ");
+                System.out.flush();
                 try
                 {
                     m.invoke(null);
@@ -61,13 +68,17 @@ class CryptoTest
                 }
             }
         }
-        System.out.println("done.");
+        {
+            Calendar cal = Calendar.getInstance();
+            System.out.print("[" + cal.getTime() + "]");
+            System.out.println(" done.");
+        }
     }
 
     @Test
     static void testRandomWithAdler32() throws Exception
     {
-        run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+        run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
             Random rand = new Random();
             public Random getInstance(long seed)
             {
@@ -80,7 +91,7 @@ class CryptoTest
     @Test
     static void testRandomWithCRC32() throws Exception
     {
-        run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+        run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
             Random rand = new Random();
             public Random getInstance(long seed)
             {
@@ -93,7 +104,7 @@ class CryptoTest
     @Test
     static void testSecureRandomWithAdler32() throws Exception
     {
-        run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+        run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
             public Random getInstance(long seed)
             {
                 try
@@ -113,7 +124,7 @@ class CryptoTest
     @Test
     static void testSecureRandomWithCRC32() throws Exception
     {
-        run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+        run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
             public Random getInstance(long seed)
             {
                 try
@@ -133,7 +144,7 @@ class CryptoTest
     @Test
     static void testMersenneTwisterWithAdler32() throws Exception
     {
-        run10000CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
+        run100CycleAtRandom(new Adler32(), new RandomInstanceProvider() {
             Random rand = new mt19937ar.MTRandom();
             public Random getInstance(long seed)
             {
@@ -146,7 +157,7 @@ class CryptoTest
     @Test
     static void testMersenneTwisterWithCRC32() throws Exception
     {
-        run10000CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
+        run100CycleAtRandom(new CRC32(), new RandomInstanceProvider() {
             Random rand = new mt19937ar.MTRandom();
             public Random getInstance(long seed)
             {
@@ -161,15 +172,15 @@ class CryptoTest
         Random getInstance(long seed);
     }
 
-    static void run10000CycleAtRandom(Checksum cs, RandomInstanceProvider prov) throws Exception
+    static void run100CycleAtRandom(Checksum cs, RandomInstanceProvider prov) throws Exception
     {
         Random rand = prov.getInstance(System.currentTimeMillis());
         long seed = 0;
-        for (int cy = 0; cy < 10000; cy++)
+        for (int cy = 0; cy < 100; cy++)
         {
             seed = rand.nextLong();
 
-            byte[] originalBuffer = new byte[rand.nextInt(Crypto.MAX_BLOCKSIZE * 5)];
+            byte[] originalBuffer = new byte[rand.nextInt(Crypto.MAX_BLOCKSIZE * 3)];
             rand.nextBytes(originalBuffer);
 
             int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE + 1) + Crypto.MIN_BLOCKSIZE;
@@ -511,10 +522,10 @@ class CryptoTest
         Random rand = new Random();
         Checksum cs = new CRC32();
     testLoop:
-        for (int cy = 0; cy < 100000; cy++)
+        for (int cy = 0; cy < 500; cy++)
         {
             int blockSize = rand.nextInt(Crypto.MAX_BLOCKSIZE - Crypto.MIN_BLOCKSIZE) + Crypto.MIN_BLOCKSIZE;
-            byte[] data = new byte[rand.nextInt(100) * blockSize / 100 + 5 * rand.nextInt(2) * blockSize];
+            byte[] data = new byte[rand.nextInt(100) * blockSize / 100 + 2 * rand.nextInt(2) * blockSize];
             if ((cy & 1) == 0)
             {
                 rand.nextBytes(data);
@@ -572,7 +583,7 @@ class CryptoTest
             {
                 cause = "unknown Exception( " + ex.getMessage() + " )";
             }
-            throw new RuntimeException("invalid decryption ( cy: " + cy 
+            throw new RuntimeException("invalid decryption ( cy: " + cy
                 + ", cause: '" + cause
                 + "', data.length: " + data.length + ", blockSize: " + blockSize + " )");
         }

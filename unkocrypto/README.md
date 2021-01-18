@@ -101,3 +101,18 @@ catch (java.io.IOException ex) {}
         System.out.println();
     }
 ```
+
+
+
+
+
+------------
+## OAP(オープンアプリ)用に関して  
+
+##### 注意点1  
+`test_oap`ディレクトリは   
+WTK(Sun Java Wireless Toolkit 2.5.2 for CLDC)のプロジェクトとして作ったディレクトリのジャンクション(シンボリックリンク)  
+`make_and_deploy_lib_for_oap.bat`や`c_oap.bat`を実行する場合は注意が必要  
+
+##### 注意点2  
+`make_and_deploy_lib_for_oap.bat`や`c_oap.bat`を実行する場合はサブモジュールのクローン(`git submodule update --init`)が必要  
