@@ -107,13 +107,20 @@ final class Cryptor
             try
             {
                 Crypto.decrypt(size, cs, rand, in, out);
-                return out.toByteArray();
+                seed = null;
+                byte[] ret = out.toByteArray();
+                in.close();
+                out.close();
+                return ret;
             }
             catch (CryptoException ex)
             {
                 // continue;
             }
         }
+        seed = null;
+        in.close();
+        out.close();
         return null;
     }
 
@@ -129,7 +136,10 @@ final class Cryptor
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         rand.setSeed(genSeed(password));
         Crypto.encrypt(blockSize, cs, rand, in, out);
-        return out.toByteArray();
+        byte[] ret = out.toByteArray();
+        in.close();
+        out.close();
+        return ret;
     }
 
     byte[] decrypt_repeat(int times, String password, byte[] src) throws IOException
