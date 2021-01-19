@@ -1,7 +1,8 @@
+package idpwmemo;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.zip.Checksum;
 import java.util.zip.CRC32;
 
@@ -11,9 +12,10 @@ import neetsdkasu.crypto.CryptoException;
 
 final class Cryptor
 {
+    static final int MAX_BLOCKSIZE = Math.min(1024, Crypto.MAX_BLOCKSIZE);
     static final String CHARSET = "UTF-8";
 
-    public static byte[] getBytes(String s) throws UnsupportedEncodingException
+    static byte[] getBytes(String s) throws IOException
     {
         return s.getBytes(CHARSET);
     }
@@ -23,7 +25,7 @@ final class Cryptor
     private final MTRandom rand = new MTRandom();
     private final Checksum cs = new CRC32();
 
-    private Cryptor() {}
+    Cryptor() {}
 
     private static long[] genSeed(int size)
     {
@@ -64,14 +66,14 @@ final class Cryptor
     private static int encryptBlockSize(int srclen)
     {
         int size = Math.max(Crypto.MIN_BLOCKSIZE, srclen + Crypto.META_SIZE);
-        if (size <= Crypto.MAX_BLOCKSIZE)
+        if (size <= MAX_BLOCKSIZE)
         {
             return size;
         }
         size = Crypto.MIN_BLOCKSIZE;
         int blockCount = (srclen + (size - Crypto.META_SIZE) - 1) / (size - Crypto.META_SIZE);
         int totalSize = size * blockCount;
-        for (int sz = Crypto.MIN_BLOCKSIZE + 1; sz <= Crypto.MAX_BLOCKSIZE; sz++)
+        for (int sz = Crypto.MIN_BLOCKSIZE + 1; sz <= MAX_BLOCKSIZE; sz++)
         {
             blockCount = (srclen + (sz - Crypto.META_SIZE) - 1) / (sz - Crypto.META_SIZE);
             if (sz * blockCount < totalSize)
@@ -93,7 +95,7 @@ final class Cryptor
         ByteArrayInputStream in = new ByteArrayInputStream(src);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         long[] seed = genSeed(password);
-        for (int size = Math.min(src.length, Crypto.MAX_BLOCKSIZE); size >= Crypto.MIN_BLOCKSIZE; size--)
+        for (int size = Math.min(src.length, MAX_BLOCKSIZE); size >= Crypto.MIN_BLOCKSIZE; size--)
         {
             if (src.length % size != 0)
             {
@@ -128,5 +130,37 @@ final class Cryptor
         rand.setSeed(genSeed(password));
         Crypto.encrypt(blockSize, cs, rand, in, out);
         return out.toByteArray();
+    }
+
+    byte[] decrypt_repeat(int times, String password, byte[] src) throws IOException
+    {
+        return decrypt_repeat(times, getBytes(password), src);
+    }
+
+    byte[] decrypt_repeat(int times, byte[] password, byte[] src) throws IOException
+    {
+        for (int i = 0; i < times; i++)
+        {
+            src = decrypt(password, src);
+            if (src == null)
+            {
+                return null;
+            }
+        }
+        return src;
+    }
+
+    byte[] encrypt_repeat(int times, String password, byte[] src) throws IOException
+    {
+        return encrypt_repeat(times, getBytes(password), src);
+    }
+
+    byte[] encrypt_repeat(int times, byte[] password, byte[] src) throws IOException
+    {
+        for (int i = 0; i < times; i++)
+        {
+            src = encrypt(password, src);
+        }
+        return src;
     }
 }
