@@ -1,8 +1,6 @@
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Calendar;
@@ -31,6 +29,10 @@ import javax.microedition.rms.RecordStoreException;
 import javax.microedition.rms.RecordStoreNotFoundException;
 
 import neetsdkasu.util.Base64;
+
+import idpwmemo.IDPWMemo;
+import idpwmemo.Service;
+import idpwmemo.Value;
 
 public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 {
@@ -71,8 +73,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
     String memoName = null;
     String memoRecordName = null;
     RecordStore memoRecordStore = null;
-    Memo memo = null;
-    String password = null;
+    IDPWMemo idpwMemo = new IDPWMemo();
     int serviceIndex = -1;
 
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException
@@ -581,7 +582,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                     if (reqAuth)
                     {
                         String credential = getAuthEncoder()
-                            .encodeToString(Cryptor.getBytes(authUser + ":" + authPassword));
+                            .encodeToString(IDPWMemo.getBytes(authUser + ":" + authPassword));
                         conn.setRequestProperty("Authorization", "Basic " + credential);
                     }
                     int code = conn.getResponseCode();
@@ -776,7 +777,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             setDisplay(getMemoList());
             return;
         }
-        password = passwordInputBox.getString();
+        String password = passwordInputBox.getString();
         if (password == null)
         {
             password = "";
@@ -784,37 +785,32 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         ByteArrayInputStream bis = null;
         try
         {
+            idpwMemo.setPassword(password);
             memoRecordStore = RecordStore.openRecordStore(memoRecordName, false);
             if (memoRecordStore.getNumRecords() == 0)
             {
-                memo = new Memo();
+                idpwMemo.newMemo();
             }
             else
             {
                 byte[] buf = memoRecordStore.getRecord(1);
-                for (int i = 0; i < 2; i++)
+                if (!idpwMemo.loadMemo(buf))
                 {
-                    buf = Cryptor.instance.decrypt(password, buf);
-                    if (buf == null)
-                    {
-                        setTicker("wrong password!");
-                        memoRecordStore = null;
-                        return;
-                    }
+                    setTicker("wrong password!");
+                    memoRecordStore = null;
+                    return;
                 }
-                bis = new ByteArrayInputStream(buf);
-                memo = Memo.load(new DataInputStream(bis));
             }
         }
         catch (RecordStoreNotFoundException ex)
         {
             closeMemoRecordStore();
-            memo = new Memo();
+            idpwMemo.newMemo();
         }
         catch (RecordStoreException ex)
         {
             closeMemoRecordStore();
-            memo = null;
+            idpwMemo.clear();
             setTicker("unknown error");
             ex.printStackTrace();
             return;
@@ -822,7 +818,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         catch (IOException ex)
         {
             closeMemoRecordStore();
-            memo = null;
+            idpwMemo.clear();
             setTicker("memo format error");
             return;
         }
@@ -860,9 +856,9 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         {
             serviceList.setTitle(memoName);
             serviceList.deleteAll();
-            for (int i = 0; i < memo.getServiceCount(); i++)
+            for (int i = 0; i < idpwMemo.getServiceCount(); i++)
             {
-                serviceList.append(memo.getService(i).getServiceName(), null);
+                serviceList.append(idpwMemo.getService(i).getServiceName(), null);
             }
         }
         return serviceList;
@@ -887,7 +883,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         if (type == Command.BACK)
         {
             closeMemoRecordStore();
-            memo = null;
+            idpwMemo.clear();
             setDisplay(getMemoList());
         }
         else if (priority == 1 && type == Command.SCREEN)
@@ -950,22 +946,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         try
         {
-            Service[] services = new Service[memo.getServiceCount()];
-            for (int i = 0; i < services.length; i++)
-            {
-                Service old = memo.getService(i);
-                byte[] secrets = old.secrets;
-                if (secrets != null && secrets.length > 0)
-                {
-                    secrets = Cryptor.instance.encrypt(newPassword,
-                        Cryptor.instance.encrypt(newPassword,
-                            Cryptor.instance.decrypt(password,
-                                Cryptor.instance.decrypt(password, secrets))));
-                }
-                services[i] = new Service(old.values, secrets);
-            }
-            memo = new Memo(services);
-            password = newPassword;
+            idpwMemo.changePassword(newPassword);
             saveMemo(serviceList);
         }
         catch (Exception ex)
@@ -1060,42 +1041,28 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 count++;
             }
         }
-        Service[] services = new Service[count];
-        for (int i = 0, index = 0; i < selectExportList.size(); i++)
-        {
-            if (!selectExportList.isSelected(i))
-            {
-                continue;
-            }
-            Service service = memo.getService(i);
-            try
-            {
-                byte[] secrets = service.secrets;
-                if (secrets != null && secrets.length > 0)
-                {
-                    secrets = Cryptor.instance.encrypt(exPassword,
-                        Cryptor.instance.encrypt(exPassword,
-                            Cryptor.instance.decrypt(password,
-                                Cryptor.instance.decrypt(password, secrets))));
-                }
-                services[index] = new Service(service.values, secrets);
-                index++;
-            }
-            catch (Exception ex)
-            {
-                setTicker("unknown error");
-                ex.printStackTrace();
-                return null;
-            }
-        }
-        ByteArrayOutputStream baos = null;
+        IDPWMemo exportMemo = new IDPWMemo();
         try
         {
-            baos = new ByteArrayOutputStream();
-            (new Memo(services)).save(new DataOutputStream(baos));
-            byte[] buf = Cryptor.instance.encrypt(exPassword,
-                Cryptor.instance.encrypt(exPassword, baos.toByteArray()));
+            exportMemo.setPassword(exPassword);
+            exportMemo.newMemo();
+
+            for (int i = 0, index = 0; i < selectExportList.size(); i++)
+            {
+                if (!selectExportList.isSelected(i))
+                {
+                    continue;
+                }
+                idpwMemo.selectService(i);
+                exportMemo.addNewService(idpwMemo.getSelectedServiceName());
+                exportMemo.setValues(idpwMemo.getValues());
+                exportMemo.setSecrets(idpwMemo.getSecrets());
+                exportMemo.updateSelectedService();
+            }
+
+            byte[] buf = exportMemo.save();
             String code = getEncoder().encodeToString(buf);
+            buf = null;
             if (code.length() > exportTextBox.getMaxSize())
             {
                 setTicker("too big data size");
@@ -1111,18 +1078,8 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         finally
         {
-            if (baos != null)
-            {
-                try
-                {
-                    baos.close();
-                }
-                catch (IOException ex)
-                {
-                    // discard
-                }
-                baos = null;
-            }
+            exportMemo.clear();
+            exportMemo = null;
         }
         return exportTextBox;
     }
@@ -1173,6 +1130,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 setTicker("wrong size");
                 return;
             }
+
         }
         catch (Exception ex)
         {
@@ -1210,7 +1168,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         setDisplay(getImportForm(0));
     }
 
-    Memo importMemo = null;
+    IDPWMemo importMemo = null;
     int importServiceIndex = 0;
     Form importForm = null;
     Form getImportForm(int importServiceIndex)
@@ -1228,47 +1186,35 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             {
                 imPassword = "";
             }
-            ByteArrayInputStream bis = null;
             try
             {
+                importMemo = new IDPWMemo();
+                importMemo.setPassword(imPassword);
                 byte[] buf = getDecoder().decode(importTextBox.getString());
-                for (int i = 0; i < 2; i++)
+                if (!importMemo.loadMemo(buf))
                 {
-                    buf = Cryptor.instance.decrypt(imPassword, buf);
-                    if (buf == null)
-                    {
-                        setTicker("wrong password");
-                        return null;
-                    }
+                    buf = null;
+                    setTicker("wrong password");
+                    importMemo.clear();
+                    importMemo = null;
+                    return null;
                 }
-                bis = new ByteArrayInputStream(buf);
-                importMemo = Memo.load(new DataInputStream(bis));
+                buf = null;
             }
             catch (IOException ex)
             {
                 setTicker("wrong format");
+                importMemo.clear();
+                importMemo = null;
                 return null;
             }
             catch (Exception ex)
             {
                 setTicker("unknown error");
                 ex.printStackTrace();
+                importMemo.clear();
+                importMemo = null;
                 return null;
-            }
-            finally
-            {
-                if (bis != null)
-                {
-                    try
-                    {
-                        bis.close();
-                    }
-                    catch (IOException ex)
-                    {
-                        // discard
-                    }
-                    bis = null;
-                }
             }
         }
         this.importServiceIndex = importServiceIndex;
@@ -1288,7 +1234,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             replaceServiceNameChoice.append(serviceList.getString(i), null);
         }
         importForm.append(replaceServiceNameChoice);
-        Value[] values = importMemo.getService(importServiceIndex).values;
+        Value[] values = importMemo.getService(importServiceIndex).getValues();
         for (int i = 0; i < values.length; i++)
         {
             StringItem si = new StringItem(values[i].getTypeName() + ": ", values[i].value);
@@ -1310,49 +1256,41 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         int action = ((ChoiceGroup)importForm.get(0)).getSelectedIndex();
         if (action < 2)
         {
-            Service service;
-            String imPassword = importPasswordInputBox.getString();
-            if (imPassword == null)
-            {
-                imPassword = "";
-            }
             try
             {
-                service = importMemo.getService(importServiceIndex);
-                byte[] secrets = service.secrets;
-                if (secrets != null && secrets.length > 0)
+                importMemo.selectService(importServiceIndex);
+                String serviceName = importMemo.getSelectedServiceName();
+                if (action == 0)
                 {
-                    secrets = Cryptor.instance.encrypt(password,
-                        Cryptor.instance.encrypt(password,
-                            Cryptor.instance.decrypt(imPassword,
-                                Cryptor.instance.decrypt(imPassword, secrets))));
+                    // add new
+                    idpwMemo.addNewService(serviceName);
+                    idpwMemo.setValues(importMemo.getValues());
+                    idpwMemo.setSecrets(importMemo.getSecrets());
+                    idpwMemo.updateSelectedService();
+                    serviceList.append(serviceName, null);
                 }
-                service = new Service(service.values, secrets);
+                else if (action == 1)
+                {
+                    // replace
+                    ChoiceGroup cg = (ChoiceGroup)importForm.get(1);
+                    if (cg.size() == 0)
+                    {
+                        setTicker("cannot replace");
+                        return;
+                    }
+                    int replace = cg.getSelectedIndex();
+                    idpwMemo.selectService(replace);
+                    idpwMemo.setValues(importMemo.getValues());
+                    idpwMemo.setSecrets(importMemo.getSecrets());
+                    idpwMemo.updateSelectedService();
+                    serviceList.set(replace, serviceName, null);
+                }
             }
             catch (Exception ex)
             {
                 setTicker("unknown error");
                 ex.printStackTrace();
                 return;
-            }
-            if (action == 0)
-            {
-                // add new
-                memo.addService(service);
-                serviceList.append(service.getServiceName(), null);
-            }
-            else if (action == 1)
-            {
-                // replace
-                ChoiceGroup cg = (ChoiceGroup)importForm.get(1);
-                if (cg.size() == 0)
-                {
-                    setTicker("cannot replace");
-                    return;
-                }
-                int replace = cg.getSelectedIndex();
-                memo.setService(replace, service);
-                serviceList.set(replace, service.getServiceName(), null);
             }
         }
         if (importServiceIndex + 1 < importMemo.getServiceCount())
@@ -1395,7 +1333,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 return;
             }
             serviceList.append(serviceName, null);
-            memo.addService(new Service(serviceName));
+            idpwMemo.addNewService(serviceName);
         }
         setDisplay(serviceList);
     }
@@ -1425,12 +1363,13 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         if (reset)
         {
             showedSecrets = false;
-            Service service = memo.getService(serviceIndex);
+            Service service = idpwMemo.getService(serviceIndex);
             detailsForm.setTitle(service.getServiceName() + " details");
             detailsForm.deleteAll();
-            for (int i = 0; i < service.values.length; i++)
+            Value[] values = service.getValues();
+            for (int i = 0; i < values.length; i++)
             {
-                Value v = service.values[i];
+                Value v = values[i];
                 ChoiceGroup cg = new ChoiceGroup(null, ChoiceGroup.POPUP, itemTypes, null);
                 cg.setSelectedIndex((int)v.type, true);
                 cg.setLayout(ChoiceGroup.LAYOUT_LEFT | ChoiceGroup.LAYOUT_NEWLINE_AFTER);
@@ -1532,54 +1471,21 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     boolean hasChanges()
     {
-        Service service = memo.getService(serviceIndex);
-        if (service.values.length != detailsForm.size() / 2)
-        {
-            return true;
-        }
-        Value[] values = getValues(detailsForm);
-        for (int i = 0; i < values.length; i++)
-        {
-            if (service.values[i].type != values[i].type)
-            {
-                return true;
-            }
-            if (!service.values[i].value.equals(values[i].value))
-            {
-                return true;
-            }
-        }
-        if (!showedSecrets)
-        {
-            return false;
-        }
-        if (service.secrets == null || service.secrets.length == 0)
-        {
-            return secretsForm.size() > 0;
-        }
-        ByteArrayOutputStream baos = null;
         try
         {
-            Value[] tmpValues = getValues(secretsForm);
-            if (tmpValues.length == 0)
+            Service before = idpwMemo.getService(serviceIndex);
+            if (before.getValues().length != detailsForm.size() / 2)
             {
                 return true;
             }
-            baos = new ByteArrayOutputStream();
-            Service.writeSecrets(new DataOutputStream(baos), tmpValues);
-            byte[] secrets = Cryptor.instance.encrypt(password,
-                Cryptor.instance.encrypt(password, baos.toByteArray()));
-            if (service.secrets.length != secrets.length)
+            idpwMemo.selectService(serviceIndex);
+            idpwMemo.setValues(getValues(detailsForm));
+            if (showedSecrets)
             {
-                return true;
+                idpwMemo.setSecrets(getValues(secretsForm));
             }
-            for (int i = 0; i < secrets.length; i++)
-            {
-                if (service.secrets[i] != secrets[i])
-                {
-                    return true;
-                }
-            }
+            Service after = idpwMemo.getSelectedService();
+            return !after.equals(before);
         }
         catch (Exception ex)
         {
@@ -1587,78 +1493,34 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             ex.printStackTrace();
             return true;
         }
-        finally
-        {
-            if (baos != null)
-            {
-                try
-                {
-                    baos.close();
-                }
-                catch (IOException ex)
-                {
-                    // discard
-                }
-            }
-            baos = null;
-        }
-        return false;
     }
 
     void updateService(Displayable ret)
     {
         String serviceName = null;
-        Value[] values = getValues(detailsForm);
-        for (int i = 0; i < values.length; i++)
+        try
         {
-            if (values[i].type == 0)
+            idpwMemo.selectService(serviceIndex);
+            idpwMemo.setValues(getValues(detailsForm));
+            if (!idpwMemo.getSelectedService().isValidState())
             {
-                serviceName = values[i].value;
-                break;
-            }
-        }
-        if (serviceName == null)
-        {
-            returnDisplay = ret;
-            serviceName = serviceList.getString(serviceIndex);
-            setDisplay(getConfirmDelete(serviceName));
-            return;
-        }
-        byte[] secrets = memo.getService(serviceIndex).secrets;
-        if (showedSecrets)
-        {
-            ByteArrayOutputStream baos = null;
-            try
-            {
-                Value[] tmpValues = getValues(secretsForm);
-                baos = new ByteArrayOutputStream();
-                Service.writeSecrets(new DataOutputStream(baos), tmpValues);
-                secrets = Cryptor.instance.encrypt(password,
-                    Cryptor.instance.encrypt(password, baos.toByteArray()));
-            }
-            catch (IOException ex)
-            {
-                setTicker("unknown error to update service");
-                ex.printStackTrace();
+                returnDisplay = ret;
+                serviceName = serviceList.getString(serviceIndex);
+                setDisplay(getConfirmDelete(serviceName));
                 return;
             }
-            finally
+            serviceName = idpwMemo.getSelectedServiceName();
+            if (showedSecrets)
             {
-                if (baos != null)
-                {
-                    try
-                    {
-                        baos.close();
-                    }
-                    catch (IOException ex)
-                    {
-                        // discard
-                    }
-                    baos = null;
-                }
+                idpwMemo.setSecrets(getValues(secretsForm));
             }
+            idpwMemo.updateSelectedService();
         }
-        memo.setService(serviceIndex, new Service(values, secrets));
+        catch (IOException ex)
+        {
+            Display.getDisplay(this).getCurrent().setTicker(getTicker("unknown error"));
+            return;
+        }
         serviceList.set(serviceIndex, serviceName, null);
         detailsForm.setTitle(serviceName + " details");
         if (showedSecrets)
@@ -1670,17 +1532,13 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     void saveMemo(Displayable ret)
     {
-        ByteArrayOutputStream baos = null;
         try
         {
             if (memoRecordStore == null)
             {
                 memoRecordStore = RecordStore.openRecordStore(memoRecordName, true);
             }
-            baos = new ByteArrayOutputStream();
-            memo.save(new DataOutputStream(baos));
-            byte[] buf = Cryptor.instance.encrypt(password,
-                Cryptor.instance.encrypt(password, baos.toByteArray()));
+            byte[] buf = idpwMemo.save();
             if (memoRecordStore.getNumRecords() == 0)
             {
                 memoRecordStore.addRecord(buf, 0, buf.length);
@@ -1689,6 +1547,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             {
                 memoRecordStore.setRecord(1, buf, 0, buf.length);
             }
+            buf = null;
             setDisplay(ret);
             ret.setTicker(getTicker("saved!"));
         }
@@ -1697,21 +1556,6 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             setDisplay(ret);
             ret.setTicker(getTicker("unknown error to save"));
             ex.printStackTrace();
-        }
-        finally
-        {
-            if (baos != null)
-            {
-                try
-                {
-                    baos.close();
-                }
-                catch (IOException ex)
-                {
-                    // discard
-                }
-                baos = null;
-            }
         }
     }
 
@@ -1740,9 +1584,9 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             setDisplay(returnDisplay);
             return;
         }
-        memo.removeService(serviceIndex);
+        idpwMemo.removeService(serviceIndex);
         serviceList.delete(serviceIndex);
-        if (memo.getServiceCount() > 0)
+        if (idpwMemo.getServiceCount() > 0)
         {
             saveMemo(serviceList);
             serviceList.setTicker(getTicker("deleted!"));
@@ -1774,51 +1618,24 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         if (reset && !showedSecrets)
         {
             showedSecrets = true;
-            Service service = memo.getService(serviceIndex);
+            Service service = idpwMemo.getService(serviceIndex);
             secretsForm.setTitle(service.getServiceName() + " secrets");
             secretsForm.deleteAll();
-            Value[] values;
-            ByteArrayInputStream bis = null;
+            Value[] values = null;
             try
             {
-                byte[] buf = memo.getService(serviceIndex).secrets;
-                if (buf == null || buf.length == 0)
+                idpwMemo.selectService(serviceIndex);
+                values = idpwMemo.getSecrets();
+                if (values.length == 0)
                 {
                     return secretsForm;
                 }
-                for (int i = 0; i < 2; i++)
-                {
-                    buf = Cryptor.instance.decrypt(password, buf);
-                    if (buf == null)
-                    {
-                        showedSecrets = false;
-                        setTicker("wrong password");
-                        return null;
-                    }
-                }
-                bis = new ByteArrayInputStream(buf);
-                values = Service.readSecrets(new DataInputStream(bis));
             }
             catch (IOException ex)
             {
                 showedSecrets = false;
                 setTicker("wrong format");
                 return null;
-            }
-            finally
-            {
-                if (bis != null)
-                {
-                    try
-                    {
-                        bis.close();
-                    }
-                    catch (IOException ex)
-                    {
-                        // discard
-                    }
-                    bis = null;
-                }
             }
             for (int i = 0; i < values.length; i++)
             {
