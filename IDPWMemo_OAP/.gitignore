@@ -1,4 +1,7 @@
-bin/*.jar
-lib/
-classes/
-tmpclasses/
+/bin/*.jar
+/*classes/
+/*lib/
+
+/bin/*.cmd
+/*.pro
+.gitkeep
