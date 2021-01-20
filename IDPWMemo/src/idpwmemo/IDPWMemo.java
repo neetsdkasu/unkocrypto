@@ -247,7 +247,7 @@ public final class IDPWMemo
         return secrets;
     }
 
-    void removeService(int index)
+    public void removeService(int index)
     {
         if (memo == null)
         {
