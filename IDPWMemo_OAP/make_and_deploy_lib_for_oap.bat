@@ -2,6 +2,8 @@
 
 pushd %~dp0
 setlocal
+set oldprompt=%prompt%
+prompt $$$S
 
 set deploydir=lib
 
@@ -66,7 +68,13 @@ set additionalflags=
 set libname=%memolib%
 set clsdir=memoclasses
 set srcdir=..\IDPWMemo\src
-set sources=%srcdir%\Memo.java 
+set sources=%srcdir%\idpwmemo\Memo.java 
+
+echo on
+mkdir %deploydir%\..\src\idpwmemo
+copy %srcdir%\idpwmemo\IDPWMemo.java ^
+    %deploydir%\..\src\idpwmemo\
+@echo off
 
 goto buildlib
 
@@ -94,5 +102,7 @@ goto %nextlabel%
 
 
 :endpoint
+prompt %oldprompt%
 endlocal
 popd
+echo on
