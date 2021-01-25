@@ -439,6 +439,7 @@ class Main extends JFrame
         {
             return;
         }
+        clear();
         try
         {
             idpwMemo.setPassword(password);
@@ -452,11 +453,11 @@ class Main extends JFrame
                 byte[] data = Files.readAllBytes(memoFile);
                 if (!idpwMemo.loadMemo(data))
                 {
+                    idpwMemo.clear();
                     JOptionPane.showMessageDialog(this, "wrong password");
                     return;
                 }
             }
-            serviceIndex = -1;
             setMemo(memoName);
         }
         catch (IOException ex)
@@ -480,6 +481,18 @@ class Main extends JFrame
         {
             setTitle(APP_TITLE + " - " + serviceName + " (" + memoName + ")");
         }
+    }
+
+    void clear()
+    {
+        idpwMemo.clear();
+        serviceIndex = -1;
+        setMemoEditorEnabled(false);
+        setServiceEditorEnabled(false);
+        setHiddenItemEditorEnabled(false);
+        list.clear();
+        resetItemTable(detailTable, details = getEmptyTableModel());
+        resetItemTable(secretTable, secrets = getEmptyTableModel());
     }
 
     void setMemo(String memoName)
