@@ -806,7 +806,7 @@ class Main extends JFrame
             IDPWMemo exportMemo = new IDPWMemo();
             exportMemo.setPassword(exPassword);
             exportMemo.newMemo();
-            exportMemo.addService(idpwMemo.getSelectedService().getCopy());
+            exportMemo.addService(idpwMemo);
             exportText = Base64.getMimeEncoder().encodeToString(
                 exportMemo.save()
             );
@@ -974,27 +974,41 @@ class Main extends JFrame
                     continue;
                 }
             }
-            if (pos == 0)
+            try
             {
-                // add new
-                idpwMemo.addService(service);
-                list.addElement(new ServiceName(idpwMemo.getService()));
+                if (pos == 0)
+                {
+                    // add new
+                    importMemo.selectService(j);
+                    idpwMemo.addService(importMemo);
+                    list.addElement(new ServiceName(idpwMemo.getService()));
+                }
+                else if (pos > 0)
+                {
+                    // replace
+                    importMemo.selectService(j);
+                    idpwMemo.setService(pos - 1, importMemo);
+                    list.set(pos - 1, new ServiceName(idpwMemo.getService()));
+                }
+                else
+                {
+                    Logger.getGlobal().log(Level.FINER, "failed with unknown error.");
+                    JOptionPane.showMessageDialog(this, "failed with unknown error.");
+                    return;
+                }
             }
-            else if (pos > 0)
+            catch (Exception ex)
             {
-                // replace
-                idpwMemo.setService(pos - 1, service);
-                list.set(pos - 1, new ServiceName(idpwMemo.getService()));
-            }
-            else
-            {
-                Logger.getGlobal().log(Level.FINER, "failed with unknown error.");
+                Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
                 JOptionPane.showMessageDialog(this, "failed with unknown error.");
                 return;
             }
-            if (serviceIndex >= 0)
+            finally
             {
-                idpwMemo.selectService(serviceIndex);
+                if (serviceIndex >= 0)
+                {
+                    idpwMemo.selectService(serviceIndex);
+                }
             }
             change = true;
         }

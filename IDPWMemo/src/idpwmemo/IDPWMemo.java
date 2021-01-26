@@ -168,8 +168,29 @@ public final class IDPWMemo
         secrets = null;
     }
 
-    public void setService(int index, Service service)
+    public void addService(IDPWMemo serviceFrom) throws IOException
     {
+        if (serviceFrom == null)
+        {
+            throw new IllegalArgumentException("serviceFrom is null");
+        }
+        if (memo == null)
+        {
+            throw new RuntimeException("no memo");
+        }
+        service = serviceFrom.getSelectedService().getCopy();
+        setSecrets(serviceFrom.getSecrets());
+        saveSecrets();
+        serviceIndex = memo.addService(service.getCopy());
+        secrets = null;
+    }
+
+    public void setService(int index, IDPWMemo serviceFrom) throws IOException
+    {
+        if (serviceFrom == null)
+        {
+            throw new IllegalArgumentException("serviceFrom is null");
+        }
         if (memo == null)
         {
             throw new RuntimeException("no memo");
@@ -178,20 +199,11 @@ public final class IDPWMemo
         {
             throw new ArrayIndexOutOfBoundsException(index);
         }
-        this.service = service;
-        memo.setService(index, service.getCopy());
+        service = serviceFrom.getSelectedService().getCopy();
+        setSecrets(serviceFrom.getSecrets());
+        saveSecrets();
         serviceIndex = index;
-        secrets = null;
-    }
-
-    public void addService(Service newService)
-    {
-        if (memo == null)
-        {
-            throw new RuntimeException("no memo");
-        }
-        service = newService;
-        serviceIndex = memo.addService(service.getCopy());
+        memo.setService(index, service.getCopy());
         secrets = null;
     }
 
