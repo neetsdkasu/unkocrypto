@@ -6,20 +6,28 @@ import java.io.IOException;
 
 final class Memo
 {
-    static final int VERSION = 1;
+    static final int VERSION = 2;
 
     static final Service[] EMPTY_SERVICES = new Service[0];
 
+    int loadedVersion;
     Service[] services;
 
     Memo()
     {
+        loadedVersion = VERSION;
         services = EMPTY_SERVICES;
     }
 
-    Memo(Service[] services)
+    Memo(int loadedVersion, Service[] services)
     {
+        this.loadedVersion = loadedVersion;
         this.services = services;
+    }
+
+    int getLoadedVersion()
+    {
+        return loadedVersion;
     }
 
     int getServiceCount()
@@ -41,6 +49,11 @@ final class Memo
         tmp[tmp.length - 1] = newService;
         services = tmp;
         return tmp.length - 1;
+    }
+
+    Service[] getServices()
+    {
+        return services;
     }
 
     Service getService(int index)
@@ -73,11 +86,21 @@ final class Memo
         }
         int count = in.readInt();
         Service[] services = new Service[count];
-        for (int i = 0; i < count; i++)
+        if (version == 1)
         {
-            services[i] = Service.load(in);
+            for (int i = 0; i < count; i++)
+            {
+                services[i] = Service.loadV1(in);
+            }
         }
-        return new Memo(services);
+        else
+        {
+            for (int i = 0; i < count; i++)
+            {
+                services[i] = Service.load(in);
+            }
+        }
+        return new Memo(version, services);
     }
 
     Service[] getFilteredServices()

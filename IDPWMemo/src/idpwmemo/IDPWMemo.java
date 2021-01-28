@@ -96,6 +96,15 @@ public final class IDPWMemo
         return memo.getServiceCount();
     }
 
+    public Service[] getServices()
+    {
+        if (memo == null)
+        {
+            throw new RuntimeException("no memo");
+        }
+        return memo.getServices();
+     }
+
     public Service getService(int index)
     {
         if (memo == null)
@@ -156,6 +165,45 @@ public final class IDPWMemo
         memo.setServices(services);
         serviceIndex = -1;
         service = null;
+        secrets = null;
+    }
+
+    public void addService(IDPWMemo serviceFrom) throws IOException
+    {
+        if (serviceFrom == null)
+        {
+            throw new IllegalArgumentException("serviceFrom is null");
+        }
+        if (memo == null)
+        {
+            throw new RuntimeException("no memo");
+        }
+        service = serviceFrom.getSelectedService().getCopy();
+        setSecrets(serviceFrom.getSecrets());
+        saveSecrets();
+        serviceIndex = memo.addService(service.getCopy());
+        secrets = null;
+    }
+
+    public void setService(int index, IDPWMemo serviceFrom) throws IOException
+    {
+        if (serviceFrom == null)
+        {
+            throw new IllegalArgumentException("serviceFrom is null");
+        }
+        if (memo == null)
+        {
+            throw new RuntimeException("no memo");
+        }
+        if (index < 0 || index >= memo.getServiceCount())
+        {
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
+        service = serviceFrom.getSelectedService().getCopy();
+        setSecrets(serviceFrom.getSecrets());
+        saveSecrets();
+        serviceIndex = index;
+        memo.setService(index, service.getCopy());
         secrets = null;
     }
 
@@ -276,6 +324,7 @@ public final class IDPWMemo
             throw new RuntimeException("not select service");
         }
         saveSecrets();
+        service.setTime(System.currentTimeMillis());
         memo.setService(serviceIndex, service.getCopy());
     }
 
