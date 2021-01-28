@@ -9,6 +9,7 @@ public final class Service
     static final Value[] EMPTY_VALUES = new Value[0];
     static final byte[] EMPTY_BYTES = new byte[0];
 
+    private long time;
     private Value[] values;
     private byte[] secrets;
 
@@ -19,8 +20,24 @@ public final class Service
 
     Service(Value[] values, byte[] secrets)
     {
+        this(0L, values, secrets);
+    }
+
+    Service(long time, Value[] values, byte[] secrets)
+    {
+        this.time = time;
         this.values = values;
         this.secrets = secrets;
+    }
+
+    public long getTime()
+    {
+        return time;
+    }
+
+    public void setTime(long time)
+    {
+        this.time = time;
     }
 
     public String getServiceName()
@@ -48,6 +65,7 @@ public final class Service
     public Service getCopy()
     {
         Service copy = new Service(
+            time,
             new Value[values.length],
             secrets.length == 0
                 ? EMPTY_BYTES
@@ -152,7 +170,8 @@ public final class Service
             return false;
         }
         Service s = (Service)o;
-        return equalsSecrets(s.secrets)
+        return time == s.time
+            && equalsSecrets(s.secrets)
             && equalsValues(s.values);
     }
 
@@ -205,24 +224,51 @@ public final class Service
         }
     }
 
-    static Service load(DataInput in) throws IOException
+    static Service loadV1(DataInput in) throws IOException
     {
         Value[] values;
         byte[] secrets;
+
         int vlen = in.readInt();
         values = new Value[vlen];
         for (int i = 0; i < vlen; i++)
         {
             values[i] = Value.load(in);
         }
+
         int slen = in.readInt();
         secrets = new byte[slen];
         in.readFully(secrets);
+
         return new Service(values, secrets);
+    }
+
+    static Service load(DataInput in) throws IOException
+    {
+        long time;
+        Value[] values;
+        byte[] secrets;
+
+        time = in.readLong();
+
+        int vlen = in.readInt();
+        values = new Value[vlen];
+        for (int i = 0; i < vlen; i++)
+        {
+            values[i] = Value.load(in);
+        }
+
+        int slen = in.readInt();
+        secrets = new byte[slen];
+        in.readFully(secrets);
+
+        return new Service(time, values, secrets);
     }
 
     void save(DataOutput out) throws IOException
     {
+        out.writeLong(time);
+
         Value[] filtered = filterValues(values);
         out.writeInt(filtered.length);
         for (int i = 0; i < filtered.length; i++)
@@ -230,6 +276,7 @@ public final class Service
             filtered[i].save(out);
         }
         filtered = null;
+
         out.writeInt(secrets.length);
         out.write(secrets);
     }
