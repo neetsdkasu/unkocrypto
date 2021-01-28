@@ -317,6 +317,27 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     }
 
+    String getDateTimeString(long time)
+    {
+        final Calendar cal = Calendar.getInstance();
+        final Date date = new Date();
+        if (time == 0L)
+        {
+            return "00-00-00 00:00";
+        }
+        date.setTime(time);
+        cal.setTime(date);
+        return Integer.toString(cal.get(Calendar.YEAR)).substring(2)
+             + "-"
+             + Integer.toString(101+cal.get(Calendar.MONTH)).substring(1)
+             + "-"
+             + Integer.toString(100+cal.get(Calendar.DATE)).substring(1)
+             + " "
+             + Integer.toString(100+cal.get(Calendar.HOUR_OF_DAY)).substring(1)
+             + ":"
+             + Integer.toString(100+cal.get(Calendar.MINUTE)).substring(1);
+    }
+
     Form memoryViewer = null;
     Form getMemoryViewer(boolean reset)
     {
@@ -346,18 +367,16 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             else
             {
                 int available = Integer.parseInt(totalSize);
-                Calendar cal = Calendar.getInstance();
-                Date date = new Date();
                 for (int i = 0; i < list.length; i++)
                 {
                     RecordStore rs = null;
+                    String date = "00-00-00 00:00";
                     int size = -1;
                     try
                     {
                         rs = RecordStore.openRecordStore(list[i], false);
                         size =  rs.getSize();
-                        date.setTime(rs.getLastModified());
-                        cal.setTime(date);
+                        date = getDateTimeString(rs.getLastModified());
                         available -= size;
                     }
                     catch (Exception ex)
@@ -384,17 +403,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                     }
                     String name = list[i].substring(0, list[i].length() - RECORD_SUFFIX.length());
                     si = new StringItem(name + ": ", Integer.toString(size)
-                        + " ("
-                        + Integer.toString(cal.get(Calendar.YEAR)).substring(2)
-                        + "-"
-                        + Integer.toString(101+cal.get(Calendar.MONTH)).substring(1)
-                        + "-"
-                        + Integer.toString(100+cal.get(Calendar.DATE)).substring(1)
-                        + " "
-                        + Integer.toString(100+cal.get(Calendar.HOUR_OF_DAY)).substring(1)
-                        + ":"
-                        + Integer.toString(100+cal.get(Calendar.MINUTE)).substring(1)
-                        + ")");
+                        + " (" + date + ")");
                     si.setLayout(StringItem.LAYOUT_NEWLINE_AFTER);
                     memoryViewer.append(si);
                 }
@@ -1054,10 +1063,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                     continue;
                 }
                 idpwMemo.selectService(i);
-                exportMemo.addNewService(idpwMemo.getSelectedServiceName());
-                exportMemo.setValues(idpwMemo.getValues());
-                exportMemo.setSecrets(idpwMemo.getSecrets());
-                exportMemo.updateSelectedService();
+                exportMemo.addService(idpwMemo);
             }
 
             byte[] buf = exportMemo.save();
@@ -1263,10 +1269,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 if (action == 0)
                 {
                     // add new
-                    idpwMemo.addNewService(serviceName);
-                    idpwMemo.setValues(importMemo.getValues());
-                    idpwMemo.setSecrets(importMemo.getSecrets());
-                    idpwMemo.updateSelectedService();
+                    idpwMemo.addService(importMemo);
                     serviceList.append(serviceName, null);
                 }
                 else if (action == 1)
@@ -1279,10 +1282,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                         return;
                     }
                     int replace = cg.getSelectedIndex();
-                    idpwMemo.selectService(replace);
-                    idpwMemo.setValues(importMemo.getValues());
-                    idpwMemo.setSecrets(importMemo.getSecrets());
-                    idpwMemo.updateSelectedService();
+                    idpwMemo.setService(replace, importMemo);
                     serviceList.set(replace, serviceName, null);
                 }
             }
@@ -1366,6 +1366,9 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             Service service = idpwMemo.getService(serviceIndex);
             detailsForm.setTitle(service.getServiceName() + " details");
             detailsForm.deleteAll();
+            StringItem si = new StringItem("LastUpdate:", getDateTimeString(service.getTime()));
+            si.setLayout(StringItem.LAYOUT_LEFT | StringItem.LAYOUT_NEWLINE_AFTER);
+            detailsForm.append(si);
             Value[] values = service.getValues();
             for (int i = 0; i < values.length; i++)
             {
@@ -1447,9 +1450,10 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
 
     Value[] getValues(Form valueForm)
     {
-        Value[] values = new Value[valueForm.size() / 2];
+        int offset = valueForm == secretsForm ? 0 : 1;
+        Value[] values = new Value[(valueForm.size() - offset) / 2];
         int count = 0;
-        for (int i = 0; i < valueForm.size(); i+= 2)
+        for (int i = offset; i < valueForm.size(); i+= 2)
         {
             String value = ((TextField)valueForm.get(i + 1)).getString();
             if (value == null || (value = value.trim()).length() == 0)
@@ -1523,6 +1527,9 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
         }
         serviceList.set(serviceIndex, serviceName, null);
         detailsForm.setTitle(serviceName + " details");
+        ((StringItem)detailsForm.get(0)).setText(
+            getDateTimeString(idpwMemo.getService(serviceIndex).getTime())
+        );
         if (showedSecrets)
         {
             secretsForm.setTitle(serviceName + " secrets");
