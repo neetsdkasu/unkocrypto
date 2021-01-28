@@ -136,9 +136,9 @@ class Main extends JFrame
     JComboBox<String> memoComboBox;
     JComboBox<ItemType> publicItemTypeComboBox;
     JComboBox<ItemType> hiddenItemTypeComboBox;
-    JList<String> serviceList;
+    JList<ServiceName> serviceList;
     JTable detailTable, secretTable;
-    DefaultListModel<String> list;
+    DefaultListModel<ServiceName> list;
     DefaultTableModel details, secrets;
 
     JButton openMemoButton;
@@ -402,12 +402,12 @@ class Main extends JFrame
         Arrays.setAll(indexes, Integer::valueOf);
         final Collator col = Collator.getInstance();
         col.setStrength(Collator.PRIMARY);
-        Arrays.sort(indexes, (a, b) -> col.compare(list.get(a), list.get(b)) );
+        Arrays.sort(indexes, (a, b) -> col.compare(list.get(a).serviceName, list.get(b).serviceName) );
         Service[] services = new Service[idpwMemo.getServiceCount()];
         for (int i = 0; i < services.length; i++)
         {
             services[i] = idpwMemo.getService(indexes[i]);
-            list.set(i, services[i].getServiceName());
+            list.set(i, new ServiceName(services[i]));
         }
         idpwMemo.setServices(services);
         if (serviceIndex >= 0)
@@ -503,9 +503,9 @@ class Main extends JFrame
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
         list.clear();
-        for (String name : idpwMemo.getServiceNames())
+        for (Service s : idpwMemo.getServices())
         {
-            list.addElement(name);
+            list.addElement(new ServiceName(s));
         }
         resetItemTable(detailTable, details = getEmptyTableModel());
         resetItemTable(secretTable, secrets = getEmptyTableModel());
@@ -519,7 +519,7 @@ class Main extends JFrame
             return;
         }
         idpwMemo.addNewService(serviceName);
-        list.addElement(serviceName);
+        list.addElement(new ServiceName(idpwMemo.getService()));
         serviceList.setSelectedIndex(list.size() - 1);
         editService();
     }
@@ -536,7 +536,7 @@ class Main extends JFrame
         idpwMemo.selectService(sel);
         resetItemTable(detailTable, details = getTableModel(idpwMemo.getValues()));
         resetItemTable(secretTable, secrets = getEmptyTableModel());
-        setTitle(memoName, list.get(sel));
+        setTitle(memoName, list.get(sel).serviceName);
         setServiceEditorEnabled(true);
         setHiddenItemEditorEnabled(false);
     }
@@ -665,7 +665,7 @@ class Main extends JFrame
         String serviceName = service.getServiceName();
         if (!service.isValidState())
         {
-            serviceName = list.get(serviceIndex);
+            serviceName = list.get(serviceIndex).serviceName;
             int ans = JOptionPane.showConfirmDialog(this, "delete '" + serviceName + "' from " + memoName, null, JOptionPane.OK_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION)
             {
@@ -692,7 +692,7 @@ class Main extends JFrame
                 JOptionPane.showMessageDialog(this, "failed to update service.");
                 return false;
             }
-            list.set(serviceIndex, serviceName);
+            list.set(serviceIndex, new ServiceName(idpwMemo.getService()));
         }
         saveMemo();
         return true;
@@ -793,7 +793,7 @@ class Main extends JFrame
             JOptionPane.showMessageDialog(this, "not selected.");
             return;
         }
-        String serviceName = list.get(sel);
+        String serviceName = list.get(sel).serviceName;
         String exPassword = JOptionPane.showInputDialog(this, "export ( " + serviceName +  " ). input export-password.");
         if (exPassword == null)
         {
@@ -806,10 +806,7 @@ class Main extends JFrame
             IDPWMemo exportMemo = new IDPWMemo();
             exportMemo.setPassword(exPassword);
             exportMemo.newMemo();
-            exportMemo.addNewService(idpwMemo.getSelectedServiceName());
-            exportMemo.setValues(idpwMemo.getValues());
-            exportMemo.setSecrets(idpwMemo.getSecrets());
-            exportMemo.updateSelectedService();
+            exportMemo.addService(idpwMemo);
             exportText = Base64.getMimeEncoder().encodeToString(
                 exportMemo.save()
             );
@@ -969,7 +966,7 @@ class Main extends JFrame
             {
                 // replace
                 int res = JOptionPane.showConfirmDialog(this,
-                    "replace <" + list.get(pos - 1) + "> for <" + serviceName + ">",
+                    "replace <" + list.get(pos - 1).serviceName + "> for <" + serviceName + ">",
                     "import", JOptionPane.OK_CANCEL_OPTION);
                 if (res == JOptionPane.CANCEL_OPTION)
                 {
@@ -977,35 +974,33 @@ class Main extends JFrame
                     continue;
                 }
             }
-            if (pos == 0)
-            {
-                // add new
-                idpwMemo.addNewService(serviceName);
-                list.addElement(serviceName);
-            }
-            else if (pos > 0)
-            {
-                // replace
-                idpwMemo.selectService(pos - 1);
-                list.set(pos - 1, serviceName);
-            }
-            else
-            {
-                Logger.getGlobal().log(Level.FINER, "failed with unknown error.");
-                JOptionPane.showMessageDialog(this, "failed with unknown error.");
-                return;
-            }
             try
             {
-                importMemo.selectService(j);
-                idpwMemo.setValues(importMemo.getValues());
-                idpwMemo.setSecrets(importMemo.getSecrets());
-                idpwMemo.updateSelectedService();
+                if (pos == 0)
+                {
+                    // add new
+                    importMemo.selectService(j);
+                    idpwMemo.addService(importMemo);
+                    list.addElement(new ServiceName(idpwMemo.getService()));
+                }
+                else if (pos > 0)
+                {
+                    // replace
+                    importMemo.selectService(j);
+                    idpwMemo.setService(pos - 1, importMemo);
+                    list.set(pos - 1, new ServiceName(idpwMemo.getService()));
+                }
+                else
+                {
+                    Logger.getGlobal().log(Level.FINER, "failed with unknown error.");
+                    JOptionPane.showMessageDialog(this, "failed with unknown error.");
+                    return;
+                }
             }
-            catch (IOException ex)
+            catch (Exception ex)
             {
-                Logger.getGlobal().log(Level.FINER, "failed with wrong data format.", ex);
-                JOptionPane.showMessageDialog(this, "failed with wrong data format.");
+                Logger.getGlobal().log(Level.FINER, "failed with unknown error.", ex);
+                JOptionPane.showMessageDialog(this, "failed with unknown error.");
                 return;
             }
             finally
