@@ -70,7 +70,7 @@ public final class IDPWMemo
     public boolean loadMemo(byte[] src) throws IOException
     {
         byte[] password = getPassword();
-        byte[] buf = cryptor.decrypt_repeat(2, password, src);
+        byte[] buf = cryptor.decryptRepeat(2, password, src);
         password = null;
         if (buf == null)
         {
@@ -279,7 +279,7 @@ public final class IDPWMemo
             return secrets;
         }
         byte[] password = getPassword();
-        byte[] buf = cryptor.decrypt_repeat(2, password, src);
+        byte[] buf = cryptor.decryptRepeat(2, password, src);
         password = null;
         src = null;
         if (buf == null)
@@ -360,7 +360,7 @@ public final class IDPWMemo
         byte[] buf = baos.toByteArray();
         dos.close();
         byte[] password = getPassword();
-        service.setSecrets(cryptor.encrypt_repeat(2, password, buf));
+        service.setSecrets(cryptor.encryptRepeat(2, password, buf));
         password = null;
         buf = null;
     }
@@ -377,7 +377,7 @@ public final class IDPWMemo
         dos.flush();
         byte[] buf = baos.toByteArray();
         dos.close();
-        return cryptor.encrypt_repeat(2, getPassword(), buf);
+        return cryptor.encryptRepeat(2, getPassword(), buf);
     }
 
     public void changePassword(String newPassword) throws IOException
@@ -402,18 +402,18 @@ public final class IDPWMemo
                 continue;
             }
             byte[] sec = sv.getSecrets();
-            byte[] dec = cryptor.decrypt_repeat(2, oldPassword, sec);
+            byte[] dec = cryptor.decryptRepeat(2, oldPassword, sec);
             sec = null;
-            encs[i] = cryptor.encrypt_repeat(2, newPassword, dec);
+            encs[i] = cryptor.encryptRepeat(2, newPassword, dec);
             dec = null;
         }
         byte[] tmp = cryptor.encrypt(Service.EMPTY_BYTES, newPassword);
         if (service != null && service.hasSecrets())
         {
             byte[] sec = service.getSecrets();
-            byte[] dec = cryptor.decrypt_repeat(2, oldPassword, sec);
+            byte[] dec = cryptor.decryptRepeat(2, oldPassword, sec);
             sec = null;
-            byte[] enc = cryptor.encrypt_repeat(2, newPassword, dec);
+            byte[] enc = cryptor.encryptRepeat(2, newPassword, dec);
             dec = null;
             service.setSecrets(enc);
             enc = null;
