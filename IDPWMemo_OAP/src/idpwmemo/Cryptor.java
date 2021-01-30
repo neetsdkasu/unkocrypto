@@ -147,12 +147,12 @@ final class Cryptor
         return ret;
     }
 
-    byte[] decrypt_repeat(int times, String password, byte[] src) throws IOException
+    byte[] decryptRepeat(int times, String password, byte[] src) throws IOException
     {
-        return decrypt_repeat(times, getBytes(password), src);
+        return decryptRepeat(times, getBytes(password), src);
     }
 
-    byte[] decrypt_repeat(int times, byte[] password, byte[] src) throws IOException
+    byte[] decryptRepeat(int times, byte[] password, byte[] src) throws IOException
     {
         for (int i = 0; i < times; i++)
         {
@@ -165,12 +165,12 @@ final class Cryptor
         return src;
     }
 
-    byte[] encrypt_repeat(int times, String password, byte[] src) throws IOException
+    byte[] encryptRepeat(int times, String password, byte[] src) throws IOException
     {
-        return encrypt_repeat(times, getBytes(password), src);
+        return encryptRepeat(times, getBytes(password), src);
     }
 
-    byte[] encrypt_repeat(int times, byte[] password, byte[] src) throws IOException
+    byte[] encryptRepeat(int times, byte[] password, byte[] src) throws IOException
     {
         for (int i = 0; i < times; i++)
         {
