@@ -40,7 +40,7 @@ final class Cryptor
         return seed;
     }
 
-    private static long[] genSeed(byte[] password)
+    private static long[] genSeedV1(byte[] password)
     {
         if (password == null || password.length == 0)
         {
@@ -85,16 +85,16 @@ final class Cryptor
         return size;
     }
 
-    byte[] decrypt(String password, byte[] src) throws IOException
+    byte[] decryptV1(String password, byte[] src) throws IOException
     {
-        return decrypt(getBytes(password), src);
+        return decryptV1(getBytes(password), src);
     }
 
-    synchronized byte[] decrypt(byte[] password, byte[] src) throws IOException
+    synchronized byte[] decryptV1(byte[] password, byte[] src) throws IOException
     {
         ByteArrayInputStream in = new ByteArrayInputStream(src);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        long[] seed = genSeed(password);
+        long[] seed = genSeedV1(password);
         for (int size = Math.min(src.length, MAX_BLOCKSIZE); size >= Crypto.MIN_BLOCKSIZE; size--)
         {
             if (src.length % size != 0)
@@ -124,17 +124,17 @@ final class Cryptor
         return null;
     }
 
-    byte[] encrypt(String password, byte[] src) throws IOException
+    byte[] encryptV1(String password, byte[] src) throws IOException
     {
-        return encrypt(getBytes(password), src);
+        return encryptV1(getBytes(password), src);
     }
 
-    synchronized byte[] encrypt(byte[] password, byte[] src) throws IOException
+    synchronized byte[] encryptV1(byte[] password, byte[] src) throws IOException
     {
         int blockSize = encryptBlockSize(src.length);
         ByteArrayInputStream in = new ByteArrayInputStream(src);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        rand.setSeed(genSeed(password));
+        rand.setSeed(genSeedV1(password));
         Crypto.encrypt(blockSize, cs, rand, in, out);
         byte[] ret = out.toByteArray();
         in.close();
@@ -142,16 +142,16 @@ final class Cryptor
         return ret;
     }
 
-    byte[] decryptRepeat(int times, String password, byte[] src) throws IOException
+    byte[] decryptRepeatV1(int times, String password, byte[] src) throws IOException
     {
-        return decryptRepeat(times, getBytes(password), src);
+        return decryptRepeatV1(times, getBytes(password), src);
     }
 
-    byte[] decryptRepeat(int times, byte[] password, byte[] src) throws IOException
+    byte[] decryptRepeatV1(int times, byte[] password, byte[] src) throws IOException
     {
         for (int i = 0; i < times; i++)
         {
-            src = decrypt(password, src);
+            src = decryptV1(password, src);
             if (src == null)
             {
                 return null;
@@ -160,16 +160,16 @@ final class Cryptor
         return src;
     }
 
-    byte[] encryptRepeat(int times, String password, byte[] src) throws IOException
+    byte[] encryptRepeatV1(int times, String password, byte[] src) throws IOException
     {
-        return encryptRepeat(times, getBytes(password), src);
+        return encryptRepeatV1(times, getBytes(password), src);
     }
 
-    byte[] encryptRepeat(int times, byte[] password, byte[] src) throws IOException
+    byte[] encryptRepeatV1(int times, byte[] password, byte[] src) throws IOException
     {
         for (int i = 0; i < times; i++)
         {
-            src = encrypt(password, src);
+            src = encryptV1(password, src);
         }
         return src;
     }

@@ -14,7 +14,7 @@ public final class IDPWMemo
     }
 
     Cryptor cryptor = Cryptor.instance;
-    byte[] encodedPassword = null;
+    byte[] encodedPasswordV1 = null;
     Memo memo = null;
     int serviceIndex = -1;
     Service service = null;
@@ -24,7 +24,7 @@ public final class IDPWMemo
 
     public void clear()
     {
-        encodedPassword = null;
+        encodedPasswordV1 = null;
         memo = null;
         serviceIndex = -1;
         service = null;
@@ -38,8 +38,8 @@ public final class IDPWMemo
 
     public void setPassword(byte[] password) throws IOException
     {
-        byte[] tmp = cryptor.encrypt(Service.EMPTY_BYTES, password);
-        encodedPassword = tmp;
+        byte[] tmp = cryptor.encryptV1(Service.EMPTY_BYTES, password);
+        encodedPasswordV1 = tmp;
         memo = null;
         serviceIndex = -1;
         service = null;
@@ -48,16 +48,16 @@ public final class IDPWMemo
 
     byte[] getPassword() throws IOException
     {
-        if (encodedPassword == null)
+        if (encodedPasswordV1 == null)
         {
             throw new RuntimeException("no password");
         }
-        return cryptor.decrypt(Service.EMPTY_BYTES, encodedPassword);
+        return cryptor.decryptV1(Service.EMPTY_BYTES, encodedPasswordV1);
     }
 
     public void newMemo()
     {
-        if (encodedPassword == null)
+        if (encodedPasswordV1 == null)
         {
             throw new RuntimeException("no password");
         }
@@ -70,7 +70,7 @@ public final class IDPWMemo
     public boolean loadMemo(byte[] src) throws IOException
     {
         byte[] password = getPassword();
-        byte[] buf = cryptor.decryptRepeat(2, password, src);
+        byte[] buf = cryptor.decryptRepeatV1(2, password, src);
         password = null;
         if (buf == null)
         {
@@ -279,7 +279,7 @@ public final class IDPWMemo
             return secrets;
         }
         byte[] password = getPassword();
-        byte[] buf = cryptor.decryptRepeat(2, password, src);
+        byte[] buf = cryptor.decryptRepeatV1(2, password, src);
         password = null;
         src = null;
         if (buf == null)
@@ -360,7 +360,7 @@ public final class IDPWMemo
         byte[] buf = baos.toByteArray();
         dos.close();
         byte[] password = getPassword();
-        service.setSecrets(cryptor.encryptRepeat(2, password, buf));
+        service.setSecrets(cryptor.encryptRepeatV1(2, password, buf));
         password = null;
         buf = null;
     }
@@ -377,7 +377,7 @@ public final class IDPWMemo
         dos.flush();
         byte[] buf = baos.toByteArray();
         dos.close();
-        return cryptor.encryptRepeat(2, getPassword(), buf);
+        return cryptor.encryptRepeatV1(2, getPassword(), buf);
     }
 
     public void changePassword(String newPassword) throws IOException
@@ -402,23 +402,23 @@ public final class IDPWMemo
                 continue;
             }
             byte[] sec = sv.getSecrets();
-            byte[] dec = cryptor.decryptRepeat(2, oldPassword, sec);
+            byte[] dec = cryptor.decryptRepeatV1(2, oldPassword, sec);
             sec = null;
-            encs[i] = cryptor.encryptRepeat(2, newPassword, dec);
+            encs[i] = cryptor.encryptRepeatV1(2, newPassword, dec);
             dec = null;
         }
-        byte[] tmp = cryptor.encrypt(Service.EMPTY_BYTES, newPassword);
+        byte[] tmp = cryptor.encryptV1(Service.EMPTY_BYTES, newPassword);
         if (service != null && service.hasSecrets())
         {
             byte[] sec = service.getSecrets();
-            byte[] dec = cryptor.decryptRepeat(2, oldPassword, sec);
+            byte[] dec = cryptor.decryptRepeatV1(2, oldPassword, sec);
             sec = null;
-            byte[] enc = cryptor.encryptRepeat(2, newPassword, dec);
+            byte[] enc = cryptor.encryptRepeatV1(2, newPassword, dec);
             dec = null;
             service.setSecrets(enc);
             enc = null;
         }
-        encodedPassword = tmp;
+        encodedPasswordV1 = tmp;
         for (int i = 0; i < memo.getServiceCount(); i++)
         {
             memo.getService(i).setSecrets(encs[i]);
