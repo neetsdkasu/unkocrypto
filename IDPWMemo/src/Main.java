@@ -712,6 +712,7 @@ class Main extends JFrame
             }
             else
             {
+                idpwMemo.convertV1ToV2();
                 byte[] data = idpwMemo.save();
                 Files.write(memoFile, data);
                 JOptionPane.showMessageDialog(this, "saved");
