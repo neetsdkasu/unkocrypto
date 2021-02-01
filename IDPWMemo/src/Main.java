@@ -487,6 +487,7 @@ class Main extends JFrame
     {
         idpwMemo.clear();
         serviceIndex = -1;
+        setTitle(null, null);
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
