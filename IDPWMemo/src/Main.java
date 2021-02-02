@@ -487,6 +487,7 @@ class Main extends JFrame
     {
         idpwMemo.clear();
         serviceIndex = -1;
+        setTitle(null, null);
         setMemoEditorEnabled(false);
         setServiceEditorEnabled(false);
         setHiddenItemEditorEnabled(false);
@@ -711,6 +712,7 @@ class Main extends JFrame
             }
             else
             {
+                idpwMemo.convertV1ToV2();
                 byte[] data = idpwMemo.save();
                 Files.write(memoFile, data);
                 JOptionPane.showMessageDialog(this, "saved");
