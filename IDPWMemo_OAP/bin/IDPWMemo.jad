@@ -1,10 +1,10 @@
 MIDlet-1: IDPWMemo, IDPWMemo.png, IDPWMemoMIDlet
 MIDlet-Data-Size: 32768
 MIDlet-Description: IDPWMemo
-MIDlet-Jar-Size: 34235
+MIDlet-Jar-Size: 35752
 MIDlet-Jar-URL: IDPWMemo.jar
 MIDlet-Name: IDPWMemo
 MIDlet-Vendor: Leonardone
-MIDlet-Version: 1.6
+MIDlet-Version: 2.0
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0

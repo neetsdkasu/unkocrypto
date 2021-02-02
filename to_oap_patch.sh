@@ -12,7 +12,7 @@ echo "6,7c6,7
 < import neetsdkasu.crypto.Crypto;
 ---
 > import neetsdkasu.crypto.oap.Crypto;
-25c25,30
+26c26,31
 <     private final MTRandom rand = new MTRandom();
 ---
 >     private final MTRandom rand = new MTRandom() {
