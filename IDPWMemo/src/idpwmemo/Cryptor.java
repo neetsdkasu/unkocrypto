@@ -28,7 +28,7 @@ final class Cryptor
 
     Cryptor() {}
 
-    private static long[] genSeedV1(int size)
+    private static long[] genSeed(int size)
     {
         long[] seed = new long[size];
         seed[0] = 0x98765432L;
@@ -45,9 +45,9 @@ final class Cryptor
     {
         if (password == null || password.length == 0)
         {
-            return genSeedV1(23);
+            return genSeed(23);
         }
-        long[] seed = genSeedV1(password.length + 13);
+        long[] seed = genSeed(password.length + 13);
         int p = 0;
         for (int i = 0; i < seed.length; i++)
         {
@@ -175,26 +175,13 @@ final class Cryptor
         return src;
     }
 
-    private static long[] genSeedV2(int size)
-    {
-        long[] seed = new long[size];
-        seed[0] = 0x98765432L;
-        seed[1] = 0xF1E2D3C4L;
-        for (int i = 2; i < seed.length; i++)
-        {
-            seed[i] = seed[i - 2] ^ (seed[i - 1] >>> ((i - 1) & 0xF)) ^ (seed[i - 1] << ((i + i + 1) & 0xF));
-            seed[i] &= 0xFFFFFFFFL;
-        }
-        return seed;
-    }
-
     private static long[] genSeedV2(byte[] password)
     {
         if (password == null || password.length == 0)
         {
-            return genSeedV2(37);
+            return genSeed(37);
         }
-        long[] seed = genSeedV2(password.length + 29);
+        long[] seed = genSeed(password.length + 29);
         int p = 0;
         for (int i = 0; i < seed.length; i++)
         {
