@@ -214,7 +214,13 @@ public final class IDPWMemo
             throw new RuntimeException("no memo");
         }
         service = serviceFrom.getSelectedService().getCopy();
-        setSecrets(serviceFrom.getSecrets());
+        Value[] srcSecrets = serviceFrom.getSecrets();
+        Value[] tmpSecrets = new Value[srcSecrets.length];
+        for (int i = 0; i < srcSecrets.length; i++)
+        {
+            tmpSecrets[i] = srcSecrets[i].getCopy();
+        }
+        setSecrets(tmpSecrets);
         saveSecrets();
         serviceIndex = memo.addService(service.getCopy());
         secrets = null;
@@ -235,7 +241,13 @@ public final class IDPWMemo
             throw new ArrayIndexOutOfBoundsException(index);
         }
         service = serviceFrom.getSelectedService().getCopy();
-        setSecrets(serviceFrom.getSecrets());
+        Value[] srcSecrets = serviceFrom.getSecrets();
+        Value[] tmpSecrets = new Value[srcSecrets.length];
+        for (int i = 0; i < srcSecrets.length; i++)
+        {
+            tmpSecrets[i] = srcSecrets[i].getCopy();
+        }
+        setSecrets(tmpSecrets);
         saveSecrets();
         serviceIndex = index;
         memo.setService(index, service.getCopy());
