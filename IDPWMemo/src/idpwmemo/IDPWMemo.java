@@ -69,7 +69,7 @@ public final class IDPWMemo
 
     public void newMemo(int version)
     {
-        if (version < 1 && version > 2)
+        if (version < 1 || version > 2)
         {
             throw new RuntimeException("wrong version");
         }
