@@ -55,7 +55,7 @@ public final class IDPWMemo
 
     byte[] getPasswordV1() throws IOException
     {
-        if (encodedPasswordV2 == null)
+        if (encodedPasswordV1 == null)
         {
             throw new RuntimeException("no password");
         }
@@ -73,7 +73,7 @@ public final class IDPWMemo
         {
             throw new RuntimeException("wrong version");
         }
-        if (encodedPasswordV2 == null)
+        if (encodedPasswordV1 == null || encodedPasswordV2 == null)
         {
             throw new RuntimeException("no password");
         }
