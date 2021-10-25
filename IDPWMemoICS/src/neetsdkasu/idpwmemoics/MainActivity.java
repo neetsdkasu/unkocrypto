@@ -95,7 +95,7 @@ public class MainActivity extends ListActivity
     }
     
     public static class MyDialogFragment extends DialogFragment 
-            implements android.text.InputFilter {
+            implements android.text.InputFilter, DialogInterface.OnShowListener {
         static MyDialogFragment newInstance() {
             MyDialogFragment f = new MyDialogFragment();
             
@@ -114,14 +114,12 @@ public class MainActivity extends ListActivity
         
         boolean firstTime = true;
 
-        @Override
-        public void onStart() {
-            super.onStart();
-            AlertDialog dialog = (AlertDialog) getDialog();
-            if (dialog == null) return;
-            android.widget.Button btn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        public void onShow (DialogInterface dialog) {
+            AlertDialog aDialog = (AlertDialog) dialog;
+            if (aDialog == null) return;
+            android.widget.Button btn = aDialog.getButton(AlertDialog.BUTTON_POSITIVE);
             if (btn == null) return;
-            EditText e = (EditText) dialog.findViewById(R.id.new_memo_name);
+            EditText e = (EditText) aDialog.findViewById(R.id.new_memo_name);
             if (e == null) {
                 btn.setEnabled(false);
             } else {
@@ -168,6 +166,8 @@ public class MainActivity extends ListActivity
                     }
                 )
                 .create();
+            
+            dialog.setOnShowListener(this);
             
             return dialog;
         }
