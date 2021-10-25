@@ -94,6 +94,18 @@ public class MainActivity extends ListActivity
         }
     }
     
+    static boolean isValidMemoNameChar(char ch) {
+        return ('A' <= ch && ch <= 'Z')
+            || ('a' <= ch && ch <= 'z')
+            || ('0' <= ch && ch <= '9')
+            || ch == '_'
+            || ch == '-'
+            || ch == '('
+            || ch == ')'
+            || ch == '['
+            || ch == ']';
+    }
+    
     public static class MyDialogFragment extends DialogFragment 
             implements android.text.InputFilter, DialogInterface.OnShowListener {
         static MyDialogFragment newInstance() {
@@ -108,7 +120,32 @@ public class MainActivity extends ListActivity
             android.widget.Button btn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             if (btn == null) return null;
             int len = dest.length() - (dend - dstart) + (end - start);
-            btn.setEnabled(len > 0);
+            if (len == 0 || len > 30) {
+                btn.setEnabled(false);
+                return null;
+            }
+            for (int i = start; i < end; i++) {
+                char ch = source.charAt(i);
+                if (!MainActivity.isValidMemoNameChar(ch)) {
+                    btn.setEnabled(false);
+                    return null;
+                }
+            }
+            for (int i = 0; i < dstart; i++) {
+                char ch = dest.charAt(i);
+                if (!MainActivity.isValidMemoNameChar(ch)) {
+                    btn.setEnabled(false);
+                    return null;
+                }
+            }
+            for (int i = dest.length()-1; i >= dend; i--) {
+                char ch = dest.charAt(i);
+                if (!MainActivity.isValidMemoNameChar(ch)) {
+                    btn.setEnabled(false);
+                    return null;
+                }
+            }
+            btn.setEnabled(true);
             return null;
         }
         
@@ -123,7 +160,21 @@ public class MainActivity extends ListActivity
             if (e == null) {
                 btn.setEnabled(false);
             } else {
-                btn.setEnabled(e.length() > 0);
+                int len = e.length();
+                if (len == 0 || len > 30) {
+                    btn.setEnabled(false);
+                } else {
+                    CharSequence s = e.getText();
+                    boolean ok = true;
+                    for (int i = len-1; i >= 0; i--) {
+                        char ch = s.charAt(i);
+                        if (!MainActivity.isValidMemoNameChar(ch)) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    btn.setEnabled(ok);
+                }
                 if (firstTime) {
                     android.text.InputFilter[] fs = e.getFilters();
                     if (fs == null) {
