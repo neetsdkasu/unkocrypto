@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IDPWMemoICS</string>
-    <string name="action_new_memo">Add</string>
-    <string name="action_settings">Setting</string>
-    <string name="dialog_title">FOO BAR</string>
+    <string name="main_action_menu">Menu</string>
+    <string name="main_action_new_memo">New Memo</string>
+    <string name="main_action_import_memo">Import</string>
+    <string name="main_action_export_memo">Export</string>
+    <string name="new_memo_dialog_title">New Memo</string>
+    <string name="new_memo_dialog_caution">allow character: A-Z a-z 0-9 _ - ( ) [ ]</string>
+    <string name="new_memo_dialog_hint">New Memo Name</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
 </resources>

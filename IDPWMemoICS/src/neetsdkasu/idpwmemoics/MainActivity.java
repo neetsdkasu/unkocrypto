@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,23 +19,19 @@ import android.widget.TextView;
 
 public class MainActivity extends ListActivity
 {
-    ArrayAdapter<MyObject> adapter = null;
+    ArrayAdapter<MemoFile> adapter = null;
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        adapter = new ArrayAdapter<MyObject>(this, android.R.layout.simple_list_item_1);
-        
+        adapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
         setListAdapter(adapter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_actions, menu);
         return super.onCreateOptionsMenu(menu);
@@ -42,58 +39,74 @@ public class MainActivity extends ListActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.action_new_memo:
-                showDialog();
+            case R.id.main_action_new_memo:
+                showNewMemoDialog();
+                return true;
+            case R.id.main_action_import_memo:
+                // TODO 外部ストレージ(SDカードなど)からMemoファイルを取り込む
+                return true;
+            case R.id.main_action_export_memo:
+                // TODO 外部ストレージ(SDカードなど)へMemoのコピーを置く
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-    
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
+        // TODO Memoを開く
         TextView msg = (TextView) findViewById(R.id.messageview);
         msg.setText("pos: " + position + ", id: " + id);
         adapter.getItem(position).data += ", pos: " + position + ", id: " + id;
         adapter.notifyDataSetChanged();
         super.onListItemClick(l, v, position, id);
     }
-    
-    void showDialog() {
-        DialogFragment f = MyDialogFragment.newInstance();
-        f.show(getFragmentManager(), "dialog");
 
+    void showNewMemoDialog() {
+        DialogFragment f = NewMemoDialogFragment.newInstance();
+        // TODO このタグ名"dialog"のままでいいのか確認する
+        f.show(getFragmentManager(), "dialog");
     }
-    
+
     public void doPositiveClick(String s) {
+        // TODO メソッド名の変更 (他のダイアログのことも考えて)
+        // TODO NewMemoの実行処理 (ファイルを作るだけ?)
         if (s == null) {
-            adapter.insert(new MyObject("Hoge" + adapter.getCount()), 0);
+            adapter.insert(new MemoFile("Hoge" + adapter.getCount()), 0);
         } else {
-            adapter.insert(new MyObject("Hoge-" + s), 0);
+            adapter.insert(new MemoFile("Hoge-" + s), 0);
         }
         adapter.notifyDataSetChanged();
     }
-    
+
     public void doNegativeClick() {
-        adapter.add(new MyObject("Fuga" + adapter.getCount()));
+        // TODO メソッド名の変更 (他のダイアログのことも考えて)
+        // TODO NewMemoのキャンセル処理
+        adapter.add(new MemoFile("Fuga" + adapter.getCount()));
         adapter.notifyDataSetChanged();
     }
-    
-    static class MyObject {
+
+    static class MemoFile {
+        // TODO Memoファイルの名前とパスを保持するように変更
+
         public String data = "";
-        
-        public MyObject(String d) {
+
+        public MemoFile(String d) {
             data = d;
         }
-        
+
         @Override
         public String toString() {
             return data;
         }
     }
-    
+
+    static boolean isValidMemoNameLength(int len) {
+        return 0 < len && len <= 50;
+    }
+
     static boolean isValidMemoNameChar(char ch) {
         return ('A' <= ch && ch <= 'Z')
             || ('a' <= ch && ch <= 'z')
@@ -105,22 +118,23 @@ public class MainActivity extends ListActivity
             || ch == '['
             || ch == ']';
     }
-    
-    public static class MyDialogFragment extends DialogFragment 
-            implements android.text.InputFilter, DialogInterface.OnShowListener {
-        static MyDialogFragment newInstance() {
-            MyDialogFragment f = new MyDialogFragment();
-            
+
+    public static class NewMemoDialogFragment extends DialogFragment
+            implements InputFilter, DialogInterface.OnShowListener {
+
+        static NewMemoDialogFragment newInstance() {
+            NewMemoDialogFragment f = new NewMemoDialogFragment();
             return f;
         }
-              
+
+        // android.text.InputFilter.filter
         public CharSequence filter (CharSequence source, int start, int end, android.text.Spanned dest, int dstart, int dend) {
             AlertDialog dialog = (AlertDialog) getDialog();
             if (dialog == null) return null;
             android.widget.Button btn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             if (btn == null) return null;
             int len = dest.length() - (dend - dstart) + (end - start);
-            if (len == 0 || len > 30) {
+            if (!MainActivity.isValidMemoNameLength(len)) {
                 btn.setEnabled(false);
                 return null;
             }
@@ -148,9 +162,10 @@ public class MainActivity extends ListActivity
             btn.setEnabled(true);
             return null;
         }
-        
+
         boolean firstTime = true;
 
+        // android.app.DialogInterface.OnShowListener.onShow
         public void onShow (DialogInterface dialog) {
             AlertDialog aDialog = (AlertDialog) dialog;
             if (aDialog == null) return;
@@ -161,7 +176,7 @@ public class MainActivity extends ListActivity
                 btn.setEnabled(false);
             } else {
                 int len = e.length();
-                if (len == 0 || len > 30) {
+                if (!MainActivity.isValidMemoNameLength(len)) {
                     btn.setEnabled(false);
                 } else {
                     CharSequence s = e.getText();
@@ -183,46 +198,41 @@ public class MainActivity extends ListActivity
                         fs = java.util.Arrays.copyOf(fs, fs.length + 1);
                     }
                     fs[fs.length-1] = this;
-                    e.setFilters(fs);   
+                    e.setFilters(fs);
                     firstTime = false;
                 }
             }
         }
-        
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            
+
              LayoutInflater inflater = getActivity().getLayoutInflater();
-            
+
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.dialog_title)
-                .setView(inflater.inflate(R.layout.mydialog, null))
+                .setTitle(R.string.new_memo_dialog_title)
+                .setView(inflater.inflate(R.layout.new_memo_dialog, null))
                 .setPositiveButton(R.string.dialog_ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int witchButton) {
                             EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.new_memo_name);
-                            String s = e.getText().toString();
-                            if (s.length() == 0) {
-                                
-                            }
                             ((MainActivity)getActivity()).doPositiveClick(e.getText().toString());
                         }
                     }
                 )
                 .setNegativeButton(R.string.dialog_cancel,
                     new DialogInterface.OnClickListener() {
+                        // TODO ここ、リスナーなしのnullでもよいか確認する
                         public void onClick(DialogInterface dialog, int witchButton) {
                             ((MainActivity)getActivity()).doNegativeClick();
                         }
                     }
                 )
                 .create();
-            
+
             dialog.setOnShowListener(this);
-            
+
             return dialog;
         }
-        
     }
-    
 }
