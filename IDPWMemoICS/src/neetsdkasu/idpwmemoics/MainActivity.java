@@ -16,18 +16,30 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class MainActivity extends ListActivity
 {
-    ArrayAdapter<MemoFile> adapter = null;
+    File memoDir = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        adapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
+        this.memoDir = getDir("memo", MODE_PRIVATE);
+        ArrayAdapter<MemoFile> adapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
+        for (File f : memoDir.listFiles()) {
+            adapter.add(new MemoFile(f));
+        }
+        adapter.sort(new Comparator<MemoFile>() {
+            public int compare (MemoFile lhs, MemoFile rhs) {
+                return lhs.name.compareTo(rhs.name);
+            }
+        });
         setListAdapter(adapter);
     }
 
@@ -60,8 +72,6 @@ public class MainActivity extends ListActivity
         // TODO Memoを開く
         TextView msg = (TextView) findViewById(R.id.messageview);
         msg.setText("pos: " + position + ", id: " + id);
-        adapter.getItem(position).data += ", pos: " + position + ", id: " + id;
-        adapter.notifyDataSetChanged();
         super.onListItemClick(l, v, position, id);
     }
 
@@ -74,33 +84,39 @@ public class MainActivity extends ListActivity
     public void doPositiveClick(String s) {
         // TODO メソッド名の変更 (他のダイアログのことも考えて)
         // TODO NewMemoの実行処理 (ファイルを作るだけ?)
-        if (s == null) {
-            adapter.insert(new MemoFile("Hoge" + adapter.getCount()), 0);
-        } else {
-            adapter.insert(new MemoFile("Hoge-" + s), 0);
+        File newfile = new File(this.memoDir, s);
+        try {
+            if (newfile.createNewFile()) {
+                ArrayAdapter<MemoFile> adapter = (ArrayAdapter<MemoFile>) getListAdapter();
+                adapter.insert(new MemoFile(newfile), 0);
+                adapter.notifyDataSetChanged();
+            } else {
+                // TODO 失敗時のメッセージ
+            }
+        } catch (IOException ex) {
+            // TODO 失敗時のメッセージ
         }
-        adapter.notifyDataSetChanged();
     }
 
     public void doNegativeClick() {
         // TODO メソッド名の変更 (他のダイアログのことも考えて)
         // TODO NewMemoのキャンセル処理
-        adapter.add(new MemoFile("Fuga" + adapter.getCount()));
-        adapter.notifyDataSetChanged();
     }
 
     static class MemoFile {
         // TODO Memoファイルの名前とパスを保持するように変更
 
-        public String data = "";
+        public File file = null;
+        public String name = null;
 
-        public MemoFile(String d) {
-            data = d;
+        public MemoFile(File f) {
+            file = f;
+            name = file.getName();
         }
 
         @Override
         public String toString() {
-            return data;
+            return name;
         }
     }
 
