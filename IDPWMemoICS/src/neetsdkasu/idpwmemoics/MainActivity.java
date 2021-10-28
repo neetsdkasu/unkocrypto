@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import java.util.Arrays;
 
 public class MainActivity extends ListActivity
 {
@@ -191,11 +192,11 @@ public class MainActivity extends ListActivity
                     btn.setEnabled(ok);
                 }
                 if (firstTime) {
-                    android.text.InputFilter[] fs = e.getFilters();
+                    InputFilter[] fs = e.getFilters();
                     if (fs == null) {
-                        fs = new android.text.InputFilter[1];
+                        fs = new InputFilter[1];
                     } else {
-                        fs = java.util.Arrays.copyOf(fs, fs.length + 1);
+                        fs = Arrays.copyOf(fs, fs.length + 1);
                     }
                     fs[fs.length-1] = this;
                     e.setFilters(fs);
