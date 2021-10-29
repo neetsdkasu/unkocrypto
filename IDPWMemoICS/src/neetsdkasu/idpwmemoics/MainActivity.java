@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -81,9 +82,7 @@ public class MainActivity extends ListActivity
         f.show(getFragmentManager(), "dialog");
     }
 
-    public void doPositiveClick(String s) {
-        // TODO メソッド名の変更 (他のダイアログのことも考えて)
-        // TODO NewMemoの実行処理 (ファイルを作るだけ?)
+    public void createNewMemo(String s) {
         File newfile = new File(this.memoDir, s);
         try {
             if (newfile.createNewFile()) {
@@ -91,10 +90,11 @@ public class MainActivity extends ListActivity
                 adapter.insert(new MemoFile(newfile), 0);
                 adapter.notifyDataSetChanged();
             } else {
-                // TODO 失敗時のメッセージ
+                Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
             }
         } catch (IOException ex) {
-            // TODO 失敗時のメッセージ
+                ex.printStackTrace();
+                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -136,6 +136,15 @@ public class MainActivity extends ListActivity
             || ch == ']';
     }
 
+    static boolean isValidMemoNameChars(CharSequence s, int start, int end) {
+        for (int i = start; i < end; i++) {
+            if (!isValidMemoNameChar(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static class NewMemoDialogFragment extends DialogFragment
             implements InputFilter, DialogInterface.OnShowListener {
 
@@ -151,32 +160,12 @@ public class MainActivity extends ListActivity
             android.widget.Button btn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             if (btn == null) return null;
             int len = dest.length() - (dend - dstart) + (end - start);
-            if (!MainActivity.isValidMemoNameLength(len)) {
-                btn.setEnabled(false);
-                return null;
-            }
-            for (int i = start; i < end; i++) {
-                char ch = source.charAt(i);
-                if (!MainActivity.isValidMemoNameChar(ch)) {
-                    btn.setEnabled(false);
-                    return null;
-                }
-            }
-            for (int i = 0; i < dstart; i++) {
-                char ch = dest.charAt(i);
-                if (!MainActivity.isValidMemoNameChar(ch)) {
-                    btn.setEnabled(false);
-                    return null;
-                }
-            }
-            for (int i = dest.length()-1; i >= dend; i--) {
-                char ch = dest.charAt(i);
-                if (!MainActivity.isValidMemoNameChar(ch)) {
-                    btn.setEnabled(false);
-                    return null;
-                }
-            }
-            btn.setEnabled(true);
+            btn.setEnabled(
+                MainActivity.isValidMemoNameLength(len)
+                && MainActivity.isValidMemoNameChars(source, start, end)
+                && MainActivity.isValidMemoNameChars(dest, 0, dstart)
+                && MainActivity.isValidMemoNameChars(dest, dend, dest.length())
+            );
             return null;
         }
 
@@ -192,22 +181,14 @@ public class MainActivity extends ListActivity
             if (e == null) {
                 btn.setEnabled(false);
             } else {
-                int len = e.length();
-                if (!MainActivity.isValidMemoNameLength(len)) {
-                    btn.setEnabled(false);
-                } else {
+                if (MainActivity.isValidMemoNameLength(e.length())) {
                     CharSequence s = e.getText();
-                    boolean ok = true;
-                    for (int i = len-1; i >= 0; i--) {
-                        char ch = s.charAt(i);
-                        if (!MainActivity.isValidMemoNameChar(ch)) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                    btn.setEnabled(ok);
+                    btn.setEnabled(MainActivity.isValidMemoNameChars(s, 0, s.length()));
+                } else {
+                    btn.setEnabled(false);
                 }
                 if (firstTime) {
+                    firstTime = false;
                     InputFilter[] fs = e.getFilters();
                     if (fs == null) {
                         fs = new InputFilter[1];
@@ -216,7 +197,6 @@ public class MainActivity extends ListActivity
                     }
                     fs[fs.length-1] = this;
                     e.setFilters(fs);
-                    firstTime = false;
                 }
             }
         }
@@ -224,7 +204,7 @@ public class MainActivity extends ListActivity
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-             LayoutInflater inflater = getActivity().getLayoutInflater();
+            LayoutInflater inflater = getActivity().getLayoutInflater();
 
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.new_memo_dialog_title)
@@ -233,7 +213,7 @@ public class MainActivity extends ListActivity
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int witchButton) {
                             EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.new_memo_name);
-                            ((MainActivity)getActivity()).doPositiveClick(e.getText().toString());
+                            ((MainActivity)getActivity()).createNewMemo(e.getText().toString());
                         }
                     }
                 )
