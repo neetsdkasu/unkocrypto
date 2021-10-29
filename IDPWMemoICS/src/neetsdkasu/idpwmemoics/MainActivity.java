@@ -1,5 +1,6 @@
 package neetsdkasu.idpwmemoics;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -25,6 +26,7 @@ import java.util.Comparator;
 public class MainActivity extends ListActivity
 {
     File memoDir = null;
+    ArrayAdapter<MemoFile> listAdapter = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -32,16 +34,16 @@ public class MainActivity extends ListActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         this.memoDir = getDir("memo", MODE_PRIVATE);
-        ArrayAdapter<MemoFile> adapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
+        listAdapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
         for (File f : memoDir.listFiles()) {
-            adapter.add(new MemoFile(f));
+            listAdapter.add(new MemoFile(f));
         }
-        adapter.sort(new Comparator<MemoFile>() {
+        listAdapter.sort(new Comparator<MemoFile>() {
             public int compare (MemoFile lhs, MemoFile rhs) {
                 return lhs.name.compareTo(rhs.name);
             }
         });
-        setListAdapter(adapter);
+        setListAdapter(listAdapter);
     }
 
     @Override
@@ -71,8 +73,6 @@ public class MainActivity extends ListActivity
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         // TODO Memoを開く
-        TextView msg = (TextView) findViewById(R.id.messageview);
-        msg.setText("pos: " + position + ", id: " + id);
         super.onListItemClick(l, v, position, id);
     }
 
@@ -86,9 +86,8 @@ public class MainActivity extends ListActivity
         File newfile = new File(this.memoDir, s);
         try {
             if (newfile.createNewFile()) {
-                ArrayAdapter<MemoFile> adapter = (ArrayAdapter<MemoFile>) getListAdapter();
-                adapter.insert(new MemoFile(newfile), 0);
-                adapter.notifyDataSetChanged();
+                listAdapter.insert(new MemoFile(newfile), 0);
+                listAdapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
             }
@@ -96,11 +95,6 @@ public class MainActivity extends ListActivity
                 ex.printStackTrace();
                 Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void doNegativeClick() {
-        // TODO メソッド名の変更 (他のダイアログのことも考えて)
-        // TODO NewMemoのキャンセル処理
     }
 
     static class MemoFile {
@@ -206,9 +200,12 @@ public class MainActivity extends ListActivity
 
             LayoutInflater inflater = getActivity().getLayoutInflater();
 
+            @SuppressLint("InflateParams")
+            android.view.View view = inflater.inflate(R.layout.new_memo_dialog, null);
+
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.new_memo_dialog_title)
-                .setView(inflater.inflate(R.layout.new_memo_dialog, null))
+                .setView(view)
                 .setPositiveButton(R.string.dialog_ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int witchButton) {
@@ -217,14 +214,7 @@ public class MainActivity extends ListActivity
                         }
                     }
                 )
-                .setNegativeButton(R.string.dialog_cancel,
-                    new DialogInterface.OnClickListener() {
-                        // TODO ここ、リスナーなしのnullでもよいか確認する
-                        public void onClick(DialogInterface dialog, int witchButton) {
-                            ((MainActivity)getActivity()).doNegativeClick();
-                        }
-                    }
-                )
+                .setNegativeButton(R.string.dialog_cancel, null)
                 .create();
 
             dialog.setOnShowListener(this);
