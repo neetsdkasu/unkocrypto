@@ -204,7 +204,7 @@ public class MainActivity extends ListActivity
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.new_memo_dialog_title)
                 .setView(view)
-                .setPositiveButton(R.string.dialog_ok,
+                .setPositiveButton(android.R.string.ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int witchButton) {
                             EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.new_memo_name);
@@ -212,7 +212,7 @@ public class MainActivity extends ListActivity
                         }
                     }
                 )
-                .setNegativeButton(R.string.dialog_cancel, null)
+                .setNegativeButton(android.R.string.cancel, null)
                 .create();
 
             dialog.setOnShowListener(this);

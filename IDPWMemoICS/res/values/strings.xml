@@ -10,6 +10,4 @@
     <string name="new_memo_dialog_hint">New Memo Name</string>
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="errmsg_internal_error">internal error</string>
-    <string name="dialog_ok">OK</string>
-    <string name="dialog_cancel">Cancel</string>
 </resources>
