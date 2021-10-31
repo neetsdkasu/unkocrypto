@@ -34,16 +34,16 @@ public class MainActivity extends ListActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         this.memoDir = getDir("memo", MODE_PRIVATE);
-        listAdapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
+        this.listAdapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
         for (File f : memoDir.listFiles()) {
-            listAdapter.add(new MemoFile(f));
+            this.listAdapter.add(new MemoFile(f));
         }
-        listAdapter.sort(new Comparator<MemoFile>() {
+        this.listAdapter.sort(new Comparator<MemoFile>() {
             public int compare (MemoFile lhs, MemoFile rhs) {
                 return lhs.name.compareTo(rhs.name);
             }
         });
-        setListAdapter(listAdapter);
+        setListAdapter(this.listAdapter);
     }
 
     @Override
@@ -86,8 +86,8 @@ public class MainActivity extends ListActivity
         File newfile = new File(this.memoDir, s);
         try {
             if (newfile.createNewFile()) {
-                listAdapter.insert(new MemoFile(newfile), 0);
-                listAdapter.notifyDataSetChanged();
+                this.listAdapter.insert(new MemoFile(newfile), 0);
+                this.listAdapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
             }
@@ -98,8 +98,6 @@ public class MainActivity extends ListActivity
     }
 
     static class MemoFile {
-        // TODO Memoファイルの名前とパスを保持するように変更
-
         public File file = null;
         public String name = null;
 
