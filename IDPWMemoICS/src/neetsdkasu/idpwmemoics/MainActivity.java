@@ -7,7 +7,9 @@ import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,12 +21,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
 public class MainActivity extends ListActivity
 {
+    private static final String TAG = "MainActivity";
+    
     File memoDir = null;
     ArrayAdapter<MemoFile> listAdapter = null;
 
@@ -61,6 +66,7 @@ public class MainActivity extends ListActivity
                 return true;
             case R.id.main_action_import_memo:
                 // TODO 外部ストレージ(SDカードなど)からMemoファイルを取り込む
+                showImportMemoDialog();
                 return true;
             case R.id.main_action_export_memo:
                 // TODO 外部ストレージ(SDカードなど)へMemoのコピーを置く
@@ -82,6 +88,12 @@ public class MainActivity extends ListActivity
         f.show(getFragmentManager(), "dialog");
     }
 
+    void showImportMemoDialog() {
+        DialogFragment f = ImportMemoDialogFragment.newInstance();
+        // TODO このタグ名"dialog"のままでいいのか確認する
+        f.show(getFragmentManager(), "dialog");
+    }
+
     public void createNewMemo(String s) {
         File newfile = new File(this.memoDir, s);
         try {
@@ -92,8 +104,8 @@ public class MainActivity extends ListActivity
                 Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
             }
         } catch (IOException ex) {
-                ex.printStackTrace();
-                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "createNewMemo", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -135,6 +147,45 @@ public class MainActivity extends ListActivity
             }
         }
         return true;
+    }
+
+    public static class ImportMemoDialogFragment extends DialogFragment {
+        
+        static ImportMemoDialogFragment newInstance() {
+            ImportMemoDialogFragment f = new ImportMemoDialogFragment();
+            return f;
+        }
+        
+        ArrayAdapter<MemoFile> importListAdapter = null;
+        
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            this.importListAdapter =  new ArrayAdapter<MemoFile>(getActivity(), android.R.layout.simple_list_item_single_choice);
+            
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            
+            dir.mkdirs();
+            File[] files = dir.listFiles(new FilenameFilter() {
+                public boolean accept(File d, String name) {
+                    return name.endsWith(".memo");
+                }
+            });
+            if (files != null) {
+                for (File f : files) {
+                    this.importListAdapter.add(new MemoFile(f));
+                }
+            }
+
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.import_memo_dialog_title)
+                .setSingleChoiceItems (this.importListAdapter, -1, null)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+            return dialog;
+        }        
     }
 
     public static class NewMemoDialogFragment extends DialogFragment

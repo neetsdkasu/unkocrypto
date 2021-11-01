@@ -8,6 +8,7 @@
     <string name="new_memo_dialog_title">New Memo</string>
     <string name="new_memo_dialog_caution">allow character: A&#8211;Z a&#8211;z 0&#8211;9 _ - ( ) [ ]</string>
     <string name="new_memo_dialog_hint">New Memo Name</string>
+    <string name="import_memo_dialog_title">Import Memo</string>
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="errmsg_internal_error">internal error</string>
 </resources>
