@@ -20,22 +20,26 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class MainActivity extends ListActivity
-{
+public class MainActivity extends ListActivity {
     private static final String TAG = "MainActivity";
-    
+
     File memoDir = null;
     ArrayAdapter<MemoFile> listAdapter = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         this.memoDir = getDir("memo", MODE_PRIVATE);
@@ -89,6 +93,7 @@ public class MainActivity extends ListActivity
     }
 
     void showImportMemoDialog() {
+        // TODO 外部ストレージがない場合にメッセージ出して終わるべき
         DialogFragment f = ImportMemoDialogFragment.newInstance();
         // TODO このタグ名"dialog"のままでいいのか確認する
         f.show(getFragmentManager(), "dialog");
@@ -106,6 +111,42 @@ public class MainActivity extends ListActivity
         } catch (IOException ex) {
             Log.e(TAG, "createNewMemo", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void importMemo(MemoFile memoFile) {
+        String name = memoFile.name.substring(0, memoFile.name.length() - 5);
+        File newFile = new File(this.memoDir, name);
+        if (newFile.exists()) {
+            // TODO 名前重複時に上書きするか確認するプロセスが必要
+            Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        OutputStream out = null;
+        InputStream in = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(newFile));
+            in = new BufferedInputStream(new FileInputStream(memoFile.file));
+            byte[] buf = new byte[2048];
+            for (;;) {
+                int len = in.read(buf, 0, buf.length);
+                if (len < 0) break;
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            this.listAdapter.insert(new MemoFile(newFile), 0);
+            this.listAdapter.notifyDataSetChanged();
+            Toast.makeText(this, android.R.string.ok, Toast.LENGTH_SHORT).show();
+        } catch (IOException ex) {
+            Log.e(TAG, "importMemo", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        } finally {
+            if (out != null) { try { out.close(); } catch (IOException ex) {
+                    Log.e(TAG, "importMemo", ex);
+            }}
+            if (in != null) { try { in.close(); } catch (IOException ex) {
+                    Log.e(TAG, "importMemo", ex);
+            }}
         }
     }
 
@@ -149,28 +190,65 @@ public class MainActivity extends ListActivity
         return true;
     }
 
-    public static class ImportMemoDialogFragment extends DialogFragment {
-        
+    public static class ImportMemoDialogFragment extends DialogFragment
+            implements FilenameFilter, DialogInterface.OnShowListener, DialogInterface.OnClickListener {
+
         static ImportMemoDialogFragment newInstance() {
             ImportMemoDialogFragment f = new ImportMemoDialogFragment();
             return f;
         }
-        
+
         ArrayAdapter<MemoFile> importListAdapter = null;
-        
+
+        // android.app.DialogInterface.OnShowListener.onShow
+        public void onShow(DialogInterface dialog) {
+            AlertDialog aDialog = (AlertDialog) dialog;
+            if (aDialog == null) return;
+            android.widget.Button btn = aDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (btn == null) return;
+            ListView listView = aDialog.getListView();
+            if (listView == null) {
+                btn.setEnabled(false);
+            } else {
+                int pos = listView.getCheckedItemPosition();
+                btn.setEnabled(pos != ListView.INVALID_POSITION);
+            }
+        }
+
+        // android.app.DialogInterface.OnClickListener.onClick
+        public void onClick(DialogInterface dialog, int witchButton) {
+            AlertDialog aDialog = (AlertDialog) dialog;
+            if (aDialog == null) return;
+            ListView listView = aDialog.getListView();
+            if (listView == null) return;
+            int pos = listView.getCheckedItemPosition();
+            if (witchButton == AlertDialog.BUTTON_POSITIVE) {
+                MemoFile memoFile = this.importListAdapter.getItem(pos);
+                ((MainActivity)getActivity()).importMemo(memoFile);
+            } else {
+                android.widget.Button btn = aDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                if (btn == null) return;
+                btn.setEnabled(pos != ListView.INVALID_POSITION);
+            }
+        }
+
+        // java.io.FilenameFilter.accept
+        public boolean accept(File d, String name) {
+            if (!name.endsWith(".memo")) return false;
+            int len = name.length() - 5;
+            if (!MainActivity.isValidMemoNameLength(len)) return false;
+            return MainActivity.isValidMemoNameChars(name, 0, len);
+        }
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
 
             this.importListAdapter =  new ArrayAdapter<MemoFile>(getActivity(), android.R.layout.simple_list_item_single_choice);
-            
+
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            
+
             dir.mkdirs();
-            File[] files = dir.listFiles(new FilenameFilter() {
-                public boolean accept(File d, String name) {
-                    return name.endsWith(".memo");
-                }
-            });
+            File[] files = dir.listFiles(this);
             if (files != null) {
                 for (File f : files) {
                     this.importListAdapter.add(new MemoFile(f));
@@ -179,17 +257,19 @@ public class MainActivity extends ListActivity
 
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.import_memo_dialog_title)
-                .setSingleChoiceItems (this.importListAdapter, -1, null)
-                .setPositiveButton(android.R.string.ok, null)
+                .setSingleChoiceItems (this.importListAdapter, -1, this)
+                .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
 
+            dialog.setOnShowListener(this);
+
             return dialog;
-        }        
+        }
     }
 
     public static class NewMemoDialogFragment extends DialogFragment
-            implements InputFilter, DialogInterface.OnShowListener {
+            implements InputFilter, DialogInterface.OnShowListener, DialogInterface.OnClickListener {
 
         static NewMemoDialogFragment newInstance() {
             NewMemoDialogFragment f = new NewMemoDialogFragment();
@@ -215,7 +295,7 @@ public class MainActivity extends ListActivity
         boolean firstTime = true;
 
         // android.app.DialogInterface.OnShowListener.onShow
-        public void onShow (DialogInterface dialog) {
+        public void onShow(DialogInterface dialog) {
             AlertDialog aDialog = (AlertDialog) dialog;
             if (aDialog == null) return;
             android.widget.Button btn = aDialog.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -244,6 +324,12 @@ public class MainActivity extends ListActivity
             }
         }
 
+        // android.app.DialogInterface.OnClickListener.onClick
+        public void onClick(DialogInterface dialog, int witchButton) {
+            EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.new_memo_name);
+            ((MainActivity)getActivity()).createNewMemo(e.getText().toString());
+        }
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
 
@@ -255,14 +341,7 @@ public class MainActivity extends ListActivity
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.new_memo_dialog_title)
                 .setView(view)
-                .setPositiveButton(android.R.string.ok,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int witchButton) {
-                            EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.new_memo_name);
-                            ((MainActivity)getActivity()).createNewMemo(e.getText().toString());
-                        }
-                    }
-                )
+                .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
 
