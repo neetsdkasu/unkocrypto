@@ -68,14 +68,15 @@ public class MainActivity extends ListActivity
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO Memoを開く
         MemoFile memoFile = this.listAdapter.getItem(position);
         openMemo(memoFile);
     }
 
     void openMemo(MemoFile memoFile) {
         Intent intent = new Intent(this, MemoViewActivity.class);
-        intent.putExtra(Utils.EXTRA_MEMO_NAME, memoFile.name);
+        Bundle args = new Bundle();
+        args.putString(Utils.KEY_MEMO_NAME, memoFile.name);
+        intent.putExtra(Utils.EXTRA_ARGUMENTS, args);
         startActivity(intent);
     }
 

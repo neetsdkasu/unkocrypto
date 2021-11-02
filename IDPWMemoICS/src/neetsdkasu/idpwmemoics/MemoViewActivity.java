@@ -4,7 +4,9 @@ import android.app.ListActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +19,7 @@ public class MemoViewActivity extends ListActivity
     ArrayAdapter<idpwmemo.Service> listAdapter = null;
     idpwmemo.IDPWMemo memo = null;
     MemoFile memoFile = null;
+    String password = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +28,9 @@ public class MemoViewActivity extends ListActivity
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String memoName = getIntent().getStringExtra(Utils.EXTRA_MEMO_NAME);
+        Bundle args = getIntent().getBundleExtra(Utils.EXTRA_ARGUMENTS);
+
+        String memoName = args.getString(Utils.KEY_MEMO_NAME);
         File memoDir = getDir(Utils.MEMO_DIR, MODE_PRIVATE);
         memoFile = new MemoFile(new File(memoDir, memoName));
 
@@ -53,10 +58,27 @@ public class MemoViewActivity extends ListActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        showService(position);
+    }
+
+    void showService(int index) {
+        Bundle args = new Bundle();
+        args.putString(Utils.KEY_MEMO_NAME, memoFile.name);
+        args.putInt(Utils.KEY_SERVICE_INDEX, index);
+        args.putString(Utils.KEY_MEMO_PASSWORD, password);
+    }
+
     void showOpenPasswordDialog() {
         OpenPasswordDialogFragment
             .newInstance()
             .show(getFragmentManager(), "open_password_dialog");
+    }
+
+    // OpenPasswordDialogFragment.Listener.giveUpOpenPassword
+    public void giveUpOpenPassword() {
+        finish();
     }
 
     // OpenPasswordDialogFragment.Listener.openMemo
@@ -71,8 +93,8 @@ public class MemoViewActivity extends ListActivity
                     return;
                 }
                 if (!this.memo.loadMemo(data)) {
-                    // TODO パスワードが違います処理
-                    Toast.makeText(this, android.R.string.no, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.info_wrong_password, Toast.LENGTH_SHORT).show();
+                    showOpenPasswordDialog();
                     return;
                 }
                 for (idpwmemo.Service s : memo.getServices()) {
@@ -82,8 +104,7 @@ public class MemoViewActivity extends ListActivity
             } else {
                 this.memo.newMemo();
             }
-            // TODO サービスをロード
-            Toast.makeText(this, android.R.string.ok, Toast.LENGTH_SHORT).show();
+            this.password = password;
         } catch (IOException ex) {
             Log.e(TAG, "openMemo", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();

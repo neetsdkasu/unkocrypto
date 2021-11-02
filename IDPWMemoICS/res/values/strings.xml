@@ -14,5 +14,6 @@
     <string name="open_password_dialog_hint">Password</string>
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_import_memo">success importing memo</string>
+    <string name="info_wrong_password">wrong password</string>
     <string name="errmsg_internal_error">internal error</string>
 </resources>

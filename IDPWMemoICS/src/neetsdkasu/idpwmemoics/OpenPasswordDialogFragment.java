@@ -18,6 +18,7 @@ public class OpenPasswordDialogFragment extends DialogFragment
 
     static interface Listener {
         void openMemo(String password);
+        void giveUpOpenPassword();
     }
 
     static OpenPasswordDialogFragment newInstance() {
@@ -27,9 +28,13 @@ public class OpenPasswordDialogFragment extends DialogFragment
 
     // android.app.DialogInterface.OnClickListener.onClick
     public void onClick(DialogInterface dialog, int witchButton) {
-        EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.open_password_dialog_password);
-        String password = e.getText().toString();
-        ((Listener)getActivity()).openMemo(password);
+        if (witchButton == AlertDialog.BUTTON_POSITIVE) {
+            EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.open_password_dialog_password);
+            String password = e.getText().toString();
+            ((Listener)getActivity()).openMemo(password);
+        } else if (witchButton == AlertDialog.BUTTON_NEGATIVE) {
+            ((Listener)getActivity()).giveUpOpenPassword();
+        }
     }
 
     @Override
@@ -44,7 +49,7 @@ public class OpenPasswordDialogFragment extends DialogFragment
             .setTitle(R.string.open_password_dialog_title)
             .setView(view)
             .setPositiveButton(android.R.string.ok, this)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(android.R.string.cancel, this)
             .create();
 
         return dialog;

@@ -16,7 +16,11 @@ final class Utils {
 
     private Utils() {}
 
-    static final String EXTRA_MEMO_NAME = "neetsdkasu.idpwmemoics.EXTRA_MEMO_NAME";
+    static final String EXTRA_ARGUMENTS = "neetsdkasu.idpwmemoics.EXTRA_ARGUMENTS";
+
+    static final String KEY_MEMO_NAME = "MEMO_NAME";
+    static final String KEY_MEMO_PASSWORD = "MEMO_PASSWORD";
+    static final String KEY_SERVICE_INDEX = "SERVICE_INDEX";
 
     static final String MEMO_DIR = "memo";
 
