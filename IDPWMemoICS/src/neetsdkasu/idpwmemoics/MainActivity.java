@@ -1,6 +1,7 @@
 package neetsdkasu.idpwmemoics;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,8 +17,7 @@ import java.util.Comparator;
 
 public class MainActivity extends ListActivity
         implements NewMemoDialogFragment.Listener,
-                   ImportMemoDialogFragment.Listener,
-                   OpenPasswordDialogFragment.Listener {
+                   ImportMemoDialogFragment.Listener {
 
     private static final String TAG = "MainActivity";
 
@@ -25,10 +25,10 @@ public class MainActivity extends ListActivity
     ArrayAdapter<MemoFile> listAdapter = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        this.memoDir = getDir("memo", MODE_PRIVATE);
+        this.memoDir = getDir(Utils.MEMO_DIR, MODE_PRIVATE);
         this.listAdapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
         for (File f : memoDir.listFiles()) {
             this.listAdapter.add(new MemoFile(f));
@@ -69,8 +69,14 @@ public class MainActivity extends ListActivity
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         // TODO Memoを開く
-        MemoFile memoFile = listAdapter.getItem(position);
-        showOpenPasswordDialog(memoFile);
+        MemoFile memoFile = this.listAdapter.getItem(position);
+        openMemo(memoFile);
+    }
+
+    void openMemo(MemoFile memoFile) {
+        Intent intent = new Intent(this, MemoViewActivity.class);
+        intent.putExtra(Utils.EXTRA_MEMO_NAME, memoFile.name);
+        startActivity(intent);
     }
 
     void showNewMemoDialog() {
@@ -84,39 +90,6 @@ public class MainActivity extends ListActivity
         ImportMemoDialogFragment
             .newInstance()
             .show(getFragmentManager(), "import_memo_dialog");
-    }
-
-    void showOpenPasswordDialog(MemoFile memoFile) {
-        OpenPasswordDialogFragment
-            .newInstance(memoFile.name)
-            .show(getFragmentManager(), "open_password_dialog");
-    }
-
-    // OpenPasswordDialogFragment.Listener.openMemo
-    public void openMemo(String memoName, String password) {
-        File file = new File(this.memoDir, memoName);        
-        // TODO
-        try {
-            idpwmemo.IDPWMemo memo = new idpwmemo.IDPWMemo();
-            memo.setPassword(password);
-            if (file.exists()) {
-                byte[] data = Utils.loadFile(file);
-                if (data == null) {
-                    Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (!memo.loadMemo(data)) {
-                    Toast.makeText(this, android.R.string.no, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            } else {
-                memo.newMemo();
-            }
-            Toast.makeText(this, android.R.string.ok, Toast.LENGTH_SHORT).show();
-        } catch (IOException ex) {
-            Log.e(TAG, "openMemo", ex);
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-        }
     }
 
     // NewMemoDialogFragment.Listener.createNewMemo
@@ -147,7 +120,7 @@ public class MainActivity extends ListActivity
         if (Utils.filecopy(memoFile.file, newFile)) {
             this.listAdapter.insert(new MemoFile(newFile), 0);
             this.listAdapter.notifyDataSetChanged();
-            Toast.makeText(this, R.string.info_success_import_memo, Toast.LENGTH_SHORT).show();            
+            Toast.makeText(this, R.string.info_success_import_memo, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }

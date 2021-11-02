@@ -17,14 +17,11 @@ public class OpenPasswordDialogFragment extends DialogFragment
     private static final String MEMO_NAME = "memoName";
 
     static interface Listener {
-        void openMemo(String memoName, String password);
+        void openMemo(String password);
     }
 
-    static OpenPasswordDialogFragment newInstance(String memoName) {
+    static OpenPasswordDialogFragment newInstance() {
         OpenPasswordDialogFragment f = new OpenPasswordDialogFragment();
-        Bundle args = new Bundle();
-        args.putString(MEMO_NAME, memoName);
-        f.setArguments(args);
         return f;
     }
 
@@ -32,8 +29,7 @@ public class OpenPasswordDialogFragment extends DialogFragment
     public void onClick(DialogInterface dialog, int witchButton) {
         EditText e = (EditText) ((Dialog)dialog).findViewById(R.id.open_password_dialog_password);
         String password = e.getText().toString();
-        String memoName = getArguments().getString(MEMO_NAME);
-        ((Listener)getActivity()).openMemo(memoName, password);
+        ((Listener)getActivity()).openMemo(password);
     }
 
     @Override

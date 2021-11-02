@@ -11,10 +11,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 final class Utils {
-    
+
     private static final String TAG = "Utils";
 
     private Utils() {}
+
+    static final String EXTRA_MEMO_NAME = "neetsdkasu.idpwmemoics.EXTRA_MEMO_NAME";
+
+    static final String MEMO_DIR = "memo";
 
     static boolean isValidMemoNameLength(int len) {
         return 0 < len && len <= 50;
@@ -40,7 +44,7 @@ final class Utils {
         }
         return true;
     }
-    
+
     static byte[] loadFile(File file) {
         byte[] buf = new byte[(int)file.length()];
         int pos = 0;
@@ -50,7 +54,7 @@ final class Utils {
             int len;
             while (pos < buf.length && (len = in.read(buf, pos, buf.length - pos)) >= 0) {
                 pos += len;
-            }            
+            }
             return buf;
         } catch (IOException ex) {
             Log.e(TAG, "loadFile", ex);
@@ -61,7 +65,7 @@ final class Utils {
             }}
         }
     }
-    
+
     static boolean filecopy(File src, File dst) {
         OutputStream out = null;
         InputStream in = null;

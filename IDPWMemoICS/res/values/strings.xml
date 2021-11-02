@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IDPWMemoICS</string>
+    <string name="memo_view_title">Memo View</string>
     <string name="main_action_menu">Menu</string>
     <string name="main_action_new_memo">New Memo</string>
     <string name="main_action_import_memo">Import</string>
