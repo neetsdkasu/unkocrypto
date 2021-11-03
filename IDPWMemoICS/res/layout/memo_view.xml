@@ -3,7 +3,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-  <ListView android:id="@android:id/list"
-     android:layout_width="wrap_content"
+  <!-- Service List -->
+  <ListView android:id="@+id/memo_view_service_list"
+     android:layout_width="match_parent"
      android:layout_height="wrap_content" />
+  <!-- Selected Service Name -->
+  <TextView android:id="@+id/memo_view_service_name"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:visibility="gone"  />
+  <!-- Selected Service Last Update -->
+  <TextView android:id="@+id/memo_view_service_lastupdate"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:text="@string/memo_view_label_lastupdate"
+     android:visibility="gone"  />
+  <!-- Label ( DETAILS ) -->
+  <TextView android:id="@+id/memo_view_details_label"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:text="@string/memo_view_label_details"
+     android:visibility="gone"  />
+  <!-- Detail Value List -->
+  <ListView android:id="@+id/memo_view_detail_list"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:visibility="gone"  />
+  <!-- Label ( SECRETS ) -->
+  <TextView android:id="@+id/memo_view_secrets_label"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:text="@string/memo_view_label_secrets"
+     android:visibility="gone"  />
+  <!-- Secret Value List -->
+  <ListView android:id="@+id/memo_view_secret_list"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:visibility="gone"  />
 </LinearLayout>
