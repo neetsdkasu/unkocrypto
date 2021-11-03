@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:title="@string/memo_view_action_menu"
+        android:icon="@android:drawable/ic_menu_more"
+        android:showAsAction="ifRoom">
+    <menu>
+      <!-- Add New Service -->
+      <item android:id="@+id/memo_view_action_add_new_service"
+            android:title="@string/memo_view_action_add_new_service" />
+      <!-- Import Serveces -->
+      <item android:id="@+id/memo_view_action_import_services"
+            android:title="@string/memo_view_action_import_services" />
+      <!-- Export Services -->
+      <item android:id="@+id/memo_view_action_export_services"
+            android:title="@string/memo_view_action_export_services" />
+      <!-- Save Service -->
+      <item android:id="@+id/memo_view_action_save_service"
+            android:title="@string/memo_view_action_save_service" />
+      <!-- Add New Value -->
+      <item android:id="@+id/memo_view_action_add_new_value"
+            android:title="@string/memo_view_action_add_new_value" />
+      <!-- Show Details -->
+      <item android:id="@+id/memo_view_action_show_details"
+            android:title="@string/memo_view_action_show_details" />
+      <!-- Show Secrets -->
+      <item android:id="@+id/memo_view_action_show_secrets"
+            android:title="@string/memo_view_action_show_secrets" />
+    </menu>
+  </item>
+</menu>
+

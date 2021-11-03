@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,6 +40,11 @@ public class MemoViewActivity extends Activity
     TextView serviceLastUpdateTextView = null;
     TextView detailsLabelTextView = null;
     TextView secretsLabelTextView = null;
+
+    boolean builtDetailsList = false;
+    boolean builtSecretsList = false;
+
+    int selectedServiceIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,27 +86,57 @@ public class MemoViewActivity extends Activity
     }
 
     @Override
-    protected void onResume() {
-        super.onStart();
-        if (this.memo != null) return;
-        showOpenPasswordDialog();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.memo_view_activity_actions, menu);
+        // TODO メニュー項目を保持する処理？
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case android.R.id.home:
-            // TODO 遷移処理
-            finish();
-            return true;
+            case android.R.id.home:
+                // TODO  サービス選択に戻る処理かメモ選択に戻る処理
+                finish();
+                return true;
+            case R.id.memo_view_action_add_new_service:
+            case R.id.memo_view_action_import_services:
+            case R.id.memo_view_action_export_services:
+            case R.id.memo_view_action_save_service:
+            case R.id.memo_view_action_add_new_value:
+                return true;
+            case R.id.memo_view_action_show_details:
+                if (Utils.hasMemo(this.memo))
+                    showServiceDetails();
+                return true;
+            case R.id.memo_view_action_show_secrets:
+                if (Utils.hasMemo(this.memo))
+                    showServiceSecrets();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Utils.hasMemo(this.memo)) return;
+        showOpenPasswordDialog();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // TODO サービス選択に戻る処理
+        super.onBackPressed();
     }
 
     // android.widget.AdapterView.OnItemClickListener.onItemClick
     public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
         if (serviceListView.equals(parent)) {
-            showServiceDetails(position);
+            loadService(position);
+            showServiceDetails();
         } else if (detailListView.equals(parent)) {
             // TODO
         } else if (secretListView.equals(parent)) {
@@ -106,16 +144,19 @@ public class MemoViewActivity extends Activity
         }
     }
 
-    void showServiceDetails(int index) {
-        // TODO 表示処理を考える
+    void loadService(int index) {
+        // TODO 処理を考える
 
         // 仮
 
-        // サービス一覧を非表示
-        this.serviceListView.setVisibility(View.GONE);
+        this.selectedServiceIndex = index;
 
-        // メモからターゲットのサービスを選択
+        this.builtDetailsList = false;
+        this.builtSecretsList = false;
+
         this.memo.selectService(index);
+
+        this.serviceListView.setVisibility(View.GONE);
 
         // サービス名の表示
         this.serviceNameTextView.setText(this.memo.getSelectedServiceName());
@@ -126,19 +167,64 @@ public class MemoViewActivity extends Activity
         this.serviceLastUpdateTextView.setText(R.string.memo_view_label_lastupdate);
         this.serviceLastUpdateTextView.append(" "+lastUpdate);
         this.serviceLastUpdateTextView.setVisibility(View.VISIBLE);
+    }
+
+    void showServiceDetails() {
+        // TODO 表示処理を考える
+
+        // 仮
+
+        // 色々と非表示
+        this.secretsLabelTextView.setVisibility(View.GONE);
+        this.secretListView.setVisibility(View.GONE);
 
         // DETAILSラベルの表示
         this.detailsLabelTextView.setVisibility(View.VISIBLE);
 
         // detailの値を表示
-        this.detailListAdapter.clear();
-        for (idpwmemo.Value v : this.memo.getValues()) {
-            String t = v.getTypeName() + ": " + v.value;
-            this.detailListAdapter.add(t);
+        if (!this.builtDetailsList) {
+            this.builtDetailsList = true;
+            this.detailListAdapter.clear();
+            for (idpwmemo.Value v : this.memo.getValues()) {
+                String t = v.getTypeName() + ": " + v.value;
+                this.detailListAdapter.add(t);
+            }
+            this.detailListAdapter.notifyDataSetChanged();
         }
-        this.detailListAdapter.notifyDataSetChanged();
         this.detailListView.setVisibility(View.VISIBLE);
-        
+
+        // アクションバーのメニューもdetails編集用に切り替える
+        // TODO
+    }
+
+    void showServiceSecrets() {
+        // TODO 表示処理を考える
+
+        // 仮
+
+        // 色々と非表示
+        this.detailsLabelTextView.setVisibility(View.GONE);
+        this.detailListView.setVisibility(View.GONE);
+
+        // SECRETSラベルの表示
+        this.secretsLabelTextView.setVisibility(View.VISIBLE);
+
+        // secretの値を表示
+        if (!this.builtSecretsList) {
+            this.builtSecretsList = true;
+            this.secretListAdapter.clear();
+            try {
+                for (idpwmemo.Value v : this.memo.getSecrets()) {
+                    String t = v.getTypeName() + ": " + v.value;
+                    this.secretListAdapter.add(t);
+                }
+            } catch (IOException ex) {
+                Log.e(TAG, "showServiceSecrets", ex);
+            }
+            this.secretListAdapter.notifyDataSetChanged();
+        }
+        this.secretListView.setVisibility(View.VISIBLE);
+
         // アクションバーのメニューもdetails編集用に切り替える
         // TODO
     }
@@ -157,7 +243,9 @@ public class MemoViewActivity extends Activity
     // OpenPasswordDialogFragment.Listener.openMemo
     public void openMemo(String password) {
         try {
-            this.memo = new idpwmemo.IDPWMemo();
+            if (this.memo == null) {
+                this.memo = new idpwmemo.IDPWMemo();
+            }
             this.memo.setPassword(password);
             if (memoFile.file.exists() && memoFile.file.length() > 0L) {
                 byte[] data = Utils.loadFile(memoFile.file);

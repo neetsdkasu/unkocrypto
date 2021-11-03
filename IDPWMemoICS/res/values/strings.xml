@@ -1,22 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IDPWMemo ICS</string>
-    <string name="memo_view_title">Memo View</string>
-    <string name="memo_view_label_details">DETAILS</string>
-    <string name="memo_view_label_secrets">SECRETS</string>
-    <string name="memo_view_label_lastupdate">Last Update:</string>
+    <!-- MainActivity Menu -->
     <string name="main_action_menu">Menu</string>
     <string name="main_action_new_memo">New Memo</string>
     <string name="main_action_import_memo">Import</string>
     <string name="main_action_export_memo">Export</string>
+    <!-- MemoViewActivity -->
+    <string name="memo_view_title">Memo View</string>
+    <string name="memo_view_label_details">DETAILS</string>
+    <string name="memo_view_label_secrets">SECRETS</string>
+    <string name="memo_view_label_lastupdate">Last Update:</string>
+    <!-- MemoViewActivity Menu -->
+    <string name="memo_view_action_menu">Menu</string>
+    <string name="memo_view_action_add_new_service">New Service</string>
+    <string name="memo_view_action_import_services">Import Services</string>
+    <string name="memo_view_action_export_services">Export Services</string>
+    <string name="memo_view_action_save_service">Save Service</string>
+    <string name="memo_view_action_add_new_value">New Value</string>
+    <string name="memo_view_action_show_details">Show Details</string>
+    <string name="memo_view_action_show_secrets">Show Secrets</string>
+    <!-- NewMemoDialog -->
     <string name="new_memo_dialog_title">New Memo</string>
     <string name="new_memo_dialog_caution">allow character: A&#8211;Z a&#8211;z 0&#8211;9 _ - ( ) [ ]</string>
     <string name="new_memo_dialog_hint">New Memo Name</string>
+    <!-- ImportMemoDialog -->
     <string name="import_memo_dialog_title">Import Memo</string>
+    <!-- OpenPasswordDialog -->
     <string name="open_password_dialog_title">Password</string>
     <string name="open_password_dialog_hint">Password</string>
+    <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_import_memo">success importing memo</string>
     <string name="info_wrong_password">wrong password</string>
+    <!-- Toast (Error Message) -->
     <string name="errmsg_internal_error">internal error</string>
 </resources>
