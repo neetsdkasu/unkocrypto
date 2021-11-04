@@ -95,15 +95,4 @@ final class Utils {
             }}
         }
     }
-
-    static boolean hasMemo(idpwmemo.IDPWMemo memo) {
-        if (memo == null) return false;
-        try {
-            int count = memo.getServiceCount();
-            return true;
-        } catch (Exception ex) {
-            // no memo
-            return false;
-        }
-    }
 }

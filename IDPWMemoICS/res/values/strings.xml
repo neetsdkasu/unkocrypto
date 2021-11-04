@@ -11,15 +11,11 @@
     <string name="memo_view_label_details">DETAILS</string>
     <string name="memo_view_label_secrets">SECRETS</string>
     <string name="memo_view_label_lastupdate">Last Update:</string>
+    <string name="memo_view_button_add_new_service">Add New</string>
+    <string name="memo_view_button_import_services">Import</string>
+    <string name="memo_view_button_add_new_value">Add New Value</string>
     <!-- MemoViewActivity Menu -->
-    <string name="memo_view_action_menu">Menu</string>
-    <string name="memo_view_action_add_new_service">New Service</string>
-    <string name="memo_view_action_import_services">Import Services</string>
-    <string name="memo_view_action_export_services">Export Services</string>
-    <string name="memo_view_action_save_service">Save Service</string>
-    <string name="memo_view_action_add_new_value">New Value</string>
-    <string name="memo_view_action_show_details">Show Details</string>
-    <string name="memo_view_action_show_secrets">Show Secrets</string>
+    <string name="memo_view_action_save_service">Save</string>
     <!-- NewMemoDialog -->
     <string name="new_memo_dialog_title">New Memo</string>
     <string name="new_memo_dialog_caution">allow character: A&#8211;Z a&#8211;z 0&#8211;9 _ - ( ) [ ]</string>

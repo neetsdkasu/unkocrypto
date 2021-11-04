@@ -33,8 +33,13 @@ public class OpenPasswordDialogFragment extends DialogFragment
             String password = e.getText().toString();
             ((Listener)getActivity()).openMemo(password);
         } else if (witchButton == AlertDialog.BUTTON_NEGATIVE) {
-            ((Listener)getActivity()).giveUpOpenPassword();
+            dialog.cancel();
         }
+    }
+
+    @Override
+    public void	onCancel(DialogInterface dialog) {
+        ((Listener)getActivity()).giveUpOpenPassword();
     }
 
     @Override
