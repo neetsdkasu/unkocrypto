@@ -7,26 +7,30 @@
                 android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                style="?android:attr/buttonBarStyle" >
     <!-- Add New Service -->
     <Button android:id="@+id/memo_view_add_new_service_button"
             android:layout_weight="1"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/memo_view_button_add_new_service"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            style="?android:attr/buttonBarButtonStyle" />
     <!-- Import Services -->
     <Button android:id="@+id/memo_view_import_services_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/memo_view_button_import_services"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            style="?android:attr/buttonBarButtonStyle" />
     <!-- Add New Value -->
     <Button android:id="@+id/memo_view_add_new_value_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/memo_view_button_add_new_value"
-            android:visibility="gone" />
+            android:visibility="gone"
+            style="?android:attr/buttonBarButtonStyle" />
   </LinearLayout>
   <!-- Lists -->
   <LinearLayout android:layout_alignParentTop="true"

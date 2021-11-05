@@ -10,10 +10,10 @@
     <string name="memo_view_title">Memo View</string>
     <string name="memo_view_label_details">DETAILS</string>
     <string name="memo_view_label_secrets">SECRETS</string>
-    <string name="memo_view_label_lastupdate">Last Update:</string>
-    <string name="memo_view_button_add_new_service">Add New</string>
-    <string name="memo_view_button_import_services">Import</string>
-    <string name="memo_view_button_add_new_value">Add New Value</string>
+    <string name="memo_view_label_lastupdate">Last Update</string>
+    <string name="memo_view_button_add_new_service">ADD NEW SERVICE</string>
+    <string name="memo_view_button_import_services">" IMPORT "</string>
+    <string name="memo_view_button_add_new_value">ADD NEW VALUE</string>
     <!-- MemoViewActivity Menu -->
     <string name="memo_view_action_save_service">Save</string>
     <!-- NewMemoDialog -->
@@ -29,6 +29,7 @@
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_import_memo">success importing memo</string>
     <string name="info_wrong_password">wrong password</string>
+    <string name="info_copied_to_clipboard">copied!</string>
     <!-- Toast (Error Message) -->
     <string name="errmsg_internal_error">internal error</string>
 </resources>

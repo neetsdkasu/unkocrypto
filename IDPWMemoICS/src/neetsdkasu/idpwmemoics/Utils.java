@@ -95,4 +95,18 @@ final class Utils {
             }}
         }
     }
+
+    private static java.text.SimpleDateFormat dateFormat = null;
+
+    static String getDateTimeString(long unixTime) {
+        if (unixTime == 0L) {
+            return "-";
+        } else {
+            if (dateFormat == null) {
+                dateFormat = new java.text.SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
+            }
+            return dateFormat.format(new java.util.Date(unixTime));
+        }
+    }
 }

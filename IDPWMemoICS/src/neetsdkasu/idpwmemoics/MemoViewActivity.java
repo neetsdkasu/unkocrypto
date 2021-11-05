@@ -1,6 +1,9 @@
 package neetsdkasu.idpwmemoics;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -129,6 +132,7 @@ public class MemoViewActivity extends Activity
                 }
                 return true;
             case R.id.memo_view_action_save_service:
+                // TODO 保存
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -157,9 +161,9 @@ public class MemoViewActivity extends Activity
         if (this.serviceListView.equals(parent)) {
             this.showService(position);
         } else if (this.detailListView.equals(parent)) {
-            // TODO 例えば 値をクリップボードへコピー
+            this.copyValueToClipboard(position);
         } else if (this.secretListView.equals(parent)) {
-            // TODO 例えば 値をクリップボードへコピー
+            this.copyValueToClipboard(position);
         }
     }
 
@@ -192,6 +196,24 @@ public class MemoViewActivity extends Activity
         }
     }
 
+    private void copyValueToClipboard(int index) {
+        if (!this.hasSelectedService()) return;
+        idpwmemo.Value[] values;
+        if (this.secretsSwitch.isChecked()) {
+            values = this.getSecretValues();
+        } else {
+            values = this.memo.getValues();
+        }
+        if (index < 0 || values.length <= index) {
+            return;
+        }
+        String text = values[index].value;
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("IDPWMemo Value", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, R.string.info_copied_to_clipboard, Toast.LENGTH_SHORT).show();
+    }
+
     private boolean hasMemo() {
         if (this.memo == null) return false;
         try {
@@ -200,6 +222,16 @@ public class MemoViewActivity extends Activity
         } catch (Exception ex) {
             // no memo
             return false;
+        }
+    }
+
+    private idpwmemo.Value[] getSecretValues() {
+        try {
+            return this.memo.getSecrets();
+        } catch (IOException ex) {
+            Log.e(TAG, "getSecretValues", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            return new idpwmemo.Value[0];
         }
     }
 
@@ -255,9 +287,10 @@ public class MemoViewActivity extends Activity
         this.serviceNameTextView.setVisibility(View.VISIBLE);
 
         // サービスのデータの最終更新日の表示
-        long lastUpdate = this.memo.getService().getTime();
+        String lastUpdate = Utils.getDateTimeString(this.memo.getService().getTime());
         this.serviceLastUpdateTextView.setText(R.string.memo_view_label_lastupdate);
-        this.serviceLastUpdateTextView.append(" "+lastUpdate);
+        this.serviceLastUpdateTextView.append(": ");
+        this.serviceLastUpdateTextView.append(lastUpdate);
         this.serviceLastUpdateTextView.setVisibility(View.VISIBLE);
 
         // DETAILS/SECRETSスイッチャーの表示
@@ -297,13 +330,9 @@ public class MemoViewActivity extends Activity
         if (!this.builtSecretsList) {
             this.builtSecretsList = true;
             this.secretListAdapter.clear();
-            try {
-                for (idpwmemo.Value v : this.memo.getSecrets()) {
-                    String t = v.getTypeName() + ": " + v.value;
-                    this.secretListAdapter.add(t);
-                }
-            } catch (IOException ex) {
-                Log.e(TAG, "showServiceSecrets", ex);
+            for (idpwmemo.Value v : this.getSecretValues()) {
+                String t = v.getTypeName() + ": " + v.value;
+                this.secretListAdapter.add(t);
             }
             this.secretListAdapter.notifyDataSetChanged();
         }
