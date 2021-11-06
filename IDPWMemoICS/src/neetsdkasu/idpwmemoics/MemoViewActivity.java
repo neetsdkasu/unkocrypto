@@ -33,6 +33,7 @@ public class MemoViewActivity extends Activity
 
     private static final String TAG = "MemoViewActivity";
 
+    // TODO <String>に変えたい
     private ArrayAdapter<idpwmemo.Service> serviceListAdapter = null;
 
     // 仮
@@ -52,6 +53,8 @@ public class MemoViewActivity extends Activity
     private Button importServicesButton = null;
     private Button addNewValueButton = null;
 
+    private View listContainer = null;
+
     private MenuItem saveServiceMenuItem = null;
 
     private MemoFile memoFile = null;
@@ -62,6 +65,8 @@ public class MemoViewActivity extends Activity
     private boolean builtSecretsList = false;
 
     private int selectedServiceIndex = -1;
+
+    private long lastPausedTime = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +87,8 @@ public class MemoViewActivity extends Activity
         this.addNewServiceButton = (Button) findViewById(R.id.memo_view_add_new_service_button);
         this.importServicesButton = (Button) findViewById(R.id.memo_view_import_services_button);
         this.addNewValueButton = (Button) findViewById(R.id.memo_view_add_new_value_button);
+
+        this.listContainer = findViewById(R.id.memo_view_list_container);
 
         Bundle args = getIntent().getBundleExtra(Utils.EXTRA_ARGUMENTS);
 
@@ -140,9 +147,22 @@ public class MemoViewActivity extends Activity
     }
 
     @Override
+    protected void onPause() {
+        this.lastPausedTime = System.currentTimeMillis();
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        if (this.hasMemo()) return;
+        if (this.hasMemo()) {
+            long time = System.currentTimeMillis();
+            long LIMIT = 60L * 1000L;
+            if (time - this.lastPausedTime < LIMIT) {
+                return;
+            }
+            this.listContainer.setVisibility(View.INVISIBLE);
+        }
         this.showOpenPasswordDialog();
     }
 
@@ -340,9 +360,13 @@ public class MemoViewActivity extends Activity
     }
 
     private void showOpenPasswordDialog() {
+        OpenPasswordDialogFragment f = (OpenPasswordDialogFragment)
+            getFragmentManager().findFragmentByTag(OpenPasswordDialogFragment.TAG);
+        if (f != null) f.dismiss();
         OpenPasswordDialogFragment
             .newInstance()
-            .show(getFragmentManager(), "open_password_dialog");
+            .show(getFragmentManager(),
+                OpenPasswordDialogFragment.TAG);
     }
 
     // OpenPasswordDialogFragment.Listener.giveUpOpenPassword
@@ -350,8 +374,30 @@ public class MemoViewActivity extends Activity
         finish();
     }
 
+    private void checkPassword(String password) {
+        idpwmemo.IDPWMemo checker = new idpwmemo.IDPWMemo();
+        try {
+            byte[] data = this.memo.save();
+            checker.setPassword(password);
+            if (checker.loadMemo(data)) {
+                this.listContainer.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(this, R.string.info_wrong_password, Toast.LENGTH_SHORT).show();
+                this.showOpenPasswordDialog();
+            }
+        } catch (IOException ex) {
+            Log.e(TAG, "checkPassword", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
     // OpenPasswordDialogFragment.Listener.openMemo
     public void openMemo(String password) {
+        if (this.hasMemo()) {
+            this.checkPassword(password);
+            return;
+        }
         try {
             if (this.memo == null) {
                 this.memo = new idpwmemo.IDPWMemo();

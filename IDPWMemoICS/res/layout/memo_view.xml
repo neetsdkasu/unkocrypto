@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
-  <!-- Buttons -->
-  <LinearLayout android:id="@+id/memo_view_buttons"
+  <!-- ButtonBar -->
+  <LinearLayout android:id="@+id/memo_view_button_bar"
                 android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -33,8 +33,9 @@
             style="?android:attr/buttonBarButtonStyle" />
   </LinearLayout>
   <!-- Lists -->
-  <LinearLayout android:layout_alignParentTop="true"
-                android:layout_above="@id/memo_view_buttons"
+  <LinearLayout android:id="@+id/memo_view_list_container"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/memo_view_button_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
@@ -47,13 +48,13 @@
     <TextView android:id="@+id/memo_view_service_name"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:visibility="gone"  />
+              android:visibility="gone" />
     <!-- Selected Service Last Update -->
     <TextView android:id="@+id/memo_view_service_lastupdate"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:text="@string/memo_view_label_lastupdate"
-              android:visibility="gone"  />
+              android:visibility="gone" />
     <!-- Switch ( DETAILS/SECRETS ) -->
     <Switch android:id="@+id/memo_view_secrets_switch"
             android:layout_width="match_parent"
@@ -66,12 +67,12 @@
               android:layout_weight="1"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:visibility="gone"  />
+              android:visibility="gone" />
     <!-- Secret Value List -->
     <ListView android:id="@+id/memo_view_secret_list"
               android:layout_weight="1"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:visibility="gone"  />
+              android:visibility="gone" />
   </LinearLayout>
 </RelativeLayout>

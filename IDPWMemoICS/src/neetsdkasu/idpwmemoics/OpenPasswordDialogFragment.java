@@ -14,6 +14,8 @@ import android.widget.EditText;
 public class OpenPasswordDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
 
+    static final String TAG = "OpenPasswordDialogFragment";
+
     private static final String MEMO_NAME = "memoName";
 
     static interface Listener {
