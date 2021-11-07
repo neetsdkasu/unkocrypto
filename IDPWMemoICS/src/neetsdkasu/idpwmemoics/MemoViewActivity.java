@@ -29,6 +29,7 @@ public class MemoViewActivity extends Activity
             AdapterView.OnItemClickListener,
             AdapterView.OnItemLongClickListener,
             CompoundButton.OnCheckedChangeListener,
+            NewServiceDialogFragment.Listener,
             OpenPasswordDialogFragment.Listener {
 
     private static final String TAG = "MemoViewActivity";
@@ -217,7 +218,12 @@ public class MemoViewActivity extends Activity
 
     // memo_view_add_new_service_button.onClick
     public void showAddNewServiceDialog(View view) {
-        // TODO
+        NewServiceDialogFragment f = (NewServiceDialogFragment)
+            getFragmentManager().findFragmentByTag(NewServiceDialogFragment.TAG);
+        if (f != null) return;
+        NewServiceDialogFragment
+            .newInstance()
+            .show(getFragmentManager(), NewServiceDialogFragment.TAG);
     }
 
     // memo_view_import_services_button.onClick
@@ -228,6 +234,26 @@ public class MemoViewActivity extends Activity
     // memo_view_add_new_value_button.onClick
     public void showAddNewValueDialog(View view) {
         // TODO
+    }
+
+    // NewServiceDialogFragment.Listener.createNewService
+    public void createNewService(String name) {
+        try {
+            this.memo.addNewService(name);
+            byte[] data = this.memo.save();
+            if (Utils.saveFile(this.memoFile.file, data)) {
+                this.serviceListAdapter.add(name);
+                this.serviceListAdapter.notifyDataSetChanged();
+                this.serviceListView.smoothScrollToPosition(this.serviceListAdapter.getCount()-1);
+                Toast.makeText(this, R.string.info_success_add_new_service, Toast.LENGTH_SHORT).show();
+            } else {
+                this.memo.removeSelectedService();
+                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException ex) {
+            Log.e(TAG, "createNewService", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void copyValueToClipboard(int index) {

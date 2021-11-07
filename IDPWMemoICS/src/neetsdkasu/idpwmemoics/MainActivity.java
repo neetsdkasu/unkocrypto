@@ -103,8 +103,10 @@ public class MainActivity extends Activity
         File newFile = new File(this.memoDir, s);
         try {
             if (newFile.createNewFile()) {
-                this.memoFileListAdapter.insert(new MemoFile(newFile), 0);
+                this.memoFileListAdapter.add(new MemoFile(newFile));
                 this.memoFileListAdapter.notifyDataSetChanged();
+                this.memoFileListView.smoothScrollToPosition(this.memoFileListAdapter.getCount()-1);
+                Toast.makeText(this, R.string.info_success_add_new_memo, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
             }
@@ -124,7 +126,7 @@ public class MainActivity extends Activity
             return;
         }
         if (Utils.filecopy(memoFile.file, newFile)) {
-            this.memoFileListAdapter.insert(new MemoFile(newFile), 0);
+            this.memoFileListAdapter.add(new MemoFile(newFile));
             this.memoFileListAdapter.notifyDataSetChanged();
             Toast.makeText(this, R.string.info_success_import_memo, Toast.LENGTH_SHORT).show();
         } else {

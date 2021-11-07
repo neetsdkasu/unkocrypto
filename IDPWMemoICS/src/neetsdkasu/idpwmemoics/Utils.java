@@ -49,6 +49,23 @@ final class Utils {
         return true;
     }
 
+    static boolean saveFile(File file, byte[] data) {
+        OutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(file));
+            out.write(data);
+            out.flush();
+            return true;
+        } catch (IOException ex) {
+            Log.e(TAG, "saveFile", ex);
+            return false;
+        } finally {
+            if (out != null) { try { out.close(); } catch (IOException ex) {
+                Log.e(TAG, "saveFile.out.close", ex);
+            }}
+        }
+    }
+
     static byte[] loadFile(File file) {
         byte[] buf = new byte[(int)file.length()];
         int pos = 0;
@@ -65,7 +82,7 @@ final class Utils {
             return null;
         } finally {
             if (in != null) { try { in.close(); } catch (IOException ex) {
-                Log.e(TAG, "loadFile", ex);
+                Log.e(TAG, "loadFile.in.close", ex);
             }}
         }
     }
@@ -88,10 +105,10 @@ final class Utils {
             return false;
         } finally {
             if (out != null) { try { out.close(); } catch (IOException ex) {
-                Log.e(TAG, "filecopy", ex);
+                Log.e(TAG, "filecopy.out.close", ex);
             }}
             if (in != null) { try { in.close(); } catch (IOException ex) {
-                Log.e(TAG, "filecopy", ex);
+                Log.e(TAG, "filecopy.in.close", ex);
             }}
         }
     }
