@@ -33,8 +33,7 @@ public class MemoViewActivity extends Activity
 
     private static final String TAG = "MemoViewActivity";
 
-    // TODO <String>に変えたい
-    private ArrayAdapter<idpwmemo.Service> serviceListAdapter = null;
+    private ArrayAdapter<String> serviceListAdapter = null;
 
     // 仮
     private ArrayAdapter<String> detailListAdapter = null;
@@ -98,7 +97,7 @@ public class MemoViewActivity extends Activity
 
         setTitle(memoName);
 
-        this.serviceListAdapter = new ArrayAdapter<idpwmemo.Service>(this, android.R.layout.simple_list_item_1);
+        this.serviceListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 
         // 仮
         this.detailListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
@@ -149,6 +148,7 @@ public class MemoViewActivity extends Activity
     @Override
     protected void onPause() {
         this.lastPausedTime = System.currentTimeMillis();
+        this.listContainer.setVisibility(View.INVISIBLE);
         super.onPause();
     }
 
@@ -159,9 +159,9 @@ public class MemoViewActivity extends Activity
             long time = System.currentTimeMillis();
             long LIMIT = 60L * 1000L;
             if (time - this.lastPausedTime < LIMIT) {
+                this.listContainer.setVisibility(View.VISIBLE);
                 return;
             }
-            this.listContainer.setVisibility(View.INVISIBLE);
         }
         this.showOpenPasswordDialog();
     }
@@ -177,19 +177,18 @@ public class MemoViewActivity extends Activity
 
     // リストのアイテムのクリックの処理
     // android.widget.AdapterView.OnItemClickListener.onItemClick
-    public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (this.serviceListView.equals(parent)) {
             this.showService(position);
-        } else if (this.detailListView.equals(parent)) {
-            this.copyValueToClipboard(position);
-        } else if (this.secretListView.equals(parent)) {
+        } else if (this.detailListView.equals(parent)
+                || this.secretListView.equals(parent)) {
             this.copyValueToClipboard(position);
         }
     }
 
     // リストのアイテムの長押しの処理
     // android.widget.AdapterView.OnItemLongClickListener.onItemLongClick
-    public boolean onItemLongClick (AdapterView<?> parent, View view, int position, long id) {
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         if (this.serviceListView.equals(parent)) {
             // TOOD
             //  例えば SHOW,EXPORT,DELETEの選択ダイアログ
@@ -214,6 +213,21 @@ public class MemoViewActivity extends Activity
         } else {
             this.showServiceDetails();
         }
+    }
+
+    // memo_view_add_new_service_button.onClick
+    public void showAddNewServiceDialog(View view) {
+        // TODO
+    }
+
+    // memo_view_import_services_button.onClick
+    public void showImportServicesDialog(View view) {
+        // TODO
+    }
+
+    // memo_view_add_new_value_button.onClick
+    public void showAddNewValueDialog(View view) {
+        // TODO
     }
 
     private void copyValueToClipboard(int index) {
@@ -377,7 +391,14 @@ public class MemoViewActivity extends Activity
     private void checkPassword(String password) {
         idpwmemo.IDPWMemo checker = new idpwmemo.IDPWMemo();
         try {
-            byte[] data = this.memo.save();
+            byte[] data;
+            if (this.memo.getServiceCount() > 0) {
+                data = this.memo.save();
+            } else {
+                this.memo.addNewService("DUMMY");
+                data = this.memo.save();
+                this.memo.removeSelectedService();
+            }
             checker.setPassword(password);
             if (checker.loadMemo(data)) {
                 this.listContainer.setVisibility(View.VISIBLE);
@@ -388,7 +409,6 @@ public class MemoViewActivity extends Activity
         } catch (IOException ex) {
             Log.e(TAG, "checkPassword", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            finish();
         }
     }
 
@@ -415,7 +435,7 @@ public class MemoViewActivity extends Activity
                     return;
                 }
                 this.serviceListAdapter.clear();
-                for (idpwmemo.Service s : this.memo.getServices()) {
+                for (String s : this.memo.getServiceNames()) {
                     this.serviceListAdapter.add(s);
                 }
             } else {
@@ -425,6 +445,7 @@ public class MemoViewActivity extends Activity
             this.serviceListAdapter.notifyDataSetChanged();
             this.addNewServiceButton.setVisibility(View.VISIBLE);
             this.importServicesButton.setVisibility(View.VISIBLE);
+            this.listContainer.setVisibility(View.VISIBLE);
         } catch (IOException ex) {
             Log.e(TAG, "openMemo", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();

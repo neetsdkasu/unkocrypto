@@ -15,6 +15,8 @@ import java.io.FilenameFilter;
 public class ImportMemoDialogFragment extends DialogFragment
         implements FilenameFilter, DialogInterface.OnShowListener, DialogInterface.OnClickListener {
 
+    static final String TAG = "ImportMemoDialogFragment";
+
     static interface Listener {
         void importMemo(MemoFile memoFile);
     }
@@ -70,6 +72,8 @@ public class ImportMemoDialogFragment extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         this.importListAdapter =  new ArrayAdapter<MemoFile>(getActivity(), android.R.layout.simple_list_item_single_choice);
+
+        // TODO 外部ストレージの状態チェックが必要
 
         File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 

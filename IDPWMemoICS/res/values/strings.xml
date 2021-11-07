@@ -2,10 +2,8 @@
 <resources>
     <string name="app_name">IDPWMemo ICS</string>
     <!-- MainActivity Menu -->
-    <string name="main_action_menu">Menu</string>
-    <string name="main_action_new_memo">New Memo</string>
-    <string name="main_action_import_memo">Import</string>
-    <string name="main_action_export_memo">Export</string>
+    <string name="main_button_add_new_memo">ADD NEW MEMO</string>
+    <string name="main_button_import_memo">" IMPORT "</string>
     <!-- MemoViewActivity -->
     <string name="memo_view_title">Memo View</string>
     <string name="memo_view_label_details">DETAILS</string>

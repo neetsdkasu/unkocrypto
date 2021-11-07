@@ -16,6 +16,8 @@ import java.util.Arrays;
 public class NewMemoDialogFragment extends DialogFragment
         implements InputFilter, DialogInterface.OnShowListener, DialogInterface.OnClickListener {
 
+    static final String TAG = "NewMemoDialogFragment";
+
     static interface Listener {
         void createNewMemo(String name);
     }
