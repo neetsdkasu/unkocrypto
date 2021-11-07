@@ -128,6 +128,7 @@ public class MainActivity extends Activity
         if (Utils.filecopy(memoFile.file, newFile)) {
             this.memoFileListAdapter.add(new MemoFile(newFile));
             this.memoFileListAdapter.notifyDataSetChanged();
+            this.memoFileListView.smoothScrollToPosition(this.memoFileListAdapter.getCount()-1);
             Toast.makeText(this, R.string.info_success_import_memo, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
