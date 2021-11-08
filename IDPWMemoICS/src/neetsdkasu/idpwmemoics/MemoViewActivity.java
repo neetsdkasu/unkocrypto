@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Base64;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -30,12 +31,14 @@ public class MemoViewActivity extends Activity
             AdapterView.OnItemClickListener,
             AdapterView.OnItemLongClickListener,
             CompoundButton.OnCheckedChangeListener,
+            ImportServicesDialogFragment.Listener,
             NewServiceDialogFragment.Listener,
             NewValueDialogFragment.Listener,
             OpenPasswordDialogFragment.Listener {
 
     private static final String TAG = "MemoViewActivity";
 
+    // (1分=60秒=60000ミリ秒)
     private static final long LOCK_TIME = 60L * 1000L;
 
     private ArrayAdapter<String> serviceListAdapter = null;
@@ -218,7 +221,16 @@ public class MemoViewActivity extends Activity
 
     // memo_view_import_services_button.onClick
     public void showImportServicesDialog(View view) {
-        // TODO
+        this.showImportServicesDialog("", "");
+    }
+
+    private void showImportServicesDialog(String data, String password) {
+        ImportServicesDialogFragment f = (ImportServicesDialogFragment)
+            getFragmentManager().findFragmentByTag(ImportServicesDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        ImportServicesDialogFragment
+            .newInstance(data, password)
+            .show(getFragmentManager(), ImportServicesDialogFragment.TAG);
     }
 
     // memo_view_add_new_value_button.onClick
@@ -231,6 +243,59 @@ public class MemoViewActivity extends Activity
         NewValueDialogFragment
             .newInstance(serviceIndex, isSecret)
             .show(getFragmentManager(), NewValueDialogFragment.TAG);
+    }
+
+    // ImportServicesDialogFragment.Listener.importServices
+    public void importServices(String data, String password) {
+        byte[] rawData;
+        try {
+            rawData = Base64.decode(data, Base64.DEFAULT);
+            if (rawData == null || rawData.length == 0) {
+                // Wrong data
+                Toast.makeText(this, R.string.info_wrong_data_format, Toast.LENGTH_SHORT).show();
+                this.showImportServicesDialog(data, password);
+                return;
+            }
+        } catch (IllegalArgumentException ex) {
+            // Wrong data
+            Toast.makeText(this, R.string.info_wrong_data_format, Toast.LENGTH_SHORT).show();
+            this.showImportServicesDialog(data, password);
+            return;
+        }
+        try {
+            idpwmemo.IDPWMemo importMemo = new idpwmemo.IDPWMemo();
+            importMemo.setPassword(password);
+            if (!importMemo.loadMemo(rawData)) {
+                // Wrong Password
+                Toast.makeText(this, R.string.info_wrong_password, Toast.LENGTH_SHORT).show();
+                this.showImportServicesDialog(data, password);
+                return;
+            }
+            if (importMemo.getServiceCount() == 0) {
+                // no data
+                Toast.makeText(this, R.string.info_no_data, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            for (int i = 0; i < importMemo.getServiceCount(); i++) {
+                importMemo.selectService(i);
+                this.memo.addService(importMemo);
+            }
+            if (!this.saveMemo()) {
+                // TODO
+            }
+            // successfully
+            int start = this.memo.getServiceCount() - importMemo.getServiceCount();
+            for (int i = start; i < this.memo.getServiceCount(); i++) {
+                String t = this.memo.getService(i).getServiceName();
+                this.serviceListAdapter.add(t);
+            }
+            this.serviceListAdapter.notifyDataSetChanged();
+            this.serviceListView.smoothScrollToPosition(this.serviceListView.getCount()-1);
+            Toast.makeText(this, R.string.info_success_import_services, Toast.LENGTH_SHORT).show();
+        } catch (IOException ex) {
+            Log.e(TAG, "importServices", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     // NewValueDialogFragment.Listener.createNewValue
@@ -382,10 +447,6 @@ public class MemoViewActivity extends Activity
     }
 
     private void selectService(int index) {
-        // TODO 処理を考える
-
-        // 仮
-
         this.memo.selectService(index);
         this.selectedServiceIndex = index;
 
@@ -414,10 +475,6 @@ public class MemoViewActivity extends Activity
     }
 
     private void showServiceDetails() {
-        // TODO 表示処理を考える
-
-        // 仮
-
         // 色々と非表示
         this.secretListView.setVisibility(View.GONE);
 
@@ -434,10 +491,6 @@ public class MemoViewActivity extends Activity
     }
 
     private void showServiceSecrets() {
-        // TODO 表示処理を考える
-
-        // 仮
-
         // 色々と非表示
         this.detailListView.setVisibility(View.GONE);
 
@@ -538,5 +591,4 @@ public class MemoViewActivity extends Activity
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
     }
-
 }

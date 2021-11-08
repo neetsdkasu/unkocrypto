@@ -6,6 +6,7 @@
     <issue id="OldTargetApi" severity="ignore" />
 
     <issue id="TextFields">
+        <ignore path="res/layout/import_services_dialog.xml" />
         <ignore path="res/layout/open_password_dialog.xml" />
     </issue>
 </lint>
