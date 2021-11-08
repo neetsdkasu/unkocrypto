@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MemoViewActivity extends Activity
         implements
@@ -30,9 +31,12 @@ public class MemoViewActivity extends Activity
             AdapterView.OnItemLongClickListener,
             CompoundButton.OnCheckedChangeListener,
             NewServiceDialogFragment.Listener,
+            NewValueDialogFragment.Listener,
             OpenPasswordDialogFragment.Listener {
 
     private static final String TAG = "MemoViewActivity";
+
+    private static final long LOCK_TIME = 60L * 1000L;
 
     private ArrayAdapter<String> serviceListAdapter = null;
 
@@ -54,8 +58,6 @@ public class MemoViewActivity extends Activity
     private Button addNewValueButton = null;
 
     private View listContainer = null;
-
-    private MenuItem saveServiceMenuItem = null;
 
     private MemoFile memoFile = null;
 
@@ -121,14 +123,6 @@ public class MemoViewActivity extends Activity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.memo_view_activity_actions, menu);
-        this.saveServiceMenuItem = menu.findItem(R.id.memo_view_action_save_service);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -137,9 +131,6 @@ public class MemoViewActivity extends Activity
                 } else {
                     finish();
                 }
-                return true;
-            case R.id.memo_view_action_save_service:
-                // TODO 保存
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -158,8 +149,7 @@ public class MemoViewActivity extends Activity
         super.onResume();
         if (this.hasMemo()) {
             long time = System.currentTimeMillis();
-            long LIMIT = 60L * 1000L;
-            if (time - this.lastPausedTime < LIMIT) {
+            if (time - this.lastPausedTime < LOCK_TIME) {
                 this.listContainer.setVisibility(View.VISIBLE);
                 return;
             }
@@ -180,7 +170,7 @@ public class MemoViewActivity extends Activity
     // android.widget.AdapterView.OnItemClickListener.onItemClick
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (this.serviceListView.equals(parent)) {
-            this.showService(position);
+            this.showService(position, false);
         } else if (this.detailListView.equals(parent)
                 || this.secretListView.equals(parent)) {
             this.copyValueToClipboard(position);
@@ -208,7 +198,7 @@ public class MemoViewActivity extends Activity
 
     // android.widget.CompoundButton.OnCheckedChangeListener.onCheckedChanged
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (!hasSelectedService()) return;
+        if (!this.hasSelectedService()) return;
         if (isChecked) {
             this.showServiceSecrets();
         } else {
@@ -233,26 +223,90 @@ public class MemoViewActivity extends Activity
 
     // memo_view_add_new_value_button.onClick
     public void showAddNewValueDialog(View view) {
-        // TODO
+        NewValueDialogFragment f = (NewValueDialogFragment)
+            getFragmentManager().findFragmentByTag(NewValueDialogFragment.TAG);
+        if (f != null) return;
+        int serviceIndex = this.selectedServiceIndex;
+        boolean isSecret = this.secretsSwitch.isChecked();
+        NewValueDialogFragment
+            .newInstance(serviceIndex, isSecret)
+            .show(getFragmentManager(), NewValueDialogFragment.TAG);
+    }
+
+    // NewValueDialogFragment.Listener.createNewValue
+    public void createNewValue(int serviceIndex, boolean isSecret, idpwmemo.Value newValue) {
+        idpwmemo.Value[] oldValues, values;
+        if (isSecret) {
+            oldValues = this.getSecretValues();
+        } else {
+            oldValues = this.memo.getValues();
+        }
+        values = Arrays.copyOf(oldValues, oldValues.length + 1);
+        values[values.length-1] = newValue;
+        if (isSecret) {
+            this.memo.setSecrets(values);
+        } else {
+            this.memo.setValues(values);
+        }
+        if (!this.updateMemo()) {
+            if (isSecret) {
+                this.memo.setSecrets(oldValues);
+            } else {
+                this.memo.setValues(oldValues);
+            }
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (isSecret) {
+            this.secretListAdapter.add(Utils.toString(newValue));
+            this.secretListAdapter.notifyDataSetChanged();
+            this.secretListView.smoothScrollToPosition(this.secretListView.getCount()-1);
+        } else {
+            this.detailListAdapter.add(Utils.toString(newValue));
+            this.detailListAdapter.notifyDataSetChanged();
+            this.detailListView.smoothScrollToPosition(this.detailListView.getCount()-1);
+        }
+        Toast.makeText(this, R.string.info_success_add_new_value, Toast.LENGTH_SHORT).show();
     }
 
     // NewServiceDialogFragment.Listener.createNewService
     public void createNewService(String name) {
-        try {
-            this.memo.addNewService(name);
-            byte[] data = this.memo.save();
-            if (Utils.saveFile(this.memoFile.file, data)) {
-                this.serviceListAdapter.add(name);
-                this.serviceListAdapter.notifyDataSetChanged();
-                this.serviceListView.smoothScrollToPosition(this.serviceListAdapter.getCount()-1);
-                Toast.makeText(this, R.string.info_success_add_new_service, Toast.LENGTH_SHORT).show();
-            } else {
-                this.memo.removeSelectedService();
-                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException ex) {
-            Log.e(TAG, "createNewService", ex);
+        this.memo.addNewService(name);
+        if (this.saveMemo()) {
+            this.serviceListAdapter.add(name);
+            this.serviceListAdapter.notifyDataSetChanged();
+            this.serviceListView.smoothScrollToPosition(this.serviceListView.getCount()-1);
+            Toast.makeText(this, R.string.info_success_add_new_service, Toast.LENGTH_SHORT).show();
+        } else {
+            this.memo.removeSelectedService();
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean updateMemo() {
+        try {
+            this.memo.updateSelectedService();
+            if (!this.saveMemo()) {
+                return false;
+            }
+            String lastUpdate = Utils.getDateTimeString(this.memo.getService().getTime());
+            this.serviceLastUpdateTextView.setText(R.string.memo_view_label_lastupdate);
+            this.serviceLastUpdateTextView.append(": ");
+            this.serviceLastUpdateTextView.append(lastUpdate);
+            return true;
+        } catch (IOException ex) {
+            Log.e(TAG, "updateMemo", ex);
+            return false;
+        }
+    }
+
+    private boolean saveMemo() {
+        try {
+            byte[] data = this.memo.save();
+            return Utils.saveFile(this.memoFile.file, data);
+        } catch (IOException ex) {
+            Log.e(TAG, "saveMemo", ex);
+            return false;
         }
     }
 
@@ -315,13 +369,16 @@ public class MemoViewActivity extends Activity
         this.secretListAdapter.clear();
         this.secretListAdapter.notifyDataSetChanged();
         this.secretsSwitch.setChecked(false);
-        this.saveServiceMenuItem.setEnabled(false);
     }
 
-    private void showService(int index) {
+    private void showService(int index, boolean isSecret) {
         this.selectService(index);
-        this.secretsSwitch.setChecked(false);
-        this.showServiceDetails();
+        this.secretsSwitch.setChecked(isSecret);
+        if (isSecret) {
+            this.showServiceSecrets();
+        } else {
+            this.showServiceDetails();
+        }
     }
 
     private void selectService(int index) {
@@ -339,7 +396,6 @@ public class MemoViewActivity extends Activity
         this.addNewServiceButton.setVisibility(View.GONE);
         this.importServicesButton.setVisibility(View.GONE);
 
-        this.saveServiceMenuItem.setEnabled(true);
         this.addNewValueButton.setVisibility(View.VISIBLE);
 
         // サービス名の表示
@@ -370,8 +426,7 @@ public class MemoViewActivity extends Activity
             this.builtDetailsList = true;
             this.detailListAdapter.clear();
             for (idpwmemo.Value v : this.memo.getValues()) {
-                String t = v.getTypeName() + ": " + v.value;
-                this.detailListAdapter.add(t);
+                this.detailListAdapter.add(Utils.toString(v));
             }
             this.detailListAdapter.notifyDataSetChanged();
         }
@@ -391,8 +446,7 @@ public class MemoViewActivity extends Activity
             this.builtSecretsList = true;
             this.secretListAdapter.clear();
             for (idpwmemo.Value v : this.getSecretValues()) {
-                String t = v.getTypeName() + ": " + v.value;
-                this.secretListAdapter.add(t);
+                this.secretListAdapter.add(Utils.toString(v));
             }
             this.secretListAdapter.notifyDataSetChanged();
         }
@@ -469,8 +523,15 @@ public class MemoViewActivity extends Activity
                 this.serviceListAdapter.clear();
             }
             this.serviceListAdapter.notifyDataSetChanged();
-            this.addNewServiceButton.setVisibility(View.VISIBLE);
-            this.importServicesButton.setVisibility(View.VISIBLE);
+            NewValueDialogFragment nvDF = (NewValueDialogFragment)
+                getFragmentManager().findFragmentByTag(NewValueDialogFragment.TAG);
+            if (nvDF != null) {
+                int serviceIndex = nvDF.getServiceIndex();
+                boolean isSecret = nvDF.isSecretValue();
+                this.showService(serviceIndex, isSecret);
+            } else {
+                this.showServiceList();
+            }
             this.listContainer.setVisibility(View.VISIBLE);
         } catch (IOException ex) {
             Log.e(TAG, "openMemo", ex);

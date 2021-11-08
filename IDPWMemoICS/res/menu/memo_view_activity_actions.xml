@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:id="@+id/memo_view_action_save_service"
-        android:title="@string/memo_view_action_save_service"
-        android:icon="@android:drawable/ic_menu_save"
-        android:enabled="false"
-        android:showAsAction="ifRoom" />
-</menu>
-

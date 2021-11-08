@@ -126,4 +126,8 @@ final class Utils {
             return dateFormat.format(new java.util.Date(unixTime));
         }
     }
+
+    static String toString(idpwmemo.Value v) {
+        return v.getTypeName() + ": " + v.value;
+    }
 }
