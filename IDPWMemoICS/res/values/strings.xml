@@ -34,6 +34,11 @@
     <string name="import_services_dialog_password_hint">Password</string>
     <string name="import_services_dialog_data_caption">Import Data</string>
     <string name="import_services_dialog_data_hint">Base64 Encoded Data</string>
+    <!-- MemoMenuDialog -->
+    <string name="memo_menu_dialog_open">OPEN</string>
+    <string name="memo_menu_dialog_export">EXPORT</string>
+    <string name="memo_menu_dialog_change_password">CHANGE PASSWORD</string>
+    <string name="memo_menu_dialog_delete">DELETE</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>

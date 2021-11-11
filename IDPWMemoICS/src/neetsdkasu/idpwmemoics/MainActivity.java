@@ -20,6 +20,7 @@ public class MainActivity extends Activity
         implements
             AdapterView.OnItemClickListener,
             AdapterView.OnItemLongClickListener,
+            MemoMenuDialogFragment.Listener,
             NewMemoDialogFragment.Listener,
             ImportMemoDialogFragment.Listener {
 
@@ -59,14 +60,24 @@ public class MainActivity extends Activity
     // android.widget.AdapterView.OnItemClickListener.onItemClick
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MemoFile memoFile = this.memoFileListAdapter.getItem(position);
-        openMemo(memoFile);
+        this.openMemo(memoFile);
     }
 
     // リストのアイテムの長押しの処理
     // android.widget.AdapterView.OnItemLongClickListener.onItemLongClick
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        // TODO 例えば OPEN,EXPORT,DELETEのメニューダイアログを出すなど
-        return false;
+        MemoFile memoFile = this.memoFileListAdapter.getItem(position);
+        this.showMemoMenuDialog(memoFile);
+        return true;
+    }
+
+    private void showMemoMenuDialog(MemoFile memoFile) {
+        MemoMenuDialogFragment f = (MemoMenuDialogFragment)
+            getFragmentManager().findFragmentByTag(MemoMenuDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        MemoMenuDialogFragment
+            .newInstance(memoFile)
+            .show(getFragmentManager(), MemoMenuDialogFragment.TAG);
     }
 
     private void openMemo(MemoFile memoFile) {
@@ -98,6 +109,27 @@ public class MainActivity extends Activity
             .show(getFragmentManager(), ImportMemoDialogFragment.TAG);
     }
 
+    // MemoMenuDialogFragment.Listener.openMemo
+    public void openMemo(String memoName) {
+        File file = new File(this.memoDir, memoName);
+        this.openMemo(new MemoFile(file));
+    }
+
+    // MemoMenuDialogFragment.Listener.exportMemo
+    public void exportMemo(String memoName) {
+        // TODO
+    }
+
+    // MemoMenuDialogFragment.Listener.changeMemoPassword
+    public void changeMemoPassword(String memoName) {
+        // TODO
+    }
+
+    // MemoMenuDialogFragment.Listener.deleteMemo
+    public void deleteMemo(String memoName) {
+        // TODO
+    }
+
     // NewMemoDialogFragment.Listener.createNewMemo
     public void createNewMemo(String s) {
         File newFile = new File(this.memoDir, s);
@@ -121,7 +153,10 @@ public class MainActivity extends Activity
         String name = memoFile.name.substring(0, memoFile.name.length() - 5);
         File newFile = new File(this.memoDir, name);
         if (newFile.exists()) {
-            // TODO 名前重複時に上書きするか確認するプロセスが必要
+            // 名前重複時は上書きしない
+            // 次のいずれかでユーザが対応すればよい
+            //  - 先に同名Memoを削除する
+            //  - インポートするMemoのファイル名を変更する
             Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
             return;
         }

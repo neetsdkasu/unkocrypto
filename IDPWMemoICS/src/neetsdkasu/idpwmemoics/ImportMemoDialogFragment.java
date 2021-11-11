@@ -62,7 +62,7 @@ public class ImportMemoDialogFragment extends DialogFragment
 
     // java.io.FilenameFilter.accept
     public boolean accept(File d, String name) {
-        if (!name.endsWith(".memo")) return false;
+        if (!name.endsWith(Utils.MEMO_EXT)) return false;
         int len = name.length() - 5;
         if (!Utils.isValidMemoNameLength(len)) return false;
         return Utils.isValidMemoNameChars(name, 0, len);

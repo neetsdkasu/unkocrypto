@@ -23,6 +23,7 @@ final class Utils {
     static final String KEY_SERVICE_INDEX = "SERVICE_INDEX";
 
     static final String MEMO_DIR = "memo";
+    static final String MEMO_EXT = ".memo";
 
     static boolean isValidMemoNameLength(int len) {
         return 0 < len && len <= 50;

@@ -42,8 +42,6 @@ public class MemoViewActivity extends Activity
     private static final long LOCK_TIME = 60L * 1000L;
 
     private ArrayAdapter<String> serviceListAdapter = null;
-
-    // 仮
     private ArrayAdapter<String> detailListAdapter = null;
     private ArrayAdapter<String> secretListAdapter = null;
 
@@ -104,8 +102,6 @@ public class MemoViewActivity extends Activity
         setTitle(memoName);
 
         this.serviceListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-
-        // 仮
         this.detailListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         this.secretListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 
@@ -281,7 +277,12 @@ public class MemoViewActivity extends Activity
                 this.memo.addService(importMemo);
             }
             if (!this.saveMemo()) {
-                // TODO
+                for (int i = 0; i < importMemo.getServiceCount(); i++) {
+                    int p = this.memo.getServiceCount() - 1;
+                    this.memo.removeService(p);
+                }
+                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+                return;
             }
             // successfully
             int start = this.memo.getServiceCount() - importMemo.getServiceCount();
