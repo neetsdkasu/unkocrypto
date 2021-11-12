@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,8 +14,6 @@ public class OpenPasswordDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
 
     static final String TAG = "OpenPasswordDialogFragment";
-
-    private static final String MEMO_NAME = "memoName";
 
     static interface Listener {
         void openMemo(String password);

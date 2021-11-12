@@ -95,6 +95,12 @@ public class MemoViewActivity extends Activity
 
         Bundle args = getIntent().getBundleExtra(Utils.EXTRA_ARGUMENTS);
 
+        if (args == null) {
+            // ここでfinish()呼んで大丈夫か分からん
+            finish();
+            return;
+        }
+
         String memoName = args.getString(Utils.KEY_MEMO_NAME);
         File memoDir = getDir(Utils.MEMO_DIR, MODE_PRIVATE);
         this.memoFile = new MemoFile(new File(memoDir, memoName));
@@ -119,6 +125,8 @@ public class MemoViewActivity extends Activity
         this.secretListView.setOnItemLongClickListener(this);
 
         this.secretsSwitch.setOnCheckedChangeListener(this);
+
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     @Override
@@ -137,9 +145,10 @@ public class MemoViewActivity extends Activity
     }
 
     @Override
-    protected void onPause() {
-        this.lastPausedTime = System.currentTimeMillis();
-        this.listContainer.setVisibility(View.INVISIBLE);
+    public void onPause() {
+        if (!isFinishing()) {
+            this.lastPausedTime = System.currentTimeMillis();
+        }
         super.onPause();
     }
 

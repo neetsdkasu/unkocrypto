@@ -4,12 +4,13 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
   <TextView android:id="@android:id/empty"
-     android:layout_width="match_parent"
-     android:layout_height="wrap_content"
-     android:text="@string/new_memo_dialog_caution" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_memo_dialog_caution" />
   <EditText android:id="@+id/new_memo_dialog_name"
-     android:layout_width="match_parent"
-     android:layout_height="wrap_content"
-     android:singleLine="true"
-     android:hint="@string/new_memo_dialog_hint" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:inputType="text"
+            android:hint="@string/new_memo_dialog_hint" />
 </LinearLayout>

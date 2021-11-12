@@ -20,6 +20,7 @@ public class MainActivity extends Activity
         implements
             AdapterView.OnItemClickListener,
             AdapterView.OnItemLongClickListener,
+            ChangePasswordDialogFragment.Listener,
             MemoMenuDialogFragment.Listener,
             NewMemoDialogFragment.Listener,
             ImportMemoDialogFragment.Listener {
@@ -60,7 +61,7 @@ public class MainActivity extends Activity
     // android.widget.AdapterView.OnItemClickListener.onItemClick
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MemoFile memoFile = this.memoFileListAdapter.getItem(position);
-        this.openMemo(memoFile);
+        this.openMemoView(memoFile.name);
     }
 
     // リストのアイテムの長押しの処理
@@ -80,10 +81,10 @@ public class MainActivity extends Activity
             .show(getFragmentManager(), MemoMenuDialogFragment.TAG);
     }
 
-    private void openMemo(MemoFile memoFile) {
+    private void openMemoView(String memoName) {
         Intent intent = new Intent(this, MemoViewActivity.class);
         Bundle args = new Bundle();
-        args.putString(Utils.KEY_MEMO_NAME, memoFile.name);
+        args.putString(Utils.KEY_MEMO_NAME, memoName);
         intent.putExtra(Utils.EXTRA_ARGUMENTS, args);
         startActivity(intent);
     }
@@ -109,10 +110,54 @@ public class MainActivity extends Activity
             .show(getFragmentManager(), ImportMemoDialogFragment.TAG);
     }
 
+    private void showChangePasswordDialog(String memoName) {
+        ChangePasswordDialogFragment f = (ChangePasswordDialogFragment)
+            getFragmentManager().findFragmentByTag(ChangePasswordDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        ChangePasswordDialogFragment
+            .newInstance(memoName)
+            .show(getFragmentManager(), ChangePasswordDialogFragment.TAG);
+    }
+
+    // ChangePasswordDialogFragment.Listener.changePassword
+    public void changePassword(String memoName, String oldPassword, String newPassword) {
+        File file = new File(this.memoDir, memoName);
+        try {
+            if (!file.exists()) {
+                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (file.length() == 0) {
+                Toast.makeText(this, R.string.info_success_change_password, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            idpwmemo.IDPWMemo memo = new idpwmemo.IDPWMemo();
+            memo.setPassword(oldPassword);
+            byte[] data = Utils.loadFile(file);
+            if (data == null) {
+                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!memo.loadMemo(data)) {
+                Toast.makeText(this, R.string.info_wrong_old_password, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            memo.changePassword(newPassword);
+            data = memo.save();
+            if (Utils.saveFile(file, data)) {
+                Toast.makeText(this, R.string.info_success_change_password, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException ex) {
+            Log.e(TAG, "changePassword", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // MemoMenuDialogFragment.Listener.openMemo
     public void openMemo(String memoName) {
-        File file = new File(this.memoDir, memoName);
-        this.openMemo(new MemoFile(file));
+        this.openMemoView(memoName);
     }
 
     // MemoMenuDialogFragment.Listener.exportMemo
@@ -122,7 +167,7 @@ public class MainActivity extends Activity
 
     // MemoMenuDialogFragment.Listener.changeMemoPassword
     public void changeMemoPassword(String memoName) {
-        // TODO
+        this.showChangePasswordDialog(memoName);
     }
 
     // MemoMenuDialogFragment.Listener.deleteMemo

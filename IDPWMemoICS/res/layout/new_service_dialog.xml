@@ -4,8 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
   <EditText android:id="@+id/new_service_dialog_name"
-     android:layout_width="match_parent"
-     android:layout_height="wrap_content"
-     android:singleLine="true"
-     android:hint="@string/new_service_dialog_hint" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:inputType="text"
+            android:hint="@string/new_service_dialog_hint" />
 </LinearLayout>
