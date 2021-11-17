@@ -1,5 +1,6 @@
 package neetsdkasu.idpwmemoics;
 
+import android.os.Environment;
 import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -130,5 +131,16 @@ final class Utils {
 
     static String toString(idpwmemo.Value v) {
         return v.getTypeName() + ": " + v.value;
+    }
+
+    static boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state)
+            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
+
+    static boolean isExternalStorageWriteable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 }

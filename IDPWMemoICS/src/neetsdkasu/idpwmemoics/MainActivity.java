@@ -21,6 +21,7 @@ public class MainActivity extends Activity
             AdapterView.OnItemClickListener,
             AdapterView.OnItemLongClickListener,
             ChangePasswordDialogFragment.Listener,
+            DeleteMemoDialogFragment.Listener,
             MemoMenuDialogFragment.Listener,
             NewMemoDialogFragment.Listener,
             ImportMemoDialogFragment.Listener {
@@ -104,7 +105,10 @@ public class MainActivity extends Activity
         ImportMemoDialogFragment f = (ImportMemoDialogFragment)
             getFragmentManager().findFragmentByTag(ImportMemoDialogFragment.TAG);
         if (f != null) f.dismiss();
-        // TODO 外部ストレージがない場合にメッセージ出して終わるべき
+        if (!Utils.isExternalStorageReadable()) {
+            Toast.makeText(this, R.string.info_storage_is_not_ready, Toast.LENGTH_SHORT).show();
+            return;
+        }
         ImportMemoDialogFragment
             .newInstance()
             .show(getFragmentManager(), ImportMemoDialogFragment.TAG);
@@ -162,6 +166,10 @@ public class MainActivity extends Activity
 
     // MemoMenuDialogFragment.Listener.exportMemo
     public void exportMemo(String memoName) {
+        if (!Utils.isExternalStorageWriteable()) {
+            Toast.makeText(this, R.string.info_storage_is_not_ready, Toast.LENGTH_SHORT).show();
+            return;
+        }
         // TODO
     }
 
@@ -172,7 +180,25 @@ public class MainActivity extends Activity
 
     // MemoMenuDialogFragment.Listener.deleteMemo
     public void deleteMemo(String memoName) {
-        // TODO
+        DeleteMemoDialogFragment f = (DeleteMemoDialogFragment)
+            getFragmentManager().findFragmentByTag(DeleteMemoDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        DeleteMemoDialogFragment
+            .newInstance(memoName)
+            .show(getFragmentManager(), DeleteMemoDialogFragment.TAG);
+    }
+
+    // DeleteMemoDialogFragment.Listener.doDeleteMemo
+    public void doDeleteMemo(String memoName) {
+        File file = new File(this.memoDir, memoName);
+        if (file.delete()) {
+            MemoFile memoFile = new MemoFile(file);
+            this.memoFileListAdapter.remove(memoFile);
+            Toast.makeText(this, R.string.info_success_delete_memo, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     // NewMemoDialogFragment.Listener.createNewMemo
@@ -203,6 +229,10 @@ public class MainActivity extends Activity
             //  - 先に同名Memoを削除する
             //  - インポートするMemoのファイル名を変更する
             Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!Utils.isExternalStorageReadable()) {
+            Toast.makeText(this, R.string.info_storage_is_not_ready, Toast.LENGTH_SHORT).show();
             return;
         }
         if (Utils.filecopy(memoFile.file, newFile)) {

@@ -73,15 +73,15 @@ public class ImportMemoDialogFragment extends DialogFragment
 
         this.importListAdapter =  new ArrayAdapter<MemoFile>(getActivity(), android.R.layout.simple_list_item_single_choice);
 
-        // TODO 外部ストレージの状態チェックが必要
+        if (Utils.isExternalStorageReadable()) {
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
-        dir.mkdirs();
-        File[] files = dir.listFiles(this);
-        if (files != null) {
-            for (File f : files) {
-                this.importListAdapter.add(new MemoFile(f));
+            dir.mkdirs();
+            File[] files = dir.listFiles(this);
+            if (files != null) {
+                for (File f : files) {
+                    this.importListAdapter.add(new MemoFile(f));
+                }
             }
         }
 

@@ -15,4 +15,18 @@ public final class MemoFile {
     public String toString() {
         return name;
     }
+
+    @Override
+    public int hashCode() {
+        return file.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MemoFile) {
+            return file.equals(((MemoFile)obj).file);
+        } else {
+            return false;
+        }
+    }
 }

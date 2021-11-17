@@ -17,6 +17,9 @@ public class ChangePasswordDialogFragment extends DialogFragment
 
     private static final String MEMO_NAME = "memoName";
 
+    // 1 min. = 60 sec. = 60*1000 msec.
+    private static final long CLEAR_TIME = 60L * 1000L;
+
     static interface Listener {
         void changePassword(String memoName, String oldPassword, String newPassword);
     }
@@ -29,6 +32,8 @@ public class ChangePasswordDialogFragment extends DialogFragment
         return f;
     }
 
+    private long lastPausedTime = 0L;
+
     // android.app.DialogInterface.OnClickListener.onClick
     public void onClick(DialogInterface dialog, int witchButton) {
         EditText e1 = (EditText) ((Dialog)dialog).findViewById(R.id.change_password_dialog_old_password);
@@ -37,6 +42,24 @@ public class ChangePasswordDialogFragment extends DialogFragment
         String newPassword = e2.getText().toString();
         String memoName = getArguments().getString(MEMO_NAME);
         ((Listener)getActivity()).changePassword(memoName, oldPassword, newPassword);
+    }
+
+    @Override
+    public void onPause() {
+        this.lastPausedTime = System.currentTimeMillis();
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        long time = System.currentTimeMillis();
+        if (time - this.lastPausedTime > CLEAR_TIME) {
+            EditText e1 = (EditText) getDialog().findViewById(R.id.change_password_dialog_old_password);
+            EditText e2 = (EditText) getDialog().findViewById(R.id.change_password_dialog_new_password);
+            e1.setText("");
+            e2.setText("");
+        }
     }
 
     @Override

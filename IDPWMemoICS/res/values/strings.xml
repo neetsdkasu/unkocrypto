@@ -44,6 +44,11 @@
     <string name="change_password_dialog_hint_for_old">Old Password</string>
     <string name="change_password_dialog_caption_for_new">New Password</string>
     <string name="change_password_dialog_hint_for_new">New Password</string>
+    <!-- DeleteMemoDialog -->
+    <string name="delete_memo_dialog_title">DELETE</string>
+    <string name="delete_memo_dialog_caption">switch to delete and tap OK if you want</string>
+    <string name="delete_memo_dialog_switch_keep">keep the memo</string>
+    <string name="delete_memo_dialog_switch_delete">DELETE the memo</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>
@@ -52,11 +57,13 @@
     <string name="info_success_add_new_value">successfully added a new value</string>
     <string name="info_success_import_services">successfully imported all services</string>
     <string name="info_success_change_password">successfully set new password</string>
+    <string name="info_success_delete_memo">successfully deleted the memo</string>
     <string name="info_wrong_password">wrong password</string>
     <string name="info_wrong_old_password">wrong old password</string>
     <string name="info_wrong_data_format">wrong data format</string>
     <string name="info_no_data">no data</string>
     <string name="info_copied_to_clipboard">copied</string>
+    <string name="info_storage_is_not_ready">storage is not ready</string>
     <!-- Toast (Error Message) -->
     <string name="errmsg_internal_error">internal error</string>
 </resources>
