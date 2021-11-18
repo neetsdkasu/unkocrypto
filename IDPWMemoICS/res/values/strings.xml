@@ -49,10 +49,15 @@
     <string name="delete_memo_dialog_caption">switch to delete and tap OK if you want</string>
     <string name="delete_memo_dialog_switch_keep">keep the memo</string>
     <string name="delete_memo_dialog_switch_delete">DELETE the memo</string>
+    <!-- ExportMemoDialog -->
+    <string name="export_memo_dialog_title">EXPORT</string>
+    <string name="export_memo_dialog_caption1">export to Downloads directory</string>
+    <string name="export_memo_dialog_caption2">choice export file name</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>
     <string name="info_success_import_memo">successfully imported memo</string>
+    <string name="info_success_export_memo">successfully exported memo</string>
     <string name="info_success_add_new_service">successfully added a new service</string>
     <string name="info_success_add_new_value">successfully added a new value</string>
     <string name="info_success_import_services">successfully imported all services</string>

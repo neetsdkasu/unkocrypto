@@ -22,6 +22,7 @@ public class MainActivity extends Activity
             AdapterView.OnItemLongClickListener,
             ChangePasswordDialogFragment.Listener,
             DeleteMemoDialogFragment.Listener,
+            ExportMemoDialogFragment.Listener,
             MemoMenuDialogFragment.Listener,
             NewMemoDialogFragment.Listener,
             ImportMemoDialogFragment.Listener {
@@ -170,7 +171,36 @@ public class MainActivity extends Activity
             Toast.makeText(this, R.string.info_storage_is_not_ready, Toast.LENGTH_SHORT).show();
             return;
         }
-        // TODO
+        this.showExportMemoDialog(memoName);
+    }
+
+    private void showExportMemoDialog(String memoName) {
+        ExportMemoDialogFragment f = (ExportMemoDialogFragment)
+            getFragmentManager().findFragmentByTag(ExportMemoDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        ExportMemoDialogFragment
+            .newInstance(memoName)
+            .show(getFragmentManager(), ExportMemoDialogFragment.TAG);
+    }
+
+    // ExportMemoDialogFragment.Listener.doExportMemo
+    public void doExportMemo(String srcMemoName, MemoFile dstMemoFile) {
+        if (dstMemoFile.file.exists()) {
+            Log.w(TAG, "doExportMemo");
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File srcFile = new File(this.memoDir, srcMemoName);
+        byte[] data = Utils.loadFile(srcFile);
+        if (data == null) {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (Utils.saveFile(dstMemoFile.file, data)) {
+            Toast.makeText(this, R.string.info_success_export_memo, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     // MemoMenuDialogFragment.Listener.changeMemoPassword
@@ -180,6 +210,10 @@ public class MainActivity extends Activity
 
     // MemoMenuDialogFragment.Listener.deleteMemo
     public void deleteMemo(String memoName) {
+        this.showDeleteMemoDialog(memoName);
+    }
+
+    private void showDeleteMemoDialog(String memoName) {
         DeleteMemoDialogFragment f = (DeleteMemoDialogFragment)
             getFragmentManager().findFragmentByTag(DeleteMemoDialogFragment.TAG);
         if (f != null) f.dismiss();

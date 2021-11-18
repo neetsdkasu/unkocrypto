@@ -54,6 +54,9 @@ final class Utils {
     static boolean saveFile(File file, byte[] data) {
         OutputStream out = null;
         try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
             out = new BufferedOutputStream(new FileOutputStream(file));
             out.write(data);
             out.flush();
@@ -127,6 +130,16 @@ final class Utils {
             }
             return dateFormat.format(new java.util.Date(unixTime));
         }
+    }
+
+    private static java.text.SimpleDateFormat exportDateFormat = null;
+
+    static String getExportDateTimeString(long unixTime) {
+        if (exportDateFormat == null) {
+            exportDateFormat = new java.text.SimpleDateFormat(
+                "yyyyMMddHHmmss", java.util.Locale.US);
+        }
+        return exportDateFormat.format(new java.util.Date(unixTime));
     }
 
     static String toString(idpwmemo.Value v) {

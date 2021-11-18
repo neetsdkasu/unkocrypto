@@ -77,10 +77,12 @@ public class ImportMemoDialogFragment extends DialogFragment
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
             dir.mkdirs();
-            File[] files = dir.listFiles(this);
-            if (files != null) {
-                for (File f : files) {
-                    this.importListAdapter.add(new MemoFile(f));
+            if (dir.isDirectory()) {
+                File[] files = dir.listFiles(this);
+                if (files != null) {
+                    for (File f : files) {
+                        this.importListAdapter.add(new MemoFile(f));
+                    }
                 }
             }
         }
