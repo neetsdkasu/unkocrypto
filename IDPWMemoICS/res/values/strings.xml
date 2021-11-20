@@ -53,6 +53,14 @@
     <string name="export_memo_dialog_title">EXPORT</string>
     <string name="export_memo_dialog_caption1">export to Downloads directory</string>
     <string name="export_memo_dialog_caption2">choice export file name</string>
+    <!-- ServiceMenuDialog -->
+    <string name="service_menu_dialog_show">SHOW</string>
+    <string name="service_menu_dialog_export">EXPORT</string>
+    <string name="service_menu_dialog_delete">DELETE</string>
+    <!-- ValueMenuDialog -->
+    <string name="value_menu_dialog_copy">COPY TO CLIPBOARD</string>
+    <string name="value_menu_dialog_edit">EDIT</string>
+    <string name="value_menu_dialog_delete">DELETE</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>
