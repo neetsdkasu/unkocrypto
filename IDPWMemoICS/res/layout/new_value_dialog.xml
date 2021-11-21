@@ -20,5 +20,5 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             android:singleLine="true"
-            android:hint="@string/new_memo_dialog_hint" />
+            android:hint="@string/new_value_dialog_hint" />
 </LinearLayout>

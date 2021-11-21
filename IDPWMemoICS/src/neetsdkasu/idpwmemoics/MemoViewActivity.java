@@ -31,6 +31,8 @@ public class MemoViewActivity extends Activity
             AdapterView.OnItemClickListener,
             AdapterView.OnItemLongClickListener,
             CompoundButton.OnCheckedChangeListener,
+            DeleteServiceDialogFragment.Listener,
+            DeleteValueDialogFragment.Listener,
             ImportServicesDialogFragment.Listener,
             NewServiceDialogFragment.Listener,
             NewValueDialogFragment.Listener,
@@ -207,7 +209,7 @@ public class MemoViewActivity extends Activity
         ServiceMenuDialogFragment f = (ServiceMenuDialogFragment)
             getFragmentManager().findFragmentByTag(ServiceMenuDialogFragment.TAG);
         if (f != null) f.dismiss();
-        String serviceName = this.memo.getService(serviceIndex).getServiceName();
+        String serviceName = this.serviceListAdapter.getItem(serviceIndex);
         ServiceMenuDialogFragment
             .newInstance(serviceIndex, serviceName)
             .show(getFragmentManager(), ServiceMenuDialogFragment.TAG);
@@ -225,61 +227,127 @@ public class MemoViewActivity extends Activity
 
     // ServiceMenuDialogFragment.Listener.deleteService
     public void deleteService(int serviceIndex) {
-        // TODO
+        this.showDeleteServiceDialog(serviceIndex);
+    }
+
+    private void showDeleteServiceDialog(int serviceIndex) {
+        DeleteServiceDialogFragment f = (DeleteServiceDialogFragment)
+            getFragmentManager().findFragmentByTag(DeleteServiceDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        String serviceName = this.serviceListAdapter.getItem(serviceIndex);
+        DeleteServiceDialogFragment
+            .newInstance(serviceName, serviceIndex)
+            .show(getFragmentManager(), DeleteServiceDialogFragment.TAG);
+    }
+
+    // DeleteServiceDialogFragment.Listener.doDeleteService
+    public void doDeleteService(int serviceIndex) {
+        idpwmemo.Service[] oldServices = this.memo.getServices();
+        idpwmemo.Service[] newServices = Arrays.copyOf(oldServices, oldServices.length - 1);
+        for (int i = serviceIndex; i + 1 < oldServices.length; i++) {
+            newServices[i] = oldServices[i + 1];
+        }
+        this.memo.setServices(newServices);
+        if (this.saveMemo()) {
+            this.serviceListAdapter.clear();
+            for (int i = 0; i < newServices.length; i++) {
+                this.serviceListAdapter.add(newServices[i].getServiceName());
+            }
+            this.serviceListAdapter.notifyDataSetChanged();
+            Toast.makeText(this, R.string.info_success_delete_service, Toast.LENGTH_SHORT).show();
+        } else {
+            this.memo.setServices(oldServices);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isServiceNameIndex(int index) {
+        idpwmemo.Value[] vs = this.memo.getValues();
+        if (idpwmemo.Value.SERVICE_NAME != (int)vs[index].type) {
+            return false;
+        }
+        for (int i = 0; i < vs.length; i++) {
+            if (idpwmemo.Value.SERVICE_NAME == (int)vs[i].type) {
+                return i == index;
+            }
+        }
+        return false;
     }
 
     private void showValueMenuDialog(int index, boolean isSecret) {
         ValueMenuDialogFragment f = (ValueMenuDialogFragment)
             getFragmentManager().findFragmentByTag(ValueMenuDialogFragment.TAG);
         if (f != null) f.dismiss();
+        boolean isServiceName = !isSecret && this.isServiceNameIndex(index);
         ValueMenuDialogFragment
-            .newInstance(this.selectedServiceIndex, index, isSecret)
+            .newInstance(this.selectedServiceIndex, index, isSecret, isServiceName)
             .show(getFragmentManager(), ValueMenuDialogFragment.TAG);
     }
 
     // ValueMenuDialogFragment.Listener.copyValue
     public void copyValue(int serviceIndex, int valueIndex, boolean isSecret) {
-        if (this.selectedServiceIndex != serviceIndex) {
-            Log.e(TAG, "[BUG] copyValue unmatch serviceIndex");
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (this.secretsSwitch.isChecked() != isSecret) {
-            Log.e(TAG, "[BUG] copyValue unmatch isSecret");
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            return;
-        }
         this.copyValueToClipboard(valueIndex);
     }
 
     // ValueMenuDialogFragment.Listener.editValue
-    public void editValue(int serviceIndex, int valueIndex, boolean isSecret) {
-        if (this.selectedServiceIndex != serviceIndex) {
-            Log.e(TAG, "[BUG] editValue unmatch serviceIndex");
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (this.secretsSwitch.isChecked() != isSecret) {
-            Log.e(TAG, "[BUG] editValue unmatch isSecret");
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            return;
-        }
+    public void editValue(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName) {
         // TODO
     }
 
     // ValueMenuDialogFragment.Listener.deleteValue
-    public void deleteValue(int serviceIndex, int valueIndex, boolean isSecret) {
-        if (this.selectedServiceIndex != serviceIndex) {
-            Log.e(TAG, "[BUG] deleteValue unmatch serviceIndex");
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            return;
+    public void deleteValue(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName) {
+        this.showDeleteValueDialog(serviceIndex, valueIndex, isSecret);
+    }
+
+    private void showDeleteValueDialog(int serviceIndex, int valueIndex, boolean isSecret) {
+        DeleteValueDialogFragment f = (DeleteValueDialogFragment)
+            getFragmentManager().findFragmentByTag(DeleteValueDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        String value;
+        if (isSecret) {
+            value = this.secretListAdapter.getItem(valueIndex);
+        } else {
+            value = this.detailListAdapter.getItem(valueIndex);
         }
-        if (this.secretsSwitch.isChecked() != isSecret) {
-            Log.e(TAG, "[BUG] deleteValue unmatch isSecret");
-            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
-            return;
+        DeleteValueDialogFragment
+            .newInstance(serviceIndex, valueIndex, isSecret, value)
+            .show(getFragmentManager(), DeleteValueDialogFragment.TAG);
+    }
+
+    // DeleteValueDialogFragment.Listener.doDeleteValue
+    public void doDeleteValue(int serviceIndex, int valueIndex, boolean isSecret) {
+        idpwmemo.Value[] oldValues;
+        if (isSecret) {
+            oldValues = this.getSecretValues();
+        } else {
+            oldValues = this.memo.getValues();
         }
-        // TODO
+        idpwmemo.Value[] newValues = Arrays.copyOf(oldValues, oldValues.length - 1);
+        for (int i = valueIndex ; i + 1 < oldValues.length; i++) {
+            newValues[i] = oldValues[i + 1];
+        }
+        if (isSecret) {
+            this.memo.setSecrets(newValues);
+        } else {
+            this.memo.setValues(newValues);
+        }
+        if (this.updateMemo()) {
+            if (isSecret) {
+                this.builtSecretsList = false;
+                this.showServiceSecrets();
+            } else {
+                this.builtDetailsList = false;
+                this.showServiceDetails();
+            }
+            Toast.makeText(this, R.string.info_success_delete_value, Toast.LENGTH_SHORT).show();
+        } else {
+            if (isSecret) {
+                this.memo.setSecrets(oldValues);
+            } else {
+                this.memo.setValues(oldValues);
+            }
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     // android.widget.CompoundButton.OnCheckedChangeListener.onCheckedChanged
@@ -678,6 +746,15 @@ public class MemoViewActivity extends Activity
             if (vmDF != null) {
                 int serviceIndex = vmDF.getServiceIndex();
                 boolean isSecret = vmDF.isSecretValue();
+                this.showService(serviceIndex, isSecret);
+                this.listContainer.setVisibility(View.VISIBLE);
+                return;
+            }
+            DeleteValueDialogFragment dvDF = (DeleteValueDialogFragment)
+                getFragmentManager().findFragmentByTag(DeleteValueDialogFragment.TAG);
+            if (dvDF != null) {
+                int serviceIndex = dvDF.getServiceIndex();
+                boolean isSecret = dvDF.isSecretValue();
                 this.showService(serviceIndex, isSecret);
                 this.listContainer.setVisibility(View.VISIBLE);
                 return;

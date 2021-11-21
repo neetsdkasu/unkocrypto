@@ -17,27 +17,29 @@ public class ValueMenuDialogFragment extends DialogFragment
     private static final String SERVICE_INDEX = "serviceIndex";
     private static final String VALUE_INDEX = "valueIndex";
     private static final String IS_SECRET = "isSecret";
+    private static final String IS_SERVICE_NAME = "isServiceName";
 
     static interface Listener {
         void copyValue(int serviceIndex, int valueIndex, boolean isSecret);
-        void editValue(int serviceIndex, int valueIndex, boolean isSecret);
-        void deleteValue(int serviceIndex, int valueIndex, boolean isSecret);
+        void editValue(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName);
+        void deleteValue(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName);
     }
 
-    static ValueMenuDialogFragment newInstance(int serviceIndex, int valueIndex, boolean isSecret) {
+    static ValueMenuDialogFragment newInstance(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName) {
         ValueMenuDialogFragment f = new ValueMenuDialogFragment();
         Bundle args = new Bundle();
         args.putInt(SERVICE_INDEX, serviceIndex);
         args.putInt(VALUE_INDEX, valueIndex);
         args.putBoolean(IS_SECRET, isSecret);
+        args.putBoolean(IS_SERVICE_NAME, isServiceName);
         f.setArguments(args);
         return f;
     }
-    
+
     int getServiceIndex() {
         return getArguments().getInt(SERVICE_INDEX);
     }
-    
+
     boolean isSecretValue() {
         return getArguments().getBoolean(IS_SECRET);
     }
@@ -48,15 +50,16 @@ public class ValueMenuDialogFragment extends DialogFragment
         int serviceIndex = this.getServiceIndex();
         int valueIndex = getArguments().getInt(VALUE_INDEX);
         boolean isSecret = this.isSecretValue();
+        boolean isServiceName = getArguments().getBoolean(IS_SERVICE_NAME);
         switch (v.getId()) {
             case R.id.value_menu_dialog_copy:
                 listener.copyValue(serviceIndex, valueIndex, isSecret);
                 break;
             case R.id.value_menu_dialog_edit:
-                listener.editValue(serviceIndex, valueIndex, isSecret);
+                listener.editValue(serviceIndex, valueIndex, isSecret, isServiceName);
                 break;
             case R.id.value_menu_dialog_delete:
-                listener.deleteValue(serviceIndex, valueIndex, isSecret);
+                listener.deleteValue(serviceIndex, valueIndex, isSecret, isServiceName);
                 break;
         }
         dismiss();
@@ -72,7 +75,12 @@ public class ValueMenuDialogFragment extends DialogFragment
 
         view.findViewById(R.id.value_menu_dialog_copy).setOnClickListener(this);
         view.findViewById(R.id.value_menu_dialog_edit).setOnClickListener(this);
-        view.findViewById(R.id.value_menu_dialog_delete).setOnClickListener(this);
+        Button delButton = (Button) view.findViewById(R.id.value_menu_dialog_delete);
+        if (getArguments().getBoolean(IS_SERVICE_NAME)) {
+            delButton.setEnabled(false);
+        } else {
+            delButton.setOnClickListener(this);
+        }
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setView(view)

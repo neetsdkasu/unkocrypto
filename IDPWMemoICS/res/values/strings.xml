@@ -28,6 +28,7 @@
     <string name="new_value_dialog_title">New Value</string>
     <string name="new_value_dialog_value_type_caption">Value Type</string>
     <string name="new_value_dialog_value_caption">Value</string>
+    <string name="new_value_dialog_hint">Value</string>
     <!-- ImportServicesDialog -->
     <string name="import_services_dialog_title">Import Services</string>
     <string name="import_services_dialog_password_caption">Import Password</string>
@@ -47,8 +48,8 @@
     <!-- DeleteMemoDialog -->
     <string name="delete_memo_dialog_title">DELETE</string>
     <string name="delete_memo_dialog_caption">switch to delete and tap OK if you want</string>
-    <string name="delete_memo_dialog_switch_keep">keep the memo</string>
-    <string name="delete_memo_dialog_switch_delete">DELETE the memo</string>
+    <string name="delete_memo_dialog_switch_keep">keep this memo</string>
+    <string name="delete_memo_dialog_switch_delete">DELETE this memo</string>
     <!-- ExportMemoDialog -->
     <string name="export_memo_dialog_title">EXPORT</string>
     <string name="export_memo_dialog_caption1">export to Downloads directory</string>
@@ -61,6 +62,16 @@
     <string name="value_menu_dialog_copy">COPY TO CLIPBOARD</string>
     <string name="value_menu_dialog_edit">EDIT</string>
     <string name="value_menu_dialog_delete">DELETE</string>
+    <!-- DeleteServiceDialog -->
+    <string name="delete_service_dialog_title">DELETE</string>
+    <string name="delete_service_dialog_caption">switch to delete and tap OK if you want</string>
+    <string name="delete_service_dialog_switch_keep">keep this service</string>
+    <string name="delete_service_dialog_switch_delete">DELETE this service</string>
+    <!-- DeleteValueDialog -->
+    <string name="delete_value_dialog_title">DELETE</string>
+    <string name="delete_value_dialog_caption">switch to delete and tap OK if you want</string>
+    <string name="delete_value_dialog_switch_keep">keep this value</string>
+    <string name="delete_value_dialog_switch_delete">DELETE this value</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>
@@ -71,6 +82,8 @@
     <string name="info_success_import_services">successfully imported all services</string>
     <string name="info_success_change_password">successfully set new password</string>
     <string name="info_success_delete_memo">successfully deleted the memo</string>
+    <string name="info_success_delete_service">successfully deleted the service</string>
+    <string name="info_success_delete_value">successfully deleted the value</string>
     <string name="info_wrong_password">wrong password</string>
     <string name="info_wrong_old_password">wrong old password</string>
     <string name="info_wrong_data_format">wrong data format</string>
