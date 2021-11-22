@@ -72,6 +72,11 @@
     <string name="delete_value_dialog_caption">switch to delete and tap OK if you want</string>
     <string name="delete_value_dialog_switch_keep">keep this value</string>
     <string name="delete_value_dialog_switch_delete">DELETE this value</string>
+    <!-- EditValueDialog -->
+    <string name="edit_value_dialog_title">Edit Value</string>
+    <string name="edit_value_dialog_value_type_caption">Value Type</string>
+    <string name="edit_value_dialog_value_caption">Value</string>
+    <string name="edit_value_dialog_hint">Value</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>
@@ -84,6 +89,7 @@
     <string name="info_success_delete_memo">successfully deleted the memo</string>
     <string name="info_success_delete_service">successfully deleted the service</string>
     <string name="info_success_delete_value">successfully deleted the value</string>
+    <string name="info_success_update_value">successfully updated the value</string>
     <string name="info_wrong_password">wrong password</string>
     <string name="info_wrong_old_password">wrong old password</string>
     <string name="info_wrong_data_format">wrong data format</string>

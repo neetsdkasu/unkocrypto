@@ -33,6 +33,7 @@ public class MemoViewActivity extends Activity
             CompoundButton.OnCheckedChangeListener,
             DeleteServiceDialogFragment.Listener,
             DeleteValueDialogFragment.Listener,
+            EditValueDialogFragment.Listener,
             ImportServicesDialogFragment.Listener,
             NewServiceDialogFragment.Listener,
             NewValueDialogFragment.Listener,
@@ -250,9 +251,7 @@ public class MemoViewActivity extends Activity
         this.memo.setServices(newServices);
         if (this.saveMemo()) {
             this.serviceListAdapter.clear();
-            for (int i = 0; i < newServices.length; i++) {
-                this.serviceListAdapter.add(newServices[i].getServiceName());
-            }
+            this.serviceListAdapter.addAll(this.memo.getServiceNames());
             this.serviceListAdapter.notifyDataSetChanged();
             Toast.makeText(this, R.string.info_success_delete_service, Toast.LENGTH_SHORT).show();
         } else {
@@ -291,7 +290,46 @@ public class MemoViewActivity extends Activity
 
     // ValueMenuDialogFragment.Listener.editValue
     public void editValue(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName) {
-        // TODO
+        this.showEditValueDialog(serviceIndex, valueIndex, isSecret, isServiceName);
+    }
+
+    private void showEditValueDialog(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName) {
+        EditValueDialogFragment f = (EditValueDialogFragment)
+            getFragmentManager().findFragmentByTag(EditValueDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        idpwmemo.Value value;
+        if (isSecret) {
+            value = this.getSecretValues()[valueIndex];
+        } else {
+            value = this.memo.getValues()[valueIndex];
+        }
+        EditValueDialogFragment
+            .newInstance(serviceIndex, valueIndex, isSecret, isServiceName, value)
+            .show(getFragmentManager(), EditValueDialogFragment.TAG);
+    }
+
+    // EditValueDialogFragment.Listener.updateValue
+    public void updateValue(int serviceIndex, int valueIndex, boolean isSecret, boolean isServiceName, idpwmemo.Value newValue) {
+        idpwmemo.Value[] values;
+        if (isSecret) {
+            values = this.getSecretValues();
+        } else {
+            values = this.memo.getValues();
+        }
+        idpwmemo.Value oldValue = values[valueIndex];
+        values[valueIndex] = newValue;
+        if (this.updateMemo()) {
+            if (isServiceName) {
+                this.serviceListAdapter.clear();
+                this.serviceListAdapter.addAll(this.memo.getServiceNames());
+                this.serviceListAdapter.notifyDataSetChanged();
+            }
+            this.showService(serviceIndex, isSecret);
+            Toast.makeText(this, R.string.info_success_update_value, Toast.LENGTH_SHORT).show();
+        } else {
+            values[valueIndex] = oldValue;
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     // ValueMenuDialogFragment.Listener.deleteValue
@@ -332,13 +370,7 @@ public class MemoViewActivity extends Activity
             this.memo.setValues(newValues);
         }
         if (this.updateMemo()) {
-            if (isSecret) {
-                this.builtSecretsList = false;
-                this.showServiceSecrets();
-            } else {
-                this.builtDetailsList = false;
-                this.showServiceDetails();
-            }
+            this.showService(serviceIndex, isSecret);
             Toast.makeText(this, R.string.info_success_delete_value, Toast.LENGTH_SHORT).show();
         } else {
             if (isSecret) {
@@ -724,9 +756,7 @@ public class MemoViewActivity extends Activity
                     return;
                 }
                 this.serviceListAdapter.clear();
-                for (String s : this.memo.getServiceNames()) {
-                    this.serviceListAdapter.add(s);
-                }
+                this.serviceListAdapter.addAll(this.memo.getServiceNames());
             } else {
                 this.memo.newMemo();
                 this.serviceListAdapter.clear();
