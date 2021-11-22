@@ -789,6 +789,15 @@ public class MemoViewActivity extends Activity
                 this.listContainer.setVisibility(View.VISIBLE);
                 return;
             }
+            EditValueDialogFragment evDF = (EditValueDialogFragment)
+                getFragmentManager().findFragmentByTag(EditValueDialogFragment.TAG);
+            if (evDF != null) {
+                int serviceIndex = evDF.getServiceIndex();
+                boolean isSecret = evDF.isSecretValue();
+                this.showService(serviceIndex, isSecret);
+                this.listContainer.setVisibility(View.VISIBLE);
+                return;
+            }
             this.showServiceList();
             this.listContainer.setVisibility(View.VISIBLE);
         } catch (IOException ex) {
