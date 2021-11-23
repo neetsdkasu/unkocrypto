@@ -34,6 +34,7 @@ public class MemoViewActivity extends Activity
             DeleteServiceDialogFragment.Listener,
             DeleteValueDialogFragment.Listener,
             EditValueDialogFragment.Listener,
+            ExportPasswordDialogFragment.Listener,
             ImportServicesDialogFragment.Listener,
             NewServiceDialogFragment.Listener,
             NewValueDialogFragment.Listener,
@@ -223,7 +224,52 @@ public class MemoViewActivity extends Activity
 
     // ServiceMenuDialogFragment.Listener.exportService
     public void exportService(int serviceIndex) {
-        // TODO
+        this.showExportPasswordDialog(serviceIndex);
+    }
+
+    private void showExportPasswordDialog(int serviceIndex) {
+        ExportPasswordDialogFragment f = (ExportPasswordDialogFragment)
+            getFragmentManager().findFragmentByTag(ExportPasswordDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        String serviceName = this.serviceListAdapter.getItem(serviceIndex);
+        ExportPasswordDialogFragment
+            .newInstance(serviceName, serviceIndex)
+            .show(getFragmentManager(), ExportPasswordDialogFragment.TAG);
+    }
+
+    // ExportPasswordDialogFragment.Listener.setExportPassword
+    public void setExportPassword(int serviceIndex, String password) {
+        try {
+            String serviceName = this.serviceListAdapter.getItem(serviceIndex);
+            this.memo.selectService(serviceIndex);
+            idpwmemo.IDPWMemo exp = new idpwmemo.IDPWMemo();
+            exp.setPassword(password);
+            exp.newMemo();
+            exp.addService(this.memo);
+            byte[] rawData = exp.save();
+            String data = Base64.encodeToString(rawData, Base64.DEFAULT);
+            this.showExportServiceDialog(serviceName, data);
+            this.copyExportDataToClipboard(data);
+        } catch (IOException ex) {
+            Log.e(TAG, "setExportPassword", ex);
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void copyExportDataToClipboard(String data) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("IDPWMemo Export Service Data", data);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, R.string.info_copied_to_clipboard, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showExportServiceDialog(String serviceName, String data) {
+        ExportServiceDialogFragment f = (ExportServiceDialogFragment)
+            getFragmentManager().findFragmentByTag(ExportServiceDialogFragment.TAG);
+        if (f != null) f.dismiss();
+        ExportServiceDialogFragment
+            .newInstance(serviceName, data)
+            .show(getFragmentManager(), ExportServiceDialogFragment.TAG);
     }
 
     // ServiceMenuDialogFragment.Listener.deleteService

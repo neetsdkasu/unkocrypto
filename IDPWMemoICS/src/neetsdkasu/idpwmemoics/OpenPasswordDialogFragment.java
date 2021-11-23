@@ -39,6 +39,7 @@ public class OpenPasswordDialogFragment extends DialogFragment
     @Override
     public void	onCancel(DialogInterface dialog) {
         ((Listener)getActivity()).giveUpOpenPassword();
+        super.onCancel(dialog);
     }
 
     @Override

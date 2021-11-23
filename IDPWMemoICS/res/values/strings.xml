@@ -77,6 +77,11 @@
     <string name="edit_value_dialog_value_type_caption">Value Type</string>
     <string name="edit_value_dialog_value_caption">Value</string>
     <string name="edit_value_dialog_hint">Value</string>
+    <!-- ExportPasswordDialog -->
+    <string name="export_password_dialog_title">EXPORT</string>
+    <string name="export_password_dialog_hint">Export Password</string>
+    <!-- ExportServiceDialog -->
+    <string name="export_service_dialog_title">EXPORT</string>
     <!-- Toast (Infomation Message) -->
     <string name="info_duplicate_memo_name">the memo name already exists</string>
     <string name="info_success_add_new_memo">successfully added a new memo</string>

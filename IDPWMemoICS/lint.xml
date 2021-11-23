@@ -8,6 +8,7 @@
     <issue id="TextFields">
         <ignore path="res/layout/import_services_dialog.xml" />
         <ignore path="res/layout/open_password_dialog.xml" />
+        <ignore path="res/layout/export_password_dialog.xml" />
         <ignore path="res/layout/change_password_dialog.xml" />
     </issue>
 </lint>
