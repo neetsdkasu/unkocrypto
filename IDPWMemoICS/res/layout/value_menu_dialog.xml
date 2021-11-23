@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    style="?android:attr/buttonBarStyle" >
+  <Button android:id="@+id/value_menu_dialog_copy"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/value_menu_dialog_copy"
+          style="?android:attr/buttonBarButtonStyle" />
+  <Button android:id="@+id/value_menu_dialog_edit"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/value_menu_dialog_edit"
+          style="?android:attr/buttonBarButtonStyle" />
+  <Button android:id="@+id/value_menu_dialog_delete"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/value_menu_dialog_delete"
+          style="?android:attr/buttonBarButtonStyle" />
+</LinearLayout>
