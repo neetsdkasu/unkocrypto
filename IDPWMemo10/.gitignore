@@ -1,0 +1,6 @@
+.gradle/
+androidTest/
+build/
+libs/
+local.properties
+!gradle-wrapper.jar
