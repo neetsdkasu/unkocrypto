@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+  <!-- ButtonBar -->
+  <LinearLayout android:id="@+id/memo_view_button_bar"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                style="?android:attr/buttonBarStyle" >
+    <!-- Add New Service -->
+    <Button android:id="@+id/memo_view_add_new_service_button"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/memo_view_button_add_new_service"
+            android:visibility="invisible"
+            android:onClick="showAddNewServiceDialog"
+            style="?android:attr/buttonBarButtonStyle" />
+    <!-- Import Services -->
+    <Button android:id="@+id/memo_view_import_services_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/memo_view_button_import_services"
+            android:visibility="invisible"
+            android:onClick="showImportServicesDialog"
+            style="?android:attr/buttonBarButtonStyle" />
+    <!-- Add New Value -->
+    <Button android:id="@+id/memo_view_add_new_value_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/memo_view_button_add_new_value"
+            android:visibility="gone"
+            android:onClick="showAddNewValueDialog"
+            style="?android:attr/buttonBarButtonStyle" />
+  </LinearLayout>
+  <!-- Lists -->
+  <LinearLayout android:id="@+id/memo_view_list_container"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/memo_view_button_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+    <!-- Service List -->
+    <ListView android:id="@+id/memo_view_service_list"
+              android:layout_weight="1"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" />
+    <!-- Selected Service Name -->
+    <TextView android:id="@+id/memo_view_service_name"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:visibility="gone" />
+    <!-- Selected Service Last Update -->
+    <TextView android:id="@+id/memo_view_service_lastupdate"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text="@string/memo_view_label_lastupdate"
+              android:visibility="gone" />
+    <!-- Switch ( DETAILS/SECRETS ) -->
+    <androidx.appcompat.widget.SwitchCompat android:id="@+id/memo_view_secrets_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textOff="@string/memo_view_label_details"
+            android:textOn="@string/memo_view_label_secrets"
+            android:visibility="gone" />
+    <!-- Detail Value List -->
+    <ListView android:id="@+id/memo_view_detail_list"
+              android:layout_weight="1"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:visibility="gone" />
+    <!-- Secret Value List -->
+    <ListView android:id="@+id/memo_view_secret_list"
+              android:layout_weight="1"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:visibility="gone" />
+  </LinearLayout>
+</RelativeLayout>
