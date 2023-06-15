@@ -1,12 +1,12 @@
 package neetsdkasu.idpwmemo10;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import androidx.fragment.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Environment;
+// import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -89,25 +89,25 @@ public class ExportMemoDialogFragment extends DialogFragment
         String memoName = getArguments().getString(MEMO_NAME);
 
         if (Utils.isExternalStorageWriteable()) {
-            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            // File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-            dir.mkdirs();
-            if (dir.isDirectory()) {
-                File file1 = new File(dir, memoName + Utils.MEMO_EXT);
-                if (!file1.exists()) {
-                    this.exportListAdapter.add(new MemoFile(file1));
-                }
-                long time = getArguments().getLong(TIME);
-                String timeString = Utils.getExportDateTimeString(time);
-                File file2 = new File(dir, memoName + "-" + timeString + Utils.MEMO_EXT);
-                if (!file2.exists()) {
-                    this.exportListAdapter.add(new MemoFile(file2));
-                }
-                File file3 = new File(dir, memoName + "-" + time + Utils.MEMO_EXT);
-                if (!file3.exists()) {
-                    this.exportListAdapter.add(new MemoFile(file3));
-                }
-            }
+            // dir.mkdirs();
+            // if (dir.isDirectory()) {
+            //     File file1 = new File(dir, memoName + Utils.MEMO_EXT);
+            //     if (!file1.exists()) {
+            //         this.exportListAdapter.add(new MemoFile(file1));
+            //     }
+            //     long time = getArguments().getLong(TIME);
+            //     String timeString = Utils.getExportDateTimeString(time);
+            //     File file2 = new File(dir, memoName + "-" + timeString + Utils.MEMO_EXT);
+            //     if (!file2.exists()) {
+            //         this.exportListAdapter.add(new MemoFile(file2));
+            //     }
+            //     File file3 = new File(dir, memoName + "-" + time + Utils.MEMO_EXT);
+            //     if (!file3.exists()) {
+            //         this.exportListAdapter.add(new MemoFile(file3));
+            //     }
+            // }
         }
 
         ListView list = (ListView) view.findViewById(R.id.export_memo_dialog_list);

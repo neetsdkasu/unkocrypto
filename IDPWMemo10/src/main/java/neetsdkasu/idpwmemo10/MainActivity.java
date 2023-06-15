@@ -1,8 +1,11 @@
 package neetsdkasu.idpwmemo10;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +15,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.File;
 import java.io.IOException;
@@ -39,25 +45,28 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        try {
+            setContentView(R.layout.main);
 
-        this.memoFileListView = (ListView) findViewById(R.id.main_memo_file_list);
+            this.memoFileListView = (ListView) findViewById(R.id.main_memo_file_list);
+            this.memoDir = getDir(Utils.MEMO_DIR, MODE_PRIVATE);
 
-        this.memoDir = getDir(Utils.MEMO_DIR, MODE_PRIVATE);
-
-        this.memoFileListAdapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
-        for (File f : this.memoDir.listFiles()) {
-            this.memoFileListAdapter.add(new MemoFile(f));
-        }
-        this.memoFileListAdapter.sort(new Comparator<MemoFile>() {
-            public int compare (MemoFile lhs, MemoFile rhs) {
-                return lhs.name.compareTo(rhs.name);
+            this.memoFileListAdapter = new ArrayAdapter<MemoFile>(this, android.R.layout.simple_list_item_1);
+            for (File f : this.memoDir.listFiles()) {
+                this.memoFileListAdapter.add(new MemoFile(f));
             }
-        });
+            this.memoFileListAdapter.sort(new Comparator<MemoFile>() {
+                public int compare (MemoFile lhs, MemoFile rhs) {
+                    return lhs.name.compareTo(rhs.name);
+                }
+            });
 
-        this.memoFileListView.setAdapter(this.memoFileListAdapter);
-        this.memoFileListView.setOnItemClickListener(this);
-        this.memoFileListView.setOnItemLongClickListener(this);
+            this.memoFileListView.setAdapter(this.memoFileListAdapter);
+            this.memoFileListView.setOnItemClickListener(this);
+            this.memoFileListView.setOnItemLongClickListener(this);
+        } catch (Exception ex) {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     // リストのアイテムのクリックの処理
@@ -103,17 +112,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showImportMemoDialog(View view) {
-        // タッチ操作による表示実行なため、このフラグメント処理は不要なはず…(モーダルダイアログなため、表示中にここへ到達不可能なはず)
-        ImportMemoDialogFragment f = (ImportMemoDialogFragment)
-            getSupportFragmentManager().findFragmentByTag(ImportMemoDialogFragment.TAG);
-        if (f != null) f.dismiss();
-        if (!Utils.isExternalStorageReadable()) {
-            Toast.makeText(this, R.string.info_storage_is_not_ready, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ImportMemoDialogFragment
-            .newInstance()
-            .show(getSupportFragmentManager(), ImportMemoDialogFragment.TAG);
+        final ActivityResultLauncher<String> launcher = registerForActivityResult(
+            new ActivityResultContracts.GetContent() {
+                @Override
+                public Intent createIntent(Context context, String input) {
+                    Intent intent = super.createIntent(context, input);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                    return intent;
+                }
+            },
+            new ActivityResultCallback<Uri>() {
+                public void onActivityResult(Uri result) {
+                    MainActivity.this.importFromFile(result);
+                }
+            }
+        );
+        launcher.launch("*/*");
     }
 
     private void showChangePasswordDialog(String memoName) {
@@ -175,13 +190,33 @@ public class MainActivity extends AppCompatActivity
         this.showExportMemoDialog(memoName);
     }
 
+    private class ExportCallback implements ActivityResultCallback<Uri> {
+        String srcMemoName = "";
+        void setMemoName(String memoName) {
+            this.srcMemoName = memoName;
+        }
+        public void onActivityResult(Uri result) {
+            MainActivity.this.doExportToFile(srcMemoName, result);
+        }
+    }
+
     private void showExportMemoDialog(String memoName) {
-        ExportMemoDialogFragment f = (ExportMemoDialogFragment)
-            getSupportFragmentManager().findFragmentByTag(ExportMemoDialogFragment.TAG);
-        if (f != null) f.dismiss();
-        ExportMemoDialogFragment
-            .newInstance(memoName)
-            .show(getSupportFragmentManager(), ExportMemoDialogFragment.TAG);
+        final ExportCallback callback = new ExportCallback();
+        final ActivityResultLauncher<String> launcher = registerForActivityResult(
+            // ライブラリパッケージが古いのでCreateDocumentは引数なしコンストラクタを使う必要
+            new ActivityResultContracts.CreateDocument() {
+                @Override
+                public Intent createIntent(Context context, String input) {
+                    Intent intent = super.createIntent(context, input);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("application/octet-stream");
+                    return intent;
+                }
+            },
+            callback
+        );
+        callback.setMemoName(memoName);
+        launcher.launch(memoName + Utils.MEMO_EXT);
     }
 
     // ExportMemoDialogFragment.Listener.doExportMemo
@@ -200,6 +235,30 @@ public class MainActivity extends AppCompatActivity
         if (Utils.saveFile(dstMemoFile.file, data)) {
             Toast.makeText(this, R.string.info_success_export_memo, Toast.LENGTH_SHORT).show();
         } else {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    void doExportToFile(String srcMemoName, Uri dst) {
+        File srcFile = new File(this.memoDir, srcMemoName);
+        byte[] data = Utils.loadFile(srcFile);
+        if (data == null) {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(dst, "wt")) {
+                if (Utils.saveFile(pfd.getFileDescriptor(), data)) {
+                    Toast.makeText(this, R.string.info_success_export_memo, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (java.io.FileNotFoundException ex) {
+            // ContentResolver.openFileDescriptor()から出る
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        } catch (IOException ex) {
+            // ParcelFileDescriptor.close()から出るらしい
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
     }
@@ -276,6 +335,38 @@ public class MainActivity extends AppCompatActivity
             this.memoFileListView.smoothScrollToPosition(this.memoFileListView.getCount()-1);
             Toast.makeText(this, R.string.info_success_import_memo, Toast.LENGTH_SHORT).show();
         } else {
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    void importFromFile(Uri uri) {
+        String fileName = Utils.getFileName(getContentResolver(), uri);
+        String name = Utils.trimMemoExtension(fileName);
+        File newFile = new File(this.memoDir, name);
+        if (newFile.exists()) {
+            // 名前重複時は上書きしない
+            // 次のいずれかでユーザが対応すればよい
+            //  - 先に同名Memoを削除する
+            //  - インポートするMemoのファイル名を変更する
+            Toast.makeText(this, R.string.info_duplicate_memo_name, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
+                if (Utils.filecopy(pfd.getFileDescriptor(), newFile)) {
+                    this.memoFileListAdapter.add(new MemoFile(newFile));
+                    this.memoFileListAdapter.notifyDataSetChanged();
+                    this.memoFileListView.smoothScrollToPosition(this.memoFileListView.getCount()-1);
+                    Toast.makeText(this, R.string.info_success_import_memo, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (java.io.FileNotFoundException ex) {
+            // ContentResolver.openFileDescriptor()から出る
+            Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
+        } catch (IOException ex) {
+            // ParcelFileDescriptor.close()から出るらしい
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
     }

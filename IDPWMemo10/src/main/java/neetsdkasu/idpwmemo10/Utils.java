@@ -1,10 +1,15 @@
 package neetsdkasu.idpwmemo10;
 
-import android.os.Environment;
+// import android.os.Environment;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -71,6 +76,23 @@ final class Utils {
         }
     }
 
+    static boolean saveFile(FileDescriptor file, byte[] data) {
+        OutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(file));
+            out.write(data);
+            out.flush();
+            return true;
+        } catch (IOException ex) {
+            Log.e(TAG, "saveFile", ex);
+            return false;
+        } finally {
+            if (out != null) { try { out.close(); } catch (IOException ex) {
+                Log.e(TAG, "saveFile.out.close", ex);
+            }}
+        }
+    }
+
     static byte[] loadFile(File file) {
         byte[] buf = new byte[(int)file.length()];
         int pos = 0;
@@ -93,6 +115,32 @@ final class Utils {
     }
 
     static boolean filecopy(File src, File dst) {
+        OutputStream out = null;
+        InputStream in = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(dst));
+            in = new BufferedInputStream(new FileInputStream(src));
+            byte[] buf = new byte[2048];
+            int len;
+            while ((len = in.read(buf, 0, buf.length)) >= 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            return true;
+        } catch (IOException ex) {
+            Log.e(TAG, "filecopy", ex);
+            return false;
+        } finally {
+            if (out != null) { try { out.close(); } catch (IOException ex) {
+                Log.e(TAG, "filecopy.out.close", ex);
+            }}
+            if (in != null) { try { in.close(); } catch (IOException ex) {
+                Log.e(TAG, "filecopy.in.close", ex);
+            }}
+        }
+    }
+
+    static boolean filecopy(FileDescriptor src, File dst) {
         OutputStream out = null;
         InputStream in = null;
         try {
@@ -147,13 +195,46 @@ final class Utils {
     }
 
     static boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state)
-            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+        // String state = Environment.getExternalStorageState();
+        // return Environment.MEDIA_MOUNTED.equals(state)
+        //     || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+        return true;
     }
 
     static boolean isExternalStorageWriteable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state);
+        // String state = Environment.getExternalStorageState();
+        // return Environment.MEDIA_MOUNTED.equals(state);
+        return true;
+    }
+
+    static String getFileName(ContentResolver cr, Uri uri) {
+        if (!"content".equals(uri.getScheme())) {
+            return uri.getLastPathSegment();
+        }
+        Cursor cursor = null;
+        try {
+            cursor = cr.query(uri, null, null, null, null);
+            int pos = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            if (pos < 0) {
+                return uri.getLastPathSegment();
+            }
+            cursor.moveToFirst();
+            return cursor.getString(pos);
+        } catch (Exception ex) {
+            Log.d(TAG, "getFileName", ex);
+            return uri.getLastPathSegment();
+        } finally {
+            if (cursor != null) {
+                try { cursor.close(); } catch (Exception ex) {}
+            }
+        }
+    }
+
+    static String trimMemoExtension(String name) {
+        if (name.endsWith(MEMO_EXT)) {
+            return name.substring(0, name.length() - 5);
+        } else {
+            return name;
+        }
     }
 }

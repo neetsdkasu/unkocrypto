@@ -1,10 +1,10 @@
 package neetsdkasu.idpwmemo10;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Environment;
+// import android.os.Environment;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -74,17 +74,17 @@ public class ImportMemoDialogFragment extends DialogFragment
         this.importListAdapter =  new ArrayAdapter<MemoFile>(getActivity(), android.R.layout.simple_list_item_single_choice);
 
         if (Utils.isExternalStorageReadable()) {
-            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            // File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-            dir.mkdirs();
-            if (dir.isDirectory()) {
-                File[] files = dir.listFiles(this);
-                if (files != null) {
-                    for (File f : files) {
-                        this.importListAdapter.add(new MemoFile(f));
-                    }
-                }
-            }
+            // dir.mkdirs();
+            // if (dir.isDirectory()) {
+            //     File[] files = dir.listFiles(this);
+            //     if (files != null) {
+            //         for (File f : files) {
+            //             this.importListAdapter.add(new MemoFile(f));
+            //         }
+            //    }
+            // }
         }
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())

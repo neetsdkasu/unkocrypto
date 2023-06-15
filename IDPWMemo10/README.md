@@ -12,6 +12,6 @@
 ### 覚え書き
 
  - Windows環境前提  
- - java7かjava8のJDK  
+ - たぶんjava8のJDK  
  - リポジトリを`git clone`してきたばかりのときはgitサブモジュールを取得する必要があり、`git submodule update`あたりを実行する？  
  - `make_libs.cmd`を実行して、libs.jarを作っておく（libsディレクトリに作られる）  
