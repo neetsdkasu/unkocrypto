@@ -11,11 +11,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MemoViewActivity"
-                  android:label="@string/memo_view_title">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="neetsdkasu.idpwmemo10.MainActivity" />
-        </activity>
     </application>
 </manifest>
