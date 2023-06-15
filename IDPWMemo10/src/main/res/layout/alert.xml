@@ -7,12 +7,7 @@
 <TextView
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:text="@string/hello"
+    android:text="@string/alert_message"
     />
-<Button
-    android:id="@+id/alert_button"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:text="@string/alert_button_text" />
 </LinearLayout>
 
