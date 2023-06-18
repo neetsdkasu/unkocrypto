@@ -5,6 +5,7 @@
     android:layout_height="fill_parent"
     >
 <TextView
+    android:id="@+id/hello_text_view"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:text="@string/hello"
@@ -14,5 +15,25 @@
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
     android:text="@string/alert_button_text" />
+<TextView
+    android:id="@+id/import_file_text_view"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:text="" />
+<Button
+    android:id="@+id/import_button"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:text="@string/import_button_text" />
+<TextView
+    android:id="@+id/export_file_text_view"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:text="@string/export_file_text_view_text" />
+<Button
+    android:id="@+id/export_button"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:text="@string/export_button_text" />
 </LinearLayout>
 

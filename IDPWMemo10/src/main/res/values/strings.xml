@@ -5,4 +5,13 @@
     <string name="alert_button_text">Show Alert</string>
     <string name="alert_title">ALERT DIALOG</string>
     <string name="alert_message">Hi! This is Alert!</string>
+    <string name="import_button_text">Import Memo</string>
+    <string name="export_file_text_view_text">export_test.memo</string>
+    <string name="export_button_text">Export Memo</string>
+    <string name="imported">Success Import</string>
+    <string name="import_error">Failure Import</string>
+    <string name="import_canceled">Canceled Import</string>
+    <string name="exported">Success Export</string>
+    <string name="export_error">Failure Export</string>
+    <string name="export_canceled">Canceled Export</string>
 </resources>
