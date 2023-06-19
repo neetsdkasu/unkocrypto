@@ -7,6 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -41,28 +44,38 @@ public class MainActivity extends Activity
         Button importButton = findViewById(R.id.import_button);
         importButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent importMemo = new Intent(Intent.ACTION_GET_CONTENT);
-                importMemo.setType("*/*");
-                importMemo.addCategory(Intent.CATEGORY_OPENABLE);
-                importMemo.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                MainActivity.this.startActivityForResult(importMemo, MainActivity.REQ_IMPORT);
-                MainActivity.this.state = 10;
+                MainActivity.this.openImportMemoFile();
             }
         });
 
         Button exportButton = findViewById(R.id.export_button);
-        final TextView exportFileTextView = findViewById(R.id.export_file_text_view);
         exportButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent exportMemo = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                exportMemo.setType("application/octet-stream");
-                exportMemo.addCategory(Intent.CATEGORY_OPENABLE);
-                CharSequence filename = exportFileTextView.getText();
-                exportMemo.putExtra(Intent.EXTRA_TITLE, filename);
-                MainActivity.this.startActivityForResult(exportMemo, MainActivity.REQ_EXPORT);
-                MainActivity.this.state = 20;
+                MainActivity.this.createExportFile();
             }
         });
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.new_memo_menu_item) {
+            this.addNewMemo();
+            return true;
+        } else if (id == R.id.import_memo_menu_item) {
+            this.openImportMemoFile();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -107,18 +120,52 @@ public class MainActivity extends Activity
         if (requestCode == MainActivity.REQ_IMPORT) {
             if (resultCode == RESULT_OK) {
                 Uri uri = data.getData();
-                importMemoFile(uri);
+                this.importMemoFile(uri);
             } else {
                 this.state = 13;
             }
         } else if (requestCode == MainActivity.REQ_EXPORT) {
             if (resultCode == RESULT_OK) {
                 Uri uri = data.getData();
-                exportMemoFile(uri);
+                this.exportMemoFile(uri);
             } else {
                 this.state = 23;
             }
         }
+    }
+
+    int addNewMemoCount = 0;
+
+    void addNewMemo() {
+        final TextView importFileTextView = findViewById(R.id.import_file_text_view);
+        this.addNewMemoCount++;
+        MTRandom rand = new MTRandom(this.addNewMemoCount);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            sb.append('A' + (char)(rand.nextInt() % 5));
+        }
+        sb.append(".memo");
+        importFileTextView.setText(sb.toString());
+    }
+
+    void openImportMemoFile() {
+        Intent importMemo = new Intent(Intent.ACTION_GET_CONTENT);
+        importMemo.setType("*/*");
+        importMemo.addCategory(Intent.CATEGORY_OPENABLE);
+        importMemo.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(importMemo, MainActivity.REQ_IMPORT);
+        this.state = 10;
+    }
+
+    void createExportFile() {
+        final TextView exportFileTextView = findViewById(R.id.export_file_text_view);
+        Intent exportMemo = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        exportMemo.setType("application/octet-stream");
+        exportMemo.addCategory(Intent.CATEGORY_OPENABLE);
+        CharSequence filename = exportFileTextView.getText();
+        exportMemo.putExtra(Intent.EXTRA_TITLE, filename);
+        startActivityForResult(exportMemo, MainActivity.REQ_EXPORT);
+        this.state = 20;
     }
 
     void importMemoFile(Uri uri) {

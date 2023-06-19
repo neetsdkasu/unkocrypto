@@ -14,4 +14,6 @@
     <string name="exported">Success Export</string>
     <string name="export_error">Failure Export</string>
     <string name="export_canceled">Canceled Export</string>
+    <string name="new_memo_menu_item_text">New</string>
+    <string name="import_memo_menu_item_text">Import</string>
 </resources>
