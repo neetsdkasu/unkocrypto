@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IDPWMemo10</string>
-    <string name="hello">Hello World, IDPWMemo10</string>
-    <string name="alert_button_text">Show Alert</string>
+
+    <!-- AlertAtivity -->
     <string name="alert_title">ALERT DIALOG</string>
     <string name="alert_message">Hi! This is Alert!</string>
-    <string name="import_button_text">Import Memo</string>
-    <string name="export_file_text_view_text">export_test.memo</string>
-    <string name="export_button_text">Export Memo</string>
+
+    <!-- Import Messages -->
     <string name="imported">Success Import</string>
     <string name="import_error">Failure Import</string>
     <string name="import_canceled">Canceled Import</string>
+
+    <!-- Export Messages -->
     <string name="exported">Success Export</string>
     <string name="export_error">Failure Export</string>
     <string name="export_canceled">Canceled Export</string>
+
+    <!-- MainActivity Option Menu -->
     <string name="new_memo_menu_item_text">New</string>
     <string name="import_memo_menu_item_text">Import</string>
+
+    <!-- MemoListView Context Menu -->
+    <string name="change_password_menu_item_text">Change Password</string>
+    <string name="export_memo_menu_item_text">Export</string>
+    <string name="delete_memo_menu_item_text">Delete</string>
 </resources>
