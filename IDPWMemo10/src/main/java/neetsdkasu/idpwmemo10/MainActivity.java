@@ -75,12 +75,15 @@ public class MainActivity extends Activity
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         int id = item.getItemId();
-        if (id == R.id.change_password_menu_item) {
-            // TODO
-            return true;
-        } else if (id == R.id.export_memo_menu_item) {
+         if (id == R.id.export_memo_menu_item) {
             String fileName = this.listAdapter.getItem(info.position);
             this.createExportFile(fileName);
+            return true;
+         } else if (id == R.id.change_memo_password_menu_item) {
+            // TODO
+            return true;
+        } else if (id == R.id.change_memo_name_menu_item) {
+            // TODO
             return true;
         } else if (id == R.id.delete_memo_menu_item) {
             // TODO

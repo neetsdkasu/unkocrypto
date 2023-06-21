@@ -17,11 +17,13 @@
     <string name="export_canceled">Canceled Export</string>
 
     <!-- MainActivity Option Menu -->
+    <string name="add_memo_menu_item_text">Add</string>
     <string name="new_memo_menu_item_text">New</string>
     <string name="import_memo_menu_item_text">Import</string>
 
     <!-- MemoListView Context Menu -->
-    <string name="change_password_menu_item_text">Change Password</string>
     <string name="export_memo_menu_item_text">Export</string>
+    <string name="change_memo_password_menu_item_text">Change Password</string>
+    <string name="change_memo_name_menu_item_text">Change Name</string>
     <string name="delete_memo_menu_item_text">Delete</string>
 </resources>
