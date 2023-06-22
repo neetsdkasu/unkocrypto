@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
 
 import idpwmemo.IDPWMemo;
 
@@ -45,20 +45,15 @@ public class NewMemoActivity extends Activity
         try {
 
             IDPWMemo memo = new IDPWMemo();
-            memo.newMemo();
             memo.setPassword(keyword);
+            memo.newMemo();
             byte[] data = memo.save();
 
-            file.createNewFile();
-
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                out.write(data);
-                out.flush();
-            }
+            Files.write(file.toPath(), data);
 
         } catch (Exception ex) {
 
-            try { file.delete(); } catch (Exception ex2) {}
+            try { Files.deleteIfExists(file.toPath()); } catch (Exception ex2) {}
 
             Utils.alertShort(this, R.string.msg_failure_create_memo);
 
