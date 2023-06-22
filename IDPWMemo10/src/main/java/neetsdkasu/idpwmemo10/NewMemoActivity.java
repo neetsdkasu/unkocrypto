@@ -1,0 +1,74 @@
+package neetsdkasu.idpwmemo10;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import java.io.File;
+import java.io.FileOutputStream;
+
+import idpwmemo.IDPWMemo;
+
+public class NewMemoActivity extends Activity
+{
+    static final String INTENT_EXTRA_NEW_MEMO_NAME = "neetsdkasu.idpwmemo10.NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME";
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.new_memo);
+    }
+
+    // res/layout/new_memo.xml Button onClick
+    public void onClickOkButton(View v) {
+
+        EditText nameEditText = findViewById(R.id.new_memo_name);
+        String name = nameEditText.getText().toString();
+
+        if (!Utils.isValidMemoName(name)) {
+            Utils.alertShort(this, R.string.msg_wrong_memo_name);
+            return;
+        }
+
+        File file = Utils.getMemoFile(this, name);
+
+        if (file.exists()) {
+            Utils.alertShort(this, R.string.msg_memo_name_already_exists);
+            return;
+        }
+
+        EditText keywordEditText = findViewById(R.id.new_memo_keyword);
+        String keyword = keywordEditText.getText().toString();
+
+        try {
+
+            IDPWMemo memo = new IDPWMemo();
+            memo.newMemo();
+            memo.setPassword(keyword);
+            byte[] data = memo.save();
+
+            file.createNewFile();
+
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                out.write(data);
+                out.flush();
+            }
+
+        } catch (Exception ex) {
+
+            try { file.delete(); } catch (Exception ex2) {}
+
+            Utils.alertShort(this, R.string.msg_failure_create_memo);
+
+            return;
+        }
+
+        Intent intent = new Intent()
+            .putExtra(NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME, name);
+
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+}

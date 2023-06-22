@@ -15,8 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,18 +25,26 @@ import mt19937ar.MTRandom;
 
 public class MainActivity extends Activity
 {
-    private static final int REQ_IMPORT = 10;
-    private static final int REQ_EXPORT = 20;
+    private static final int REQ_IMPORT                  = 10;
+    private static final int REQ_EXPORT                  = 20;
+    private static final int REQ_NEW_MEMO                = 30;
 
-    private static final int STATE_IDLE            = 0;
-    private static final int STATE_REQ_IMPORT      = 10;
-    private static final int STATE_SUCCESS_IMPORT  = 11;
-    private static final int STATE_FAILURE_IMPORT  = 12;
-    private static final int STATE_CANCELED_IMPORT = 13;
-    private static final int STATE_REQ_EXPORT      = 20;
-    private static final int STATE_SUCCESS_EXPORT  = 21;
-    private static final int STATE_FAILURE_EXPORT  = 22;
-    private static final int STATE_CANCELED_EXPORT = 23;
+    private static final int STATE_IDLE                  = 0;
+    private static final int STATE_SUCCESS               = 1;
+    private static final int STATE_FAILURE               = 2;
+    private static final int STATE_CANCELED              = 3;
+    private static final int STATE_REQ_IMPORT            = MainActivity.REQ_IMPORT;
+    private static final int STATE_SUCCESS_IMPORT        = MainActivity.REQ_IMPORT + MainActivity.STATE_SUCCESS;
+    private static final int STATE_FAILURE_IMPORT        = MainActivity.REQ_IMPORT + MainActivity.STATE_FAILURE;
+    private static final int STATE_CANCELED_IMPORT       = MainActivity.REQ_IMPORT + MainActivity.STATE_CANCELED;
+    private static final int STATE_REQ_EXPORT            = MainActivity.REQ_EXPORT;
+    private static final int STATE_SUCCESS_EXPORT        = MainActivity.REQ_EXPORT + MainActivity.STATE_SUCCESS;
+    private static final int STATE_FAILURE_EXPORT        = MainActivity.REQ_EXPORT + MainActivity.STATE_FAILURE;
+    private static final int STATE_CANCELED_EXPORT       = MainActivity.REQ_EXPORT + MainActivity.STATE_CANCELED;
+    private static final int STATE_REQ_NEW_MEMO          = MainActivity.REQ_NEW_MEMO;
+    private static final int STATE_SUCCESS_NEW_MEMO      = MainActivity.REQ_NEW_MEMO + MainActivity.STATE_SUCCESS;
+    private static final int STATE_FAILURE_NEW_MEMO      = MainActivity.REQ_NEW_MEMO + MainActivity.STATE_FAILURE;
+    private static final int STATE_CANCELED_NEW_MEMO     = MainActivity.REQ_NEW_MEMO + MainActivity.STATE_CANCELED;
 
     private int state = MainActivity.STATE_IDLE;
 
@@ -50,15 +57,19 @@ public class MainActivity extends Activity
         setContentView(R.layout.main);
 
         List<String> memoList = new ArrayList<>();
+        for (File f : Utils.getMemoDir(this).listFiles()) {
+            memoList.add(f.getName());
+        }
+        memoList.sort(String.CASE_INSENSITIVE_ORDER);
 
         listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, memoList);
 
-        ListView listView = findViewById(R.id.memo_list_view);
+        ListView listView = findViewById(R.id.main_memo_list);
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String fileName = MainActivity.this.listAdapter.getItem(position);
-                Toast.makeText(MainActivity.this, fileName, Toast.LENGTH_SHORT).show();
+                Utils.alertShort(MainActivity.this, fileName);
             }
         });
         registerForContextMenu(listView);
@@ -79,7 +90,7 @@ public class MainActivity extends Activity
             String fileName = this.listAdapter.getItem(info.position);
             this.createExportFile(fileName);
             return true;
-         } else if (id == R.id.change_memo_password_menu_item) {
+         } else if (id == R.id.change_memo_keyword_menu_item) {
             // TODO
             return true;
         } else if (id == R.id.change_memo_name_menu_item) {
@@ -122,86 +133,105 @@ public class MainActivity extends Activity
     }
 
     private void showStateMessage() {
+        int resId;
         switch (this.state) {
             case MainActivity.STATE_REQ_IMPORT:
+                // NO MESSAGE
                 return;
             case MainActivity.STATE_SUCCESS_IMPORT:
-                Toast.makeText(this, R.string.imported, Toast.LENGTH_SHORT).show();
+                resId = R.string.msg_success_import;
                 break;
             case MainActivity.STATE_FAILURE_IMPORT:
-                Toast.makeText(this, R.string.import_error, Toast.LENGTH_SHORT).show();
+                resId = R.string.msg_failure_import;
                 break;
             case MainActivity.STATE_CANCELED_IMPORT:
-                Toast.makeText(this, R.string.import_canceled, Toast.LENGTH_SHORT).show();
+                resId = R.string.msg_canceled_import;
                 break;
             case MainActivity.STATE_REQ_EXPORT:
+                // NO MESSAGE
                 return;
             case MainActivity.STATE_SUCCESS_EXPORT:
-                Toast.makeText(this, R.string.exported, Toast.LENGTH_SHORT).show();
+                resId = R.string.msg_success_export;
                 break;
             case MainActivity.STATE_FAILURE_EXPORT:
-                Toast.makeText(this, R.string.export_error, Toast.LENGTH_SHORT).show();
+                resId = R.string.msg_failure_export;
                 break;
             case MainActivity.STATE_CANCELED_EXPORT:
-                Toast.makeText(this, R.string.export_canceled, Toast.LENGTH_SHORT).show();
+                resId = R.string.msg_canceled_export;
+                break;
+            case MainActivity.STATE_REQ_NEW_MEMO:
+                // NO MESSAGE
+                return;
+            case MainActivity.STATE_SUCCESS_NEW_MEMO:
+                resId = R.string.msg_success_new_memo;
+                break;
+            case MainActivity.STATE_FAILURE_NEW_MEMO:
+                resId = R.string.msg_failure_new_memo;
+                break;
+            case MainActivity.STATE_CANCELED_NEW_MEMO:
+                resId = R.string.msg_canceled_new_memo;
                 break;
             default:
-                break;
+                // NO MESSAGE
+                return;
         }
+        Utils.alertShort(this, resId);
         this.state = MainActivity.STATE_IDLE;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == MainActivity.REQ_IMPORT) {
-            if (resultCode == RESULT_OK) {
-                Uri uri = data.getData();
-                this.importMemoFile(uri);
-            } else {
-                this.state = MainActivity.STATE_CANCELED_IMPORT;
-            }
+        if (requestCode == MainActivity.REQ_NEW_MEMO) {
+            this.addedNewMemo(resultCode, data);
+        } else if (requestCode == MainActivity.REQ_IMPORT) {
+            this.importMemoFile(resultCode, data);
         } else if (requestCode == MainActivity.REQ_EXPORT) {
-            if (resultCode == RESULT_OK) {
-                Uri uri = data.getData();
-                this.exportMemoFile(uri);
-            } else {
-                this.state = MainActivity.STATE_CANCELED_EXPORT;
-            }
+            this.exportMemoFile(resultCode, data);
         }
     }
 
-    private int addNewMemoCount = 0;
-
     private void addNewMemo() {
-        this.addNewMemoCount++;
-        MTRandom rand = new MTRandom(this.addNewMemoCount);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8; i++) {
-            sb.append((char)((int)'A' + (rand.nextInt() % 20)));
+        Intent intent = new Intent(this, NewMemoActivity.class);
+        startActivityForResult(intent, MainActivity.REQ_NEW_MEMO);
+    }
+
+    private void addedNewMemo(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || data == null) {
+            this.state = MainActivity.STATE_CANCELED_NEW_MEMO;
+            return;
         }
-        sb.append(".memo");
-        this.listAdapter.add(sb.toString());
+        if (!data.hasExtra(NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME)) {
+            this.state = MainActivity.STATE_FAILURE_NEW_MEMO;
+            return;
+        }
+        this.state = MainActivity.STATE_SUCCESS_NEW_MEMO;
+        String name = data.getStringExtra(NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME);
+        listAdapter.setNotifyOnChange(false);
+        listAdapter.add(name);
+        listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
+        listAdapter.notifyDataSetChanged();
     }
 
     private void openImportMemoFile() {
-        Intent importMemo = new Intent(Intent.ACTION_GET_CONTENT);
-        importMemo.setType("*/*");
-        importMemo.addCategory(Intent.CATEGORY_OPENABLE);
-        importMemo.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        startActivityForResult(importMemo, MainActivity.REQ_IMPORT);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT)
+            .setType("*/*")
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        if (intent.resolveActivity(getPackageManager()) == null) {
+            this.state = MainActivity.STATE_FAILURE_IMPORT;
+            this.showStateMessage();
+            return;
+        }
+        startActivityForResult(intent, MainActivity.REQ_IMPORT);
         this.state = MainActivity.STATE_REQ_IMPORT;
     }
 
-    private void createExportFile(String fileName) {
-        Intent exportMemo = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        exportMemo.setType("application/octet-stream");
-        exportMemo.addCategory(Intent.CATEGORY_OPENABLE);
-        exportMemo.putExtra(Intent.EXTRA_TITLE, fileName);
-        startActivityForResult(exportMemo, MainActivity.REQ_EXPORT);
-        this.state = MainActivity.STATE_REQ_EXPORT;
-    }
-
-    private void importMemoFile(Uri uri) {
+    private void importMemoFile(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || data == null) {
+            this.state = MainActivity.STATE_CANCELED_IMPORT;
+            return;
+        }
+        Uri uri = data.getData();
         try {
             try (Cursor returnCursor = getContentResolver().query(uri, null, null, null, null)) {
                 int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
@@ -215,7 +245,26 @@ public class MainActivity extends Activity
         }
     }
 
-    private void exportMemoFile(Uri uri) {
+    private void createExportFile(String fileName) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+            .setType("application/octet-stream")
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .putExtra(Intent.EXTRA_TITLE, fileName);
+        if (intent.resolveActivity(getPackageManager()) == null) {
+            this.state = MainActivity.STATE_FAILURE_EXPORT;
+            this.showStateMessage();
+            return;
+        }
+        startActivityForResult(intent, MainActivity.REQ_EXPORT);
+        this.state = MainActivity.STATE_REQ_EXPORT;
+    }
+
+    private void exportMemoFile(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || data == null) {
+            this.state = MainActivity.STATE_CANCELED_EXPORT;
+            return;
+        }
+        Uri uri = data.getData();
         try {
             try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "w")) {
                 try (FileOutputStream out = new FileOutputStream(pfd.getFileDescriptor())) {

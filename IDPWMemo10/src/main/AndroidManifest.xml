@@ -11,6 +11,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.NewMemoActivity"
+                  android:label="@string/new_memo_title"
+                  android:exported="false"
+                  android:parentActivityName="neetsdkasu.idpwmemo10.MainActivity">
+        </activity>
         <activity android:name="neetsdkasu.idpwmemo10.AlertActivity"
                   android:label="@string/alert_title"
                   android:exported="false"

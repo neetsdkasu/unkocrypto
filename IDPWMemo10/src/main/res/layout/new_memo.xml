@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/new_memo_name_text_view_text" 
+      android:labelFor="@id/new_memo_name"
+      />
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/new_memo_name_allows_text_view_text" 
+      />
+  <EditText
+      android:id="@+id/new_memo_name"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:singleLine="true"
+      android:importantForAutofill="no"
+      android:inputType="text"
+      />
+   <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/new_memo_keyword_text_view_text"
+      android:labelFor="@id/new_memo_keyword" 
+      />
+  <EditText
+      android:id="@+id/new_memo_keyword"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:singleLine="true"
+      android:importantForAutofill="no"
+      android:inputType="text"
+      />
+  <Button
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/new_memo_ok_button_text"
+      android:onClick="onClickOkButton"
+      />
+</LinearLayout>
+
