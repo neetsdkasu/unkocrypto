@@ -10,6 +10,7 @@ final class Utils {
     private Utils() {}
 
     static final String MEMO_DIR = "memo";
+    static final String EXTENSION = ".memo";
 
     static final int MEMO_NAME_LENGTH_MIN = 1;
     static final int MEMO_NAME_LENGTH_MAX = 50;

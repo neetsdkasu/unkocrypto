@@ -7,30 +7,30 @@
   <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="@string/new_memo_name_text_view_text"
-      android:labelFor="@id/new_memo_name"
-      />
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="@string/new_memo_name_allows_text_view_text"
+      android:text="@string/import_memo_file_name_text_view_text"
+      android:labelFor="@id/import_memo_file_name"
       />
   <EditText
-      android:id="@+id/new_memo_name"
+      android:id="@+id/import_memo_file_name"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
       android:singleLine="true"
       android:importantForAutofill="no"
       android:inputType="text"
       />
-   <TextView
+  <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="@string/new_memo_keyword_text_view_text"
-      android:labelFor="@id/new_memo_keyword"
+      android:text="@string/import_memo_name_text_view_text"
+      android:labelFor="@id/import_memo_name"
+      />
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/import_memo_name_allows_text_view_text"
       />
   <EditText
-      android:id="@+id/new_memo_keyword"
+      android:id="@+id/import_memo_name"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
       android:singleLine="true"
@@ -41,8 +41,20 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:padding="2.0dp"
-      android:text="@string/new_memo_ok_button_text"
+      android:text="@string/import_memo_ok_button_text"
       android:onClick="onClickOkButton"
+      />
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/import_memo_create_or_override_text_view_text"
+      />
+  <Switch
+      android:id="@+id/import_memo_override_switch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:textOff="@string/import_memo_override_switch_textoff"
+      android:textOn="@string/import_memo_override_switch_texton"
       />
 </LinearLayout>
 
