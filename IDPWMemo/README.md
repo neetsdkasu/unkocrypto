@@ -13,20 +13,23 @@ compiler version:
 
 
 --------
-####　コンパイル（開発用）
+#### コンパイル（開発用）  
+
 バッチファイル c.bat を実行する  
 コンパイルに成功するかを確認するための処理  
 
 
 -------
-#### 実行（開発用）
+#### 実行（開発用）  
+
 バッチファイル a.bat を実行する  
 IDPWMemo GUIアプリが起動する  
 実行時の動作を確認するためのもの  
 
 
 ------
-#### アプリのJAR生成
+#### アプリのJAR生成  
+
 バッチファイル build.bat を実行する  
 ディレクトリ bin に IDPWMemo.jar が生成される  
 javaw -jar IDPWMemo.jar でGUIアプリとして実行できる  
@@ -36,7 +39,7 @@ javaw -jar IDPWMemo.jar でGUIアプリとして実行できる
 ------
 #### idpwmemo.IDPWMemo クラスを他プロジェクトからライブラリ的に使う場合  
 
-新規作成
+##### 新規作成
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
@@ -64,7 +67,7 @@ try {
 }
 ```
 
-ロード
+##### ロード
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
@@ -97,7 +100,7 @@ try {
 }
 ```
 
-新規アカウント情報追加
+##### 新規アカウント情報追加
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
@@ -151,7 +154,7 @@ try {
 ```
 
 
-アカウント情報の変更
+##### アカウント情報の変更
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
@@ -218,7 +221,7 @@ try {
 ```
 
 
-アカウント情報の削除
+##### アカウント情報の削除
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
@@ -254,7 +257,7 @@ try {
 ```
 
 
-マスターパスワードの変更
+##### マスターパスワードの変更
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
