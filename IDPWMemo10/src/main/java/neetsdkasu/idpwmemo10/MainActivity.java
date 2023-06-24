@@ -2,6 +2,7 @@ package neetsdkasu.idpwmemo10;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -57,9 +58,12 @@ public class MainActivity extends Activity
     private ArrayAdapter<String> listAdapter = null;
 
     private ActivityResultManager activityResultManager = null;
-
-    private ActivityResultManager getActivityResultManager() { return this.activityResultManager; }
-    private void setActivityResultManager(ActivityResultManager manager) { this.activityResultManager = manager; }
+    private ActivityResultManager getActivityResultManager() {
+        if (this.activityResultManager == null) {
+            this.activityResultManager = new ActivityResultManager(this);
+        }
+        return this.activityResultManager;
+    }
 
     private ActivityResultManager.Launcher<Void>   addNewMemoLauncher     = null;
     private ActivityResultManager.Launcher<Void>   pickImportFileLauncher = null;
@@ -90,12 +94,11 @@ public class MainActivity extends Activity
         });
         registerForContextMenu(listView);
 
-        ActivityResultManager manager = new ActivityResultManager(this);
-        this.setActivityResultManager(manager);
-        this.addNewMemoLauncher = manager.register(new AddNewMemoCondacts());
-        this.pickImportFileLauncher = manager.register(new PickImportFileCondacts());
-        this.importMemoLauncher = manager.register(new ImportMemoCondacts());
-        this.exportMemoLauncher = manager.register(new ExportMemoCondacts());
+        ActivityResultManager manager = this.getActivityResultManager();
+        this.addNewMemoLauncher = manager.register(new MainActivity.AddNewMemoCondacts());
+        this.pickImportFileLauncher = manager.register(new MainActivity.PickImportFileCondacts());
+        this.importMemoLauncher = manager.register(new MainActivity.ImportMemoCondacts());
+        this.exportMemoLauncher = manager.register(new MainActivity.ExportMemoCondacts());
     }
 
     @Override
@@ -163,8 +166,8 @@ public class MainActivity extends Activity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ActivityResultManager manager = this.getActivityResultManager();
-        if (manager != null && !manager.onActivityResult(requestCode, resultCode, data)) {
+        if (!this.getActivityResultManager().onActivityResult(requestCode, resultCode, data)) {
+            Utils.alertShort(this, R.string.msg_internal_error); // DEBUG
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -322,9 +325,28 @@ public class MainActivity extends Activity
     }
 
     private final class ExportMemoCondacts extends ActivityResultManager.Condacts<String> {
+        // 念のためにSharedPreferencesに一時保存するが
+        // このアプリが同時起動されているときにどう挙動するのか全くわからねえな
+        // まぁ俺しか使わんアプリだが
+        private final String KEY = "export_memo_name";
+        private String memoName = null;
+        private void setMemoName(String name) {
+            this.memoName = name;
+            MainActivity.this.getPreferences(Activity.MODE_PRIVATE).edit()
+                .putString(this.KEY, name)
+                .apply();
+        }
+        private String getMemoName() {
+            if (this.memoName == null) {
+                this.memoName = MainActivity.this.getPreferences(Activity.MODE_PRIVATE)
+                    .getString(this.KEY, null);
+            }
+            return this.memoName;
+        }
         @Override
         public Intent onCreate(String name) {
             MainActivity.this.state = MainActivity.STATE_REQ_EXPORT_MEMO;
+            this.setMemoName(name);
             String fileName = name + Utils.EXTENSION;
             return new Intent(Intent.ACTION_CREATE_DOCUMENT)
                 .setType("application/octet-stream")
@@ -351,17 +373,19 @@ public class MainActivity extends Activity
                 MainActivity.this.state = MainActivity.STATE_FAILURE_EXPORT_MEMO;
                 return;
             }
+            String memoName = this.getMemoName();
+            if (memoName == null) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_EXPORT_MEMO;
+                return;
+            }
+            this.setMemoName(null);
             try {
+                File memoFile = Utils.getMemoFile(MainActivity.this, memoName);
+                byte[] buf = Files.readAllBytes(memoFile.toPath());
                 try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "w")) {
                     try (FileOutputStream out = new FileOutputStream(pfd.getFileDescriptor())) {
-
-                        // TODO
-                        MTRandom rand = new MTRandom();
-                        byte[] buf = new byte[1024];
-                        rand.nextBytes(buf);
                         out.write(buf);
                         out.flush();
-
                         MainActivity.this.state = MainActivity.STATE_SUCCESS_EXPORT_MEMO;
                     }
                 }
@@ -370,95 +394,4 @@ public class MainActivity extends Activity
             }
         }
     }
-
-    // private void addNewMemo() {
-        // Intent intent = new Intent(this, NewMemoActivity.class);
-        // startActivityForResult(intent, MainActivity.REQ_NEW_MEMO);
-    // }
-
-    // private void addedNewMemo(int resultCode, Intent data) {
-        // if (resultCode != RESULT_OK || data == null) {
-            // this.state = MainActivity.STATE_CANCELED_NEW_MEMO;
-            // return;
-        // }
-        // if (!data.hasExtra(NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME)) {
-            // this.state = MainActivity.STATE_FAILURE_NEW_MEMO;
-            // return;
-        // }
-        // this.state = MainActivity.STATE_SUCCESS_NEW_MEMO;
-        // String name = data.getStringExtra(NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME);
-        // listAdapter.setNotifyOnChange(false);
-        // listAdapter.add(name);
-        // listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
-        // listAdapter.notifyDataSetChanged();
-    // }
-
-    // private void openImportMemoFile() {
-        // Intent intent = new Intent(Intent.ACTION_GET_CONTENT)
-            // .setType("*/*")
-            // .addCategory(Intent.CATEGORY_OPENABLE)
-            // .putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        // if (intent.resolveActivity(getPackageManager()) == null) {
-            // this.state = MainActivity.STATE_FAILURE_IMPORT;
-            // this.showStateMessage();
-            // return;
-        // }
-        // startActivityForResult(intent, MainActivity.REQ_IMPORT);
-        // this.state = MainActivity.STATE_REQ_IMPORT;
-    // }
-
-    // private void importMemoFile(int resultCode, Intent data) {
-        // if (resultCode != RESULT_OK || data == null) {
-            // this.state = MainActivity.STATE_CANCELED_IMPORT;
-            // return;
-        // }
-        // Uri uri = data.getData();
-        // try {
-            // try (Cursor returnCursor = getContentResolver().query(uri, null, null, null, null)) {
-                // int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                // returnCursor.moveToFirst();
-                // String fileName = returnCursor.getString(nameIndex);
-                // this.listAdapter.add(fileName);
-                // this.state = MainActivity.STATE_SUCCESS_IMPORT;
-            // }
-        // } catch (Exception ex) {
-            // this.state = MainActivity.STATE_FAILURE_IMPORT;
-        // }
-    // }
-
-    // private void createExportFile(String fileName) {
-        // Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
-            // .setType("application/octet-stream")
-            // .addCategory(Intent.CATEGORY_OPENABLE)
-            // .putExtra(Intent.EXTRA_TITLE, fileName);
-        // if (intent.resolveActivity(getPackageManager()) == null) {
-            // this.state = MainActivity.STATE_FAILURE_EXPORT;
-            // this.showStateMessage();
-            // return;
-        // }
-        // startActivityForResult(intent, MainActivity.REQ_EXPORT);
-        // this.state = MainActivity.STATE_REQ_EXPORT;
-    // }
-
-    // private void exportMemoFile(int resultCode, Intent data) {
-        // if (resultCode != RESULT_OK || data == null) {
-            // this.state = MainActivity.STATE_CANCELED_EXPORT;
-            // return;
-        // }
-        // Uri uri = data.getData();
-        // try {
-            // try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "w")) {
-                // try (FileOutputStream out = new FileOutputStream(pfd.getFileDescriptor())) {
-                    // MTRandom rand = new MTRandom();
-                    // byte[] buf = new byte[1024];
-                    // rand.nextBytes(buf);
-                    // out.write(buf);
-                    // out.flush();
-                    // this.state = MainActivity.STATE_SUCCESS_EXPORT;
-                // }
-            // }
-        // } catch (Exception ex) {
-            // this.state = MainActivity.STATE_FAILURE_EXPORT;
-        // }
-    // }
 }

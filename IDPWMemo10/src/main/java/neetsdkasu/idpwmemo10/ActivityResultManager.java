@@ -30,7 +30,7 @@ final class ActivityResultManager {
     private final class Flag {
         private boolean enabled = true;
         boolean isEnabled() { return this.enabled; }
-        void setEnabled(boolean enabled) { this.enabled = enabled; }
+        void disabled() { this.enabled = false; }
     }
 
     static final class Launcher<T> {
@@ -91,7 +91,9 @@ final class ActivityResultManager {
             ActivityResultManager.ResultListener listener = this.listenerList.get(i);
             if (listener == condacts) {
                 Flag oldFlag = this.flagList.set(i, null);
-                oldFlag.setEnabled(false);
+                if (oldFlag != null) {
+                    oldFlag.disabled();
+                }
                 this.listenerList.set(i, null);
                 return true;
             }
@@ -104,14 +106,15 @@ final class ActivityResultManager {
             return false;
         }
         ActivityResultManager.ResultListener listener = this.listenerList.get(requestCode - 1);
-        if (listener != null) {
-            if (resultCode == Activity.RESULT_OK) {
-                listener.onOk(data);
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                listener.onCanceled();
-            } else {
-                listener.onUserResult(resultCode, data);
-            }
+        if (listener == null) {
+            return true;
+        }
+        if (resultCode == Activity.RESULT_OK) {
+            listener.onOk(data);
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            listener.onCanceled();
+        } else {
+            listener.onUserResult(resultCode, data);
         }
         return true;
     }

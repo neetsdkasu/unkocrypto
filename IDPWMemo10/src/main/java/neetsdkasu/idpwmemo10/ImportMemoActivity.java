@@ -28,8 +28,13 @@ public class ImportMemoActivity extends Activity
 
         String fileName = this.getImportFileName();
 
-        EditText fileNameEditText = findViewById(R.id.import_memo_name);
+        EditText fileNameEditText = findViewById(R.id.import_memo_file_name);
         fileNameEditText.setText(fileName == null ? "???????" : fileName);
+
+        if (fileName != null) {
+            EditText nameEditText = findViewById(R.id.import_memo_name);
+            nameEditText.setText(this.trimFileNameForMemoName(fileName));
+        }
     }
 
     // res/layout/import_memo.xml Button onClick
@@ -68,10 +73,11 @@ public class ImportMemoActivity extends Activity
             return;
         }
 
-        File cache = new File(getCacheDir(), "cache.memo");
+        File cache = new File(getCacheDir(), "import_orverride_cache.memo");
 
         try {
             if (file.exists()) {
+                // 念のための一時保存（うまくいくか不明だが）
                 Files.move(file.toPath(), cache.toPath());
             }
             try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
@@ -117,6 +123,18 @@ public class ImportMemoActivity extends Activity
         } catch (Exception ex) {
             return null;
         }
+    }
+
+    private String trimFileNameForMemoName(String fileName) {
+        if (fileName.endsWith(Utils.EXTENSION)) {
+            int endIndex = fileName.lastIndexOf(Utils.EXTENSION);
+            fileName = fileName.substring(0, endIndex);
+        }
+        String memoName = fileName.replaceAll("[^a-zA-Z0-9\\-_\\(\\)\\[\\]]", "_");
+        if (memoName.length() <= Utils.MEMO_NAME_LENGTH_MAX) {
+            return memoName;
+        }
+        return memoName.substring(0, Utils.MEMO_NAME_LENGTH_MAX);
     }
 
 }
