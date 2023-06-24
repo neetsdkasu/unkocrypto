@@ -154,6 +154,54 @@ try {
 ```
 
 
+##### アカウント情報の参照
+```java
+import idpwmemo.IDPWMemo;
+import idpwmemo.IDPWMemoException;
+import idpwmemo.Value;
+import java.util.Arrays;
+
+try {
+    IDPWMemo memo = /* 前述のロードなど */;
+    
+    // 編集対象のアカウント情報のインデックスを特定
+    int index = Arrays.asList(memo.getServiceNames()).indexOf("GitHub account");
+    if (index < 0) {
+        // "GitHub account"と言う設定名のアカウント情報は保存されてない
+        throw new RuntimeException("not found GitHub account !");
+    }
+    
+    // 変更対象のアカウント情報を選択する
+    // 内部でアカウント情報の一時的なデータが生成される
+    memo.selectSevice(index);
+
+    // getValuesメソッドの戻り値はmemo内部で一時保持してる生のデータのため直接変更ができてしまうので取り扱いに注意
+    Value[] values = memo.getValues();
+
+    for (Value v : values) {
+        // データのtypeの文字列表現とデータの値valueを表示
+        System.out.println("type: " + v.getTypeName() + ", value: " + v.value);
+    }
+    
+    // getSecretsメソッドの戻り値はmemo内部で一時保持してる生のデータのため直接変更ができてしまうので取り扱いに注意
+    Value[] secrets = memo.getSecrets();
+
+    for (Value v : secrets) {
+        // データのtypeの文字列表現とデータの値valueを表示
+        System.out.println("type: " + v.getTypeName() + ", value: " + v.value);
+    }
+
+} catch (IDPWMemoException ex) {
+    // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
+    // RuntimeExceptionのサブクラスなので無視してOK
+} catch (java.io.IOException ex2) {
+    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
+    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
+    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+}
+```
+
+
 ##### アカウント情報の変更
 ```java
 import idpwmemo.IDPWMemo;
