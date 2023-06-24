@@ -225,7 +225,6 @@ try {
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
-import idpwmemo.Value;
 import java.util.Arrays;
 
 try {
@@ -261,7 +260,6 @@ try {
 ```java
 import idpwmemo.IDPWMemo;
 import idpwmemo.IDPWMemoException;
-import idpwmemo.Value;
 import java.util.Arrays;
 
 try {
