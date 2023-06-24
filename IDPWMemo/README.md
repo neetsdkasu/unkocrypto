@@ -164,7 +164,8 @@ import java.util.Arrays;
 try {
     IDPWMemo memo = /* 前述のロードなど */;
     
-    // 編集対象のアカウント情報のインデックスを特定
+    // getServiceNamesメソッドは登録済みアカウント情報の設定名一覧をString[]で取得する
+    // 参照対象のアカウント情報のインデックスを特定
     int index = Arrays.asList(memo.getServiceNames()).indexOf("GitHub account");
     if (index < 0) {
         // "GitHub account"と言う設定名のアカウント情報は保存されてない
@@ -212,6 +213,7 @@ import java.util.Arrays;
 try {
     IDPWMemo memo = /* 前述のロードなど */;
     
+    // getServiceNamesメソッドは登録済みアカウント情報の設定名一覧をString[]で取得する
     // 編集対象のアカウント情報のインデックスを特定
     int index = Arrays.asList(memo.getServiceNames()).indexOf("GitHub account");
     if (index < 0) {
@@ -278,6 +280,7 @@ import java.util.Arrays;
 try {
     IDPWMemo memo = /* 前述のロードなど */;
     
+    // getServiceNamesメソッドは登録済みアカウント情報の設定名一覧をString[]で取得する
     // 削除対象のアカウント情報のインデックスを特定
     int index = Arrays.asList(memo.getServiceNames()).indexOf("GitHub account");
     if (index < 0) {
