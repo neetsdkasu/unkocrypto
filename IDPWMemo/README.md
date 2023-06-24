@@ -245,9 +245,9 @@ try {
 
     // Value.PASSWORDとして登録した情報の変更の場合 (同じValue.typeのものを複数登録できるため、完全一致を探す必要がある･･･)
     String oldPassword = "PassworD";
-    for (int i = 0; i < values.length; i++) {
-        if (values[i].type == Value.PASSWORD && oldPassword.equals(value[i].value)) {
-            values[i].value = "NewPassworD";
+    for (int i = 0; i < secrets.length; i++) {
+        if (secrets[i].type == Value.PASSWORD && oldPassword.equals(secrets[i].value)) {
+            secrets[i].value = "NewPassworD";
             break;
         }
     }
