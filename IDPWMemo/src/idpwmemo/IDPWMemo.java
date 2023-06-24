@@ -57,7 +57,7 @@ public final class IDPWMemo
     {
         if (encodedPasswordV1 == null)
         {
-            throw new RuntimeException("no password");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_PASSWORD);
         }
         return cryptor.decryptV1(Service.EMPTY_BYTES, encodedPasswordV1);
     }
@@ -71,11 +71,11 @@ public final class IDPWMemo
     {
         if (version < 1 || version > 2)
         {
-            throw new RuntimeException("wrong version");
+            throw new IllegalArgumentException("version " + version + " is unsupported (supported version 1 or 2)");
         }
         if (encodedPasswordV1 == null || encodedPasswordV2 == null)
         {
-            throw new RuntimeException("no password");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_PASSWORD);
         }
         this.version = version;
         memo = new Memo();
@@ -126,7 +126,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         return memo.getServiceCount();
     }
@@ -135,7 +135,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         return memo.getServices();
      }
@@ -144,7 +144,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         return memo.getService(index);
     }
@@ -153,7 +153,7 @@ public final class IDPWMemo
     {
         if (serviceIndex < 0)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         return memo.getService(serviceIndex);
     }
@@ -162,7 +162,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         saveSecrets();
         return service;
@@ -172,7 +172,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         return service.getServiceName();
     }
@@ -181,7 +181,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         String[] names = new String[memo.getServiceCount()];
         for (int i = 0; i < names.length; i++)
@@ -195,7 +195,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         memo.setServices(services);
         serviceIndex = -1;
@@ -211,7 +211,7 @@ public final class IDPWMemo
         }
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         service = serviceFrom.getSelectedService().getCopy();
         Value[] srcSecrets = serviceFrom.getSecrets();
@@ -234,7 +234,7 @@ public final class IDPWMemo
         }
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (index < 0 || index >= memo.getServiceCount())
         {
@@ -258,7 +258,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         service = new Service(serviceName);
         serviceIndex = memo.addService(service.getCopy());
@@ -269,7 +269,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (index < 0 || index >= memo.getServiceCount())
         {
@@ -284,7 +284,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         return service.getValues();
     }
@@ -293,7 +293,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         service.setValues(values);
     }
@@ -302,7 +302,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         secrets = values == null
                 ? Service.EMPTY_VALUES
@@ -317,7 +317,7 @@ public final class IDPWMemo
         }
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         byte[] src = service.getSecrets();
         if (src == null || src.length == 0)
@@ -339,7 +339,7 @@ public final class IDPWMemo
         src = null;
         if (buf == null)
         {
-            throw new  RuntimeException("secrets data is broken");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_BROKEN_SECRETS);
         }
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buf));
         buf = null;
@@ -354,7 +354,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (index < 0 || index >= memo.getServiceCount())
         {
@@ -376,7 +376,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         saveSecrets();
         service.setTime(System.currentTimeMillis());
@@ -387,7 +387,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         memo.removeService(serviceIndex);
         serviceIndex = -1;
@@ -431,7 +431,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
@@ -449,7 +449,7 @@ public final class IDPWMemo
         }
         else
         {
-            throw new RuntimeException("BUG");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN);
         }
     }
 
@@ -462,7 +462,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (version == 1)
         {
@@ -474,7 +474,7 @@ public final class IDPWMemo
         }
         else
         {
-            throw new RuntimeException("BUG");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN);
         }
     }
 
