@@ -250,7 +250,7 @@ public class MemoViewActivity extends Activity
             String data = Base64.encodeToString(rawData, Base64.DEFAULT);
             this.showExportServiceDialog(serviceName, data);
             this.copyExportDataToClipboard(data);
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "setExportPassword", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
@@ -526,7 +526,7 @@ public class MemoViewActivity extends Activity
             this.serviceListAdapter.notifyDataSetChanged();
             this.serviceListView.smoothScrollToPosition(this.serviceListView.getCount()-1);
             Toast.makeText(this, R.string.info_success_import_services, Toast.LENGTH_SHORT).show();
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "importServices", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
@@ -593,7 +593,7 @@ public class MemoViewActivity extends Activity
             this.serviceLastUpdateTextView.append(": ");
             this.serviceLastUpdateTextView.append(lastUpdate);
             return true;
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "updateMemo", ex);
             return false;
         }
@@ -603,7 +603,7 @@ public class MemoViewActivity extends Activity
         try {
             byte[] data = this.memo.save();
             return Utils.saveFile(this.memoFile.file, data);
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "saveMemo", ex);
             return false;
         }
@@ -641,7 +641,7 @@ public class MemoViewActivity extends Activity
     private idpwmemo.Value[] getSecretValues() {
         try {
             return this.memo.getSecrets();
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "getSecretValues", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
             return new idpwmemo.Value[0];
@@ -773,7 +773,7 @@ public class MemoViewActivity extends Activity
                 Toast.makeText(this, R.string.info_wrong_password, Toast.LENGTH_SHORT).show();
                 this.showOpenPasswordDialog();
             }
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "checkPassword", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
@@ -846,7 +846,7 @@ public class MemoViewActivity extends Activity
             }
             this.showServiceList();
             this.listContainer.setVisibility(View.VISIBLE);
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "openMemo", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
