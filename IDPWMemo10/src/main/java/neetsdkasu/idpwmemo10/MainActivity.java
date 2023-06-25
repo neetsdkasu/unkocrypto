@@ -167,7 +167,6 @@ public class MainActivity extends Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (!this.getActivityResultManager().onActivityResult(requestCode, resultCode, data)) {
-            Utils.alertShort(this, R.string.msg_internal_error); // DEBUG
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -311,16 +310,21 @@ public class MainActivity extends Activity
         }
         @Override
         public void onOk(Intent data) {
-            if (data == null || !data.hasExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME)) {
+            boolean hasExtra = data.hasExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME)
+                            && data.hasExtra(ImportMemoActivity.INTENT_EXTRA_OVERWRITE);
+            if (data == null || !hasExtra) {
                 MainActivity.this.state = MainActivity.STATE_FAILURE_IMPORT_MEMO;
                 return;
             }
             MainActivity.this.state = MainActivity.STATE_SUCCESS_IMPORT_MEMO;
-            String name = data.getStringExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME);
-            MainActivity.this.listAdapter.setNotifyOnChange(false);
-            MainActivity.this.listAdapter.add(name);
-            MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
-            MainActivity.this.listAdapter.notifyDataSetChanged();
+            boolean overwrite = data.getBooleanExtra(ImportMemoActivity.INTENT_EXTRA_OVERWRITE, false);
+            if (!overwrite) {
+                String name = data.getStringExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME);
+                MainActivity.this.listAdapter.setNotifyOnChange(false);
+                MainActivity.this.listAdapter.add(name);
+                MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
+                MainActivity.this.listAdapter.notifyDataSetChanged();
+            }
         }
     }
 

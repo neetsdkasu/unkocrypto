@@ -19,6 +19,7 @@ import java.nio.file.Files;
 public class ImportMemoActivity extends Activity
 {
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.ImportMemoActivity.INTENT_EXTRA_MEMO_NAME";
+    static final String INTENT_EXTRA_OVERWRITE = "neetsdkasu.idpwmemo10.ImportMemoActivity.INTENT_EXTRA_OVERWRITE";
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -50,9 +51,10 @@ public class ImportMemoActivity extends Activity
 
         File file = Utils.getMemoFile(this, name);
 
-        Switch overrideSwitch = findViewById(R.id.import_memo_override_switch);
+        Switch overwriteSwitch = findViewById(R.id.import_memo_overwrite_switch);
+        boolean overwrite = overwriteSwitch.isChecked();
 
-        if (overrideSwitch.isChecked()) {
+        if (overwrite) {
             if (!file.exists()) {
                 Utils.alertShort(this, R.string.msg_not_found_memo_name);
                 return;
@@ -98,7 +100,8 @@ public class ImportMemoActivity extends Activity
         }
 
         Intent result = new Intent()
-            .putExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME, name);
+            .putExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME, name)
+            .putExtra(ImportMemoActivity.INTENT_EXTRA_OVERWRITE, overwrite);
 
         setResult(RESULT_OK, result);
         finish();

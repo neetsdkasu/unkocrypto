@@ -51,17 +51,14 @@
       android:layout_width="match_parent"
       android:layout_height="12sp"
       />
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="@string/import_memo_create_or_override_text_view_text"
-      />
   <Switch
-      android:id="@+id/import_memo_override_switch"
+      android:id="@+id/import_memo_overwrite_switch"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:textOff="@string/import_memo_override_switch_textoff"
-      android:textOn="@string/import_memo_override_switch_texton"
+      android:text="@string/import_memo_overwrite_switch_text"
+      android:showText="true"
+      android:textOff="@string/import_memo_overwrite_switch_textoff"
+      android:textOn="@string/import_memo_overwrite_switch_texton"
       />
 </LinearLayout>
 
