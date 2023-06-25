@@ -154,7 +154,7 @@ public class MainActivity extends Activity
             } else {
                 Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
             }
-        } catch (IOException ex) {
+        } catch (idpwmemo.IDPWMemoException ex) {
             Log.e(TAG, "changePassword", ex);
             Toast.makeText(this, R.string.errmsg_internal_error, Toast.LENGTH_SHORT).show();
         }
