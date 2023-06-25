@@ -683,16 +683,7 @@ class Main extends JFrame
         }
         else
         {
-            try
-            {
-                idpwMemo.updateSelectedService();
-            }
-            catch (IOException ex)
-            {
-                Logger.getGlobal().log(Level.FINER, "failed to update service.", ex);
-                JOptionPane.showMessageDialog(this, "failed to update service.");
-                return false;
-            }
+            idpwMemo.updateSelectedService();
             list.set(serviceIndex, new ServiceName(idpwMemo.getService()));
         }
         saveMemo();
@@ -742,17 +733,7 @@ class Main extends JFrame
         {
             return;
         }
-        Value[] values = null;
-        try
-        {
-            values = idpwMemo.getSecrets();
-        }
-        catch (IOException ex)
-        {
-            Logger.getGlobal().log(Level.FINER, "failed to read secrets.", ex);
-            JOptionPane.showMessageDialog(this, "failed to read secrets.");
-            return;
-        }
+        Value[] values = idpwMemo.getSecrets();
         setHiddenItemEditorEnabled(true);
         resetItemTable(secretTable, secrets = getTableModel(values));
     }
