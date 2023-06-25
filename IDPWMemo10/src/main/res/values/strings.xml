@@ -31,7 +31,7 @@
     <!-- MainActivity Option Menu -->
     <string name="add_memo_menu_item_text">Add</string>
     <string name="new_memo_menu_item_text">New</string>
-    <string name="import_memo_menu_item_text">Import</string> 
+    <string name="import_memo_menu_item_text">Import</string>
 
     <!-- MemoListView Context Menu -->
     <string name="export_memo_menu_item_text">Export</string>
@@ -55,6 +55,14 @@
     <string name="import_memo_overwrite_switch_text">Create New or Overwrite ?</string>
     <string name="import_memo_overwrite_switch_textoff">Create New</string>
     <string name="import_memo_overwrite_switch_texton">Overwrite</string>
-    
+
+    <!-- ChangeMemoKeywordActivity -->
+    <string name="change_memo_keyword_title">Change Memo Password</string>
+    <string name="change_memo_keyword_old_keyword_text">Current Password</string>
+    <string name="change_memo_keyword_new_keyword_text">New Password</string>
+    <string name="change_memo_keyword_ok_button_text">OK</string>
+    <string name="change_memo_keyword_execute_switch_text">Do or Do Not ?</string>
+    <string name="change_memo_keyword_execute_switch_textoff">Do NOT Change</string>
+    <string name="change_memo_keyword_execute_switch_texton">Do Change</string>
 
 </resources>

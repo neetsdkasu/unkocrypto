@@ -31,6 +31,7 @@ public class MainActivity extends Activity
     private static final int REQ_IMPORT_MEMO             = 20;
     private static final int REQ_EXPORT_MEMO             = 30;
     private static final int REQ_ADD_NEW_MEMO            = 40;
+    private static final int REQ_CHANGE_MEMO_KEYWORD     = 50;
 
     private static final int STATE_IDLE                        = 0;
     private static final int STATE_SUCCESS                     = 1;
@@ -52,6 +53,10 @@ public class MainActivity extends Activity
     private static final int STATE_SUCCESS_ADD_NEW_MEMO        = MainActivity.REQ_ADD_NEW_MEMO + MainActivity.STATE_SUCCESS;
     private static final int STATE_FAILURE_ADD_NEW_MEMO        = MainActivity.REQ_ADD_NEW_MEMO + MainActivity.STATE_FAILURE;
     private static final int STATE_CANCELED_ADD_NEW_MEMO       = MainActivity.REQ_ADD_NEW_MEMO + MainActivity.STATE_CANCELED;
+    private static final int STATE_REQ_CHANGE_MEMO_KEYWORD      = MainActivity.REQ_CHANGE_MEMO_KEYWORD;
+    private static final int STATE_SUCCESS_CHANGE_MEMO_KEYWORD  = MainActivity.REQ_CHANGE_MEMO_KEYWORD + MainActivity.STATE_SUCCESS;
+    private static final int STATE_FAILURE_CHANGE_MEMO_KEYWORD  = MainActivity.REQ_CHANGE_MEMO_KEYWORD + MainActivity.STATE_FAILURE;
+    private static final int STATE_CANCELED_CHANGE_MEMO_KEYWORD = MainActivity.REQ_CHANGE_MEMO_KEYWORD + MainActivity.STATE_CANCELED;
 
     private int state = MainActivity.STATE_IDLE;
 
@@ -69,6 +74,7 @@ public class MainActivity extends Activity
     private ActivityResultManager.Launcher<Void>   pickImportFileLauncher = null;
     private ActivityResultManager.Launcher<Uri>    importMemoLauncher     = null;
     private ActivityResultManager.Launcher<String> exportMemoLauncher     = null;
+    private ActivityResultManager.Launcher<String> changeMemoKeywordLauncher = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -99,6 +105,7 @@ public class MainActivity extends Activity
         this.pickImportFileLauncher = manager.register(new MainActivity.PickImportFileCondacts());
         this.importMemoLauncher = manager.register(new MainActivity.ImportMemoCondacts());
         this.exportMemoLauncher = manager.register(new MainActivity.ExportMemoCondacts());
+        this.changeMemoKeywordLauncher = manager.register(new MainActivity.ChangeMemoKeywordCondacts());
     }
 
     @Override
@@ -112,24 +119,23 @@ public class MainActivity extends Activity
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         int id = item.getItemId();
-         if (id == R.id.export_memo_menu_item) {
-            String memoName = this.listAdapter.getItem(info.position);
+        String memoName = this.listAdapter.getItem(info.position);
+        if (id == R.id.export_memo_menu_item) {
             if (this.exportMemoLauncher != null) {
                 this.exportMemoLauncher.launch(memoName);
             }
-            return true;
          } else if (id == R.id.change_memo_keyword_menu_item) {
-            // TODO
-            return true;
+            if (this.changeMemoKeywordLauncher != null) {
+                this.changeMemoKeywordLauncher.launch(memoName);
+            }
         } else if (id == R.id.change_memo_name_menu_item) {
             // TODO
-            return true;
         } else if (id == R.id.delete_memo_menu_item) {
             // TODO
-            return true;
         } else {
             return super.onContextItemSelected(item);
         }
+        return true;
     }
 
     @Override
@@ -396,6 +402,28 @@ public class MainActivity extends Activity
             } catch (Exception ex) {
                 MainActivity.this.state = MainActivity.STATE_FAILURE_EXPORT_MEMO;
             }
+        }
+    }
+
+    private final class ChangeMemoKeywordCondacts extends ActivityResultManager.Condacts<String> {
+        @Override
+        public Intent onCreate(String name) {
+            MainActivity.this.state = MainActivity.STATE_REQ_CHANGE_MEMO_KEYWORD;
+            return new Intent(MainActivity.this, ChangeMemoKeywordActivity.class)
+                .putExtra(ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME, name);
+        }
+        @Override
+        public void onFailedToStart() {
+            MainActivity.this.state = MainActivity.STATE_FAILURE_CHANGE_MEMO_KEYWORD;
+            MainActivity.this.showStateMessage();
+        }
+        @Override
+        public void onCanceled() {
+            MainActivity.this.state = MainActivity.STATE_CANCELED_CHANGE_MEMO_KEYWORD;
+        }
+        @Override
+        public void onOk(Intent data) {
+            MainActivity.this.state = MainActivity.STATE_SUCCESS_CHANGE_MEMO_KEYWORD;
         }
     }
 }
