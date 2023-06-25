@@ -82,7 +82,7 @@ final class Memo
         int version = in.readInt();
         if (version > VERSION)
         {
-            throw new IOException("invalid version");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN_MEMO_VERSION);
         }
         int count = in.readInt();
         Service[] services = new Service[count];
