@@ -39,6 +39,10 @@ javaw -jar IDPWMemo.jar でGUIアプリとして実行できる
 ------
 #### idpwmemo.IDPWMemo クラスを他プロジェクトからライブラリ的に使う場合  
 
+`idpwmemo.Service`クラスを直接使うとバグらせやすいので、下記で示す`idpwmemo.IDPWMemo`クラスと`idpwmemo.Value`クラスだけで処理するほうがよいかも？　　
+
+
+
 ##### 新規作成
 ```java
 import idpwmemo.IDPWMemo;
@@ -59,11 +63,7 @@ try {
 
 } catch (IDPWMemoException ex) {
     // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // RuntimeExceptionのサブクラスなので無視してもOK（通常は捕捉する必要はないはず）
 }
 ```
 
@@ -91,12 +91,8 @@ try {
         // マスターパスワードの間違い、もしくは、データが壊れてる(あるいはIDPWMemoのファイルではない)
     }
 } catch (IDPWMemoException ex) {
-    // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外(IDPWMemo以外のファイルを読み込ませても生じるかも)
+    // RuntimeExceptionのサブクラスなので無視してもOK
 }
 ```
 
@@ -145,11 +141,7 @@ try {
 
 } catch (IDPWMemoException ex) {
     // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // RuntimeExceptionのサブクラスなので無視してもOK（通常は捕捉する必要はないはず）
 }
 ```
 
@@ -194,11 +186,7 @@ try {
 
 } catch (IDPWMemoException ex) {
     // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // RuntimeExceptionのサブクラスなので無視してもOK（通常は捕捉する必要はないはず）
 }
 ```
 
@@ -262,11 +250,7 @@ try {
 
 } catch (IDPWMemoException ex) {
     // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // RuntimeExceptionのサブクラスなので無視してもOK（通常は捕捉する必要はないはず）
 }
 ```
 
@@ -298,11 +282,7 @@ try {
 
 } catch (IDPWMemoException ex) {
     // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // RuntimeExceptionのサブクラスなので無視してもOK（通常は捕捉する必要はないはず）
 }
 ```
 
@@ -327,10 +307,6 @@ try {
 
 } catch (IDPWMemoException ex) {
     // IDPWMemoクラスを使う側の取り扱いのミスで生じる例外
-    // RuntimeExceptionのサブクラスなので無視してOK
-} catch (java.io.IOException ex2) {
-    // IDPWMemoの内部でByteArrayOutputStreamやByteArrayInputStreamを使うので
-    // それらのIOExceptionを捕捉して潰さず キーワード throws で外に丸投げしている(潰すべきだったが面倒)
-    // どちらのクラスもIOExceptionは投げないと思うので対処は不要だがチェック例外なため　catch　か　throws が必要
+    // RuntimeExceptionのサブクラスなので無視してもOK（通常は捕捉する必要はないはず）
 }
 ```
