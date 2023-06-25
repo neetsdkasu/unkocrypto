@@ -824,7 +824,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             ex.printStackTrace();
             return;
         }
-        catch (IOException ex)
+        catch (idpwmemo.IDPWMemoException ex)
         {
             closeMemoRecordStore();
             idpwMemo.clear();
@@ -1207,7 +1207,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                 }
                 buf = null;
             }
-            catch (IOException ex)
+            catch (idpwmemo.IDPWMemoException ex)
             {
                 setTicker("wrong format");
                 importMemo.clear();
@@ -1520,7 +1520,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
             }
             idpwMemo.updateSelectedService();
         }
-        catch (IOException ex)
+        catch (idpwmemo.IDPWMemoException ex)
         {
             Display.getDisplay(this).getCurrent().setTicker(getTicker("unknown error"));
             return;
@@ -1638,7 +1638,7 @@ public class IDPWMemoMIDlet extends MIDlet implements CommandListener
                     return secretsForm;
                 }
             }
-            catch (IOException ex)
+            catch (idpwmemo.IDPWMemoException ex)
             {
                 showedSecrets = false;
                 setTicker("wrong format");

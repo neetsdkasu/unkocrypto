@@ -35,29 +35,43 @@ public final class IDPWMemo
         secrets = null;
     }
 
-    public void setPassword(String password) throws IOException
+    public void setPassword(String password)
     {
-        setPassword(getBytes(password));
+        try
+        {
+            setPassword(getBytes(password));
+        }
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
-    public void setPassword(byte[] password) throws IOException
+    public void setPassword(byte[] password)
     {
-        byte[] tmp1 = cryptor.encryptV1(Service.EMPTY_BYTES, password);
-        byte[] tmp2 = cryptor.encryptV2(password, password);
-        encodedPasswordV1 = tmp1;
-        encodedPasswordV2 = tmp2;
-        version = 0;
-        memo = null;
-        serviceIndex = -1;
-        service = null;
-        secrets = null;
+        try
+        {
+            byte[] tmp1 = cryptor.encryptV1(Service.EMPTY_BYTES, password);
+            byte[] tmp2 = cryptor.encryptV2(password, password);
+            encodedPasswordV1 = tmp1;
+            encodedPasswordV2 = tmp2;
+            version = 0;
+            memo = null;
+            serviceIndex = -1;
+            service = null;
+            secrets = null;
+        }
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
     byte[] getPasswordV1() throws IOException
     {
         if (encodedPasswordV1 == null)
         {
-            throw new RuntimeException("no password");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_PASSWORD);
         }
         return cryptor.decryptV1(Service.EMPTY_BYTES, encodedPasswordV1);
     }
@@ -71,11 +85,11 @@ public final class IDPWMemo
     {
         if (version < 1 || version > 2)
         {
-            throw new RuntimeException("wrong version");
+            throw new IllegalArgumentException("version " + version + " is unsupported (supported version 1 or 2)");
         }
         if (encodedPasswordV1 == null || encodedPasswordV2 == null)
         {
-            throw new RuntimeException("no password");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_PASSWORD);
         }
         this.version = version;
         memo = new Memo();
@@ -84,49 +98,56 @@ public final class IDPWMemo
         secrets = null;
     }
 
-    public boolean loadMemo(byte[] src) throws IOException
+    public boolean loadMemo(byte[] src)
     {
-        byte[] buf = null;
-        int st = Cryptor.checkSrcType(src);
-        if ((st&2) != 0)
+        try
         {
-            buf = cryptor.decryptV2(encodedPasswordV2, src);
-        }
-        if (buf != null)
-        {
-            version = 2;
-        }
-        else if ((st&1) != 0)
-        {
-            byte[] password = getPasswordV1();
-            buf = cryptor.decryptRepeatV1(2, password, src);
-            password = null;
-            if (buf == null)
+            byte[] buf = null;
+            int st = Cryptor.checkSrcType(src);
+            if ((st&2) != 0)
+            {
+                buf = cryptor.decryptV2(encodedPasswordV2, src);
+            }
+            if (buf != null)
+            {
+                version = 2;
+            }
+            else if ((st&1) != 0)
+            {
+                byte[] password = getPasswordV1();
+                buf = cryptor.decryptRepeatV1(2, password, src);
+                password = null;
+                if (buf == null)
+                {
+                    return false;
+                }
+                version = 1;
+            }
+            else
             {
                 return false;
             }
-            version = 1;
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buf));
+            buf = null;
+            Memo tmp = Memo.load(dis);
+            dis.close();
+            memo = tmp;
+            serviceIndex = -1;
+            service = null;
+            secrets = null;
+            return true;
         }
-        else
+        catch (IOException ex)
         {
-            return false;
+            throw new IDPWMemoException(ex);
         }
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buf));
-        buf = null;
-        Memo tmp = Memo.load(dis);
-        dis.close();
-        memo = tmp;
-        serviceIndex = -1;
-        service = null;
-        secrets = null;
-        return true;
     }
 
     public int getServiceCount()
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         return memo.getServiceCount();
     }
@@ -135,7 +156,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         return memo.getServices();
      }
@@ -144,7 +165,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         return memo.getService(index);
     }
@@ -153,26 +174,33 @@ public final class IDPWMemo
     {
         if (serviceIndex < 0)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         return memo.getService(serviceIndex);
     }
 
-    public Service getSelectedService() throws IOException
+    public Service getSelectedService()
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
-        saveSecrets();
-        return service;
+        try
+        {
+            saveSecrets();
+            return service;
+        }
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
     public String getSelectedServiceName()
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         return service.getServiceName();
     }
@@ -181,7 +209,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         String[] names = new String[memo.getServiceCount()];
         for (int i = 0; i < names.length; i++)
@@ -195,7 +223,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         memo.setServices(services);
         serviceIndex = -1;
@@ -203,7 +231,7 @@ public final class IDPWMemo
         secrets = null;
     }
 
-    public void addService(IDPWMemo serviceFrom) throws IOException
+    public void addService(IDPWMemo serviceFrom)
     {
         if (serviceFrom == null)
         {
@@ -211,22 +239,29 @@ public final class IDPWMemo
         }
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
-        service = serviceFrom.getSelectedService().getCopy();
-        Value[] srcSecrets = serviceFrom.getSecrets();
-        Value[] tmpSecrets = new Value[srcSecrets.length];
-        for (int i = 0; i < srcSecrets.length; i++)
+        try
         {
-            tmpSecrets[i] = srcSecrets[i].getCopy();
+            service = serviceFrom.getSelectedService().getCopy();
+            Value[] srcSecrets = serviceFrom.getSecrets();
+            Value[] tmpSecrets = new Value[srcSecrets.length];
+            for (int i = 0; i < srcSecrets.length; i++)
+            {
+                tmpSecrets[i] = srcSecrets[i].getCopy();
+            }
+            setSecrets(tmpSecrets);
+            saveSecrets();
+            serviceIndex = memo.addService(service.getCopy());
+            secrets = null;
         }
-        setSecrets(tmpSecrets);
-        saveSecrets();
-        serviceIndex = memo.addService(service.getCopy());
-        secrets = null;
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
-    public void setService(int index, IDPWMemo serviceFrom) throws IOException
+    public void setService(int index, IDPWMemo serviceFrom)
     {
         if (serviceFrom == null)
         {
@@ -234,31 +269,38 @@ public final class IDPWMemo
         }
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (index < 0 || index >= memo.getServiceCount())
         {
             throw new ArrayIndexOutOfBoundsException(index);
         }
-        service = serviceFrom.getSelectedService().getCopy();
-        Value[] srcSecrets = serviceFrom.getSecrets();
-        Value[] tmpSecrets = new Value[srcSecrets.length];
-        for (int i = 0; i < srcSecrets.length; i++)
+        try
         {
-            tmpSecrets[i] = srcSecrets[i].getCopy();
+            service = serviceFrom.getSelectedService().getCopy();
+            Value[] srcSecrets = serviceFrom.getSecrets();
+            Value[] tmpSecrets = new Value[srcSecrets.length];
+            for (int i = 0; i < srcSecrets.length; i++)
+            {
+                tmpSecrets[i] = srcSecrets[i].getCopy();
+            }
+            setSecrets(tmpSecrets);
+            saveSecrets();
+            serviceIndex = index;
+            memo.setService(index, service.getCopy());
+            secrets = null;
         }
-        setSecrets(tmpSecrets);
-        saveSecrets();
-        serviceIndex = index;
-        memo.setService(index, service.getCopy());
-        secrets = null;
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
     public void addNewService(String serviceName)
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         service = new Service(serviceName);
         serviceIndex = memo.addService(service.getCopy());
@@ -269,7 +311,7 @@ public final class IDPWMemo
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (index < 0 || index >= memo.getServiceCount())
         {
@@ -284,7 +326,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         return service.getValues();
     }
@@ -293,7 +335,7 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         service.setValues(values);
     }
@@ -302,14 +344,14 @@ public final class IDPWMemo
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         secrets = values == null
                 ? Service.EMPTY_VALUES
                 : values;
     }
 
-    public Value[] getSecrets() throws IOException
+    public Value[] getSecrets()
     {
         if (secrets != null)
         {
@@ -317,44 +359,51 @@ public final class IDPWMemo
         }
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
-        byte[] src = service.getSecrets();
-        if (src == null || src.length == 0)
+        try
         {
-            secrets = Service.EMPTY_VALUES;
+            byte[] src = service.getSecrets();
+            if (src == null || src.length == 0)
+            {
+                secrets = Service.EMPTY_VALUES;
+                return secrets;
+            }
+            byte[] buf = null;
+            if (version == 1)
+            {
+                byte[] password = getPasswordV1();
+                buf = cryptor.decryptRepeatV1(2, password, src);
+                password = null;
+            }
+            else if (version == 2)
+            {
+                buf = cryptor.decryptV2(encodedPasswordV2, src);
+            }
+            src = null;
+            if (buf == null)
+            {
+                throw new IDPWMemoException(IDPWMemoException.CAUSE_BROKEN_SECRETS);
+            }
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buf));
+            buf = null;
+            Value[] tmp = Service.readSecrets(dis);
+            dis.close();
+            secrets = tmp;
+            tmp = null;
             return secrets;
         }
-        byte[] buf = null;
-        if (version == 1)
+        catch (IOException ex)
         {
-            byte[] password = getPasswordV1();
-            buf = cryptor.decryptRepeatV1(2, password, src);
-            password = null;
+            throw new IDPWMemoException(ex);
         }
-        else if (version == 2)
-        {
-            buf = cryptor.decryptV2(encodedPasswordV2, src);
-        }
-        src = null;
-        if (buf == null)
-        {
-            throw new  RuntimeException("secrets data is broken");
-        }
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buf));
-        buf = null;
-        Value[] tmp = Service.readSecrets(dis);
-        dis.close();
-        secrets = tmp;
-        tmp = null;
-        return secrets;
     }
 
     public void removeService(int index)
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
         if (index < 0 || index >= memo.getServiceCount())
         {
@@ -372,22 +421,29 @@ public final class IDPWMemo
         memo.removeService(index);
     }
 
-    public void updateSelectedService() throws IOException
+    public void updateSelectedService()
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
-        saveSecrets();
-        service.setTime(System.currentTimeMillis());
-        memo.setService(serviceIndex, service.getCopy());
+        try
+        {
+            saveSecrets();
+            service.setTime(System.currentTimeMillis());
+            memo.setService(serviceIndex, service.getCopy());
+        }
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
     public void removeSelectedService()
     {
         if (service == null)
         {
-            throw new RuntimeException("not select service");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SELECT_SERVICE);
         }
         memo.removeService(serviceIndex);
         serviceIndex = -1;
@@ -427,54 +483,75 @@ public final class IDPWMemo
         buf = null;
     }
 
-    public byte[] save() throws IOException
+    public byte[] save()
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        memo.save(dos);
-        dos.flush();
-        byte[] buf = baos.toByteArray();
-        dos.close();
-        if (version == 1)
+        try
         {
-            return cryptor.encryptRepeatV1(2, getPasswordV1(), buf);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            memo.save(dos);
+            dos.flush();
+            byte[] buf = baos.toByteArray();
+            dos.close();
+            if (version == 1)
+            {
+                return cryptor.encryptRepeatV1(2, getPasswordV1(), buf);
+            }
+            else if (version == 2)
+            {
+                return cryptor.encryptV2(encodedPasswordV2, buf);
+            }
+            else
+            {
+                throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN);
+            }
         }
-        else if (version == 2)
+        catch (IOException ex)
         {
-            return cryptor.encryptV2(encodedPasswordV2, buf);
-        }
-        else
-        {
-            throw new RuntimeException("BUG");
+            throw new IDPWMemoException(ex);
         }
     }
 
-    public void changePassword(String newPassword) throws IOException
+    public void changePassword(String newPassword)
     {
-        changePassword(Cryptor.getBytes(newPassword));
+        try
+        {
+            changePassword(Cryptor.getBytes(newPassword));
+        }
+        catch (IOException ex)
+        {
+            throw new IDPWMemoException(ex);
+        }
     }
 
-    public void changePassword(byte[] newPassword) throws IOException
+    public void changePassword(byte[] newPassword)
     {
         if (memo == null)
         {
-            throw new RuntimeException("no memo");
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_NOT_SET_MEMO);
         }
-        if (version == 1)
+        try
         {
-            changePasswordV1(newPassword);
+            if (version == 1)
+            {
+                changePasswordV1(newPassword);
+            }
+            else if (version == 2)
+            {
+                changePasswordV2(newPassword);
+            }
+            else
+            {
+                throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN);
+            }
         }
-        else if (version == 2)
+        catch (IOException ex)
         {
-            changePasswordV2(newPassword);
-        }
-        else
-        {
-            throw new RuntimeException("BUG");
+            throw new IDPWMemoException(ex);
         }
     }
 
@@ -560,44 +637,51 @@ public final class IDPWMemo
         encs = null;
     }
 
-    public void convertV1ToV2() throws IOException
+    public void convertV1ToV2()
     {
         if (version != 1)
         {
             return;
         }
-        byte[] oldPassword = getPasswordV1();
-        byte[][] encs = new byte[memo.getServiceCount()][];
-        for (int i = 0; i < memo.getServiceCount(); i++)
+        try
         {
-            Service sv = memo.getService(i);
-            if (!sv.hasSecrets())
+            byte[] oldPassword = getPasswordV1();
+            byte[][] encs = new byte[memo.getServiceCount()][];
+            for (int i = 0; i < memo.getServiceCount(); i++)
             {
-                encs[i] = Service.EMPTY_BYTES;
-                continue;
+                Service sv = memo.getService(i);
+                if (!sv.hasSecrets())
+                {
+                    encs[i] = Service.EMPTY_BYTES;
+                    continue;
+                }
+                byte[] sec = sv.getSecrets();
+                byte[] dec = cryptor.decryptRepeatV1(2, oldPassword, sec);
+                sec = null;
+                encs[i] = cryptor.encryptV2(encodedPasswordV2, dec);
+                dec = null;
             }
-            byte[] sec = sv.getSecrets();
-            byte[] dec = cryptor.decryptRepeatV1(2, oldPassword, sec);
-            sec = null;
-            encs[i] = cryptor.encryptV2(encodedPasswordV2, dec);
-            dec = null;
+            if (service != null && service.hasSecrets())
+            {
+                byte[] sec = service.getSecrets();
+                byte[] dec = cryptor.decryptRepeatV1(2, oldPassword, sec);
+                sec = null;
+                byte[] enc = cryptor.encryptV2(encodedPasswordV2, dec);
+                dec = null;
+                service.setSecrets(enc);
+                enc = null;
+            }
+            for (int i = 0; i < memo.getServiceCount(); i++)
+            {
+                memo.getService(i).setSecrets(encs[i]);
+            }
+            version = 2;
+            oldPassword = null;
+            encs = null;
         }
-        if (service != null && service.hasSecrets())
+        catch (IOException ex)
         {
-            byte[] sec = service.getSecrets();
-            byte[] dec = cryptor.decryptRepeatV1(2, oldPassword, sec);
-            sec = null;
-            byte[] enc = cryptor.encryptV2(encodedPasswordV2, dec);
-            dec = null;
-            service.setSecrets(enc);
-            enc = null;
+            throw new IDPWMemoException(ex);
         }
-        for (int i = 0; i < memo.getServiceCount(); i++)
-        {
-            memo.getService(i).setSecrets(encs[i]);
-        }
-        version = 2;
-        oldPassword = null;
-        encs = null;
     }
 }
