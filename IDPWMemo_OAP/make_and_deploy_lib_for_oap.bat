@@ -68,7 +68,8 @@ set additionalflags=
 set libname=%memolib%
 set clsdir=memoclasses
 set srcdir=..\IDPWMemo\src
-set sources=%srcdir%\idpwmemo\Memo.java 
+set sources=%srcdir%\idpwmemo\Memo.java ^
+           %srcdir%\idpwmemo\IDPWMemoException.java 
 
 echo on
 mkdir %deploydir%\..\src\idpwmemo
