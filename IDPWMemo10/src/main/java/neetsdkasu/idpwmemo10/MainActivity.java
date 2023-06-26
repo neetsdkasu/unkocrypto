@@ -233,6 +233,19 @@ public class MainActivity extends Activity
                 resId = R.string.msg_canceled_new_memo;
                 break;
 
+            case MainActivity.STATE_REQ_CHANGE_MEMO_KEYWORD:
+                // NO MESSAGE
+                return;
+            case MainActivity.STATE_SUCCESS_CHANGE_MEMO_KEYWORD:
+                resId = R.string.msg_success_change_memo_keyword;
+                break;
+            case MainActivity.STATE_FAILURE_CHANGE_MEMO_KEYWORD:
+                resId = R.string.msg_failure_change_memo_keyword;
+                break;
+            case MainActivity.STATE_CANCELED_CHANGE_MEMO_KEYWORD:
+                resId = R.string.msg_canceled_change_memo_keyword;
+                break;
+
             default:
                 // NO MESSAGE
                 return;

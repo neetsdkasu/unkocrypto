@@ -80,6 +80,7 @@ public class ImportMemoActivity extends Activity
         try {
             if (file.exists()) {
                 // 念のための一時保存（うまくいくか不明だが）
+                Files.deleteIfExists(cache.toPath());
                 Files.move(file.toPath(), cache.toPath());
             }
             try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {

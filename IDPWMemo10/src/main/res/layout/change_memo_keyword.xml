@@ -53,7 +53,7 @@
   <Button
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="@string/change_memo_keyword_ok_button_text"
+      android:text="@string/ok_button_text"
       android:onClick="onClickOkButton"
       />
   <Space

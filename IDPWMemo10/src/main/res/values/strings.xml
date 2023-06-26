@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">IDPWMemo10</string>
 
+    <string name="ok_button_text">OK</string>
+
     <!-- AlertAtivity -->
     <string name="alert_title">ALERT DIALOG</string>
     <string name="alert_message">Hi! This is Alert!</string>
@@ -21,12 +23,19 @@
     <string name="msg_failure_new_memo">Failure New Memo</string>
     <string name="msg_canceled_new_memo">Canceled New Memo</string>
 
+    <!-- Change Memo Keyword Messages -->
+    <string name="msg_success_change_memo_keyword">Success Change Password</string>
+    <string name="msg_failure_change_memo_keyword">Failure Change Password</string>
+    <string name="msg_canceled_change_memo_keyword">Canceled Change Password</string>
+
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
     <string name="msg_memo_name_already_exists">This Name Already Exists</string>
     <string name="msg_failure_create_memo">Failure Create Memo</string>
     <string name="msg_not_found_memo_name">Not Found The Memo Name</string>
+    <string name="msg_please_switch_on">Please Switch On</string>
+    <string name="msg_wrong_current_keyword">Wrong Current Password</string>
 
     <!-- MainActivity Option Menu -->
     <string name="add_memo_menu_item_text">Add</string>
@@ -44,14 +53,12 @@
     <string name="new_memo_name_text_view_text">Memo Name (length &lt;= 50)</string>
     <string name="new_memo_name_allows_text_view_text">allows: a&#8211;z A&#8211;Z 0&#8211;9 and -_()[]</string>
     <string name="new_memo_keyword_text_view_text">Memo Password</string>
-    <string name="new_memo_ok_button_text">OK</string>
 
     <!-- ImportMemoAtivity -->
     <string name="import_memo_title">Import Memo From File</string>
     <string name="import_memo_file_name_text_view_text">Import File</string>
     <string name="import_memo_name_text_view_text">Memo Name (length &lt;= 50)</string>
     <string name="import_memo_name_allows_text_view_text">allows: a&#8211;z A&#8211;Z 0&#8211;9 and -_()[]</string>
-    <string name="import_memo_ok_button_text">OK</string>
     <string name="import_memo_overwrite_switch_text">Create New or Overwrite ?</string>
     <string name="import_memo_overwrite_switch_textoff">Create New</string>
     <string name="import_memo_overwrite_switch_texton">Overwrite</string>
@@ -60,7 +67,6 @@
     <string name="change_memo_keyword_title">Change Memo Password</string>
     <string name="change_memo_keyword_old_keyword_text">Current Password</string>
     <string name="change_memo_keyword_new_keyword_text">New Password</string>
-    <string name="change_memo_keyword_ok_button_text">OK</string>
     <string name="change_memo_keyword_execute_switch_text">Do or Do Not ?</string>
     <string name="change_memo_keyword_execute_switch_textoff">Do NOT Change</string>
     <string name="change_memo_keyword_execute_switch_texton">Do Change</string>
