@@ -19,7 +19,7 @@ import java.nio.file.Files;
 public class ImportMemoActivity extends Activity
 {
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.ImportMemoActivity.INTENT_EXTRA_MEMO_NAME";
-    static final String INTENT_EXTRA_OVERWRITE = "neetsdkasu.idpwmemo10.ImportMemoActivity.INTENT_EXTRA_OVERWRITE";
+    static final int ACTIVITY_RESULT_OVERWRITE = Activity.RESULT_FIRST_USER;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -30,7 +30,11 @@ public class ImportMemoActivity extends Activity
         String fileName = this.getImportFileName();
 
         EditText fileNameEditText = findViewById(R.id.import_memo_file_name);
-        fileNameEditText.setText(fileName == null ? "???????" : fileName);
+        if (fileName == null) {
+            fileNameEditText.setText(R.string.common_text_unknown_name);
+        } else {
+            fileNameEditText.setText(fileName);
+        }
 
         if (fileName != null) {
             EditText nameEditText = findViewById(R.id.import_memo_name);
@@ -101,10 +105,9 @@ public class ImportMemoActivity extends Activity
         }
 
         Intent result = new Intent()
-            .putExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME, name)
-            .putExtra(ImportMemoActivity.INTENT_EXTRA_OVERWRITE, overwrite);
+            .putExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME, name);
 
-        setResult(RESULT_OK, result);
+        setResult(overwrite ? ImportMemoActivity.ACTIVITY_RESULT_OVERWRITE : RESULT_OK, result);
         finish();
     }
 

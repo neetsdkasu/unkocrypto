@@ -7,11 +7,11 @@
   <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="@string/import_memo_file_name_text_view_text"
-      android:labelFor="@id/import_memo_file_name"
+      android:text="@string/change_memo_name_current_name_text_view_text"
+      android:labelFor="@id/change_memo_name_current_name"
       />
   <EditText
-      android:id="@+id/import_memo_file_name"
+      android:id="@+id/change_memo_name_current_name"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
       android:singleLine="true"
@@ -22,7 +22,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="@string/common_text_new_memo_name"
-      android:labelFor="@id/import_memo_name"
+      android:labelFor="@id/change_memo_name_new_name"
       />
   <TextView
       android:layout_width="match_parent"
@@ -30,7 +30,7 @@
       android:text="@string/common_text_memo_name_allows"
       />
   <EditText
-      android:id="@+id/import_memo_name"
+      android:id="@+id/change_memo_name_new_name"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
       android:singleLine="true"
@@ -52,13 +52,13 @@
       android:layout_height="12sp"
       />
   <Switch
-      android:id="@+id/import_memo_overwrite_switch"
+      android:id="@+id/change_memo_name_execute_switch"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="@string/import_memo_overwrite_switch_text"
+      android:text="@string/change_memo_name_execute_switch_text"
       android:showText="true"
-      android:textOff="@string/import_memo_overwrite_switch_textoff"
-      android:textOn="@string/import_memo_overwrite_switch_texton"
+      android:textOff="@string/change_memo_name_execute_switch_textoff"
+      android:textOn="@string/change_memo_name_execute_switch_texton"
       />
 </LinearLayout>
 

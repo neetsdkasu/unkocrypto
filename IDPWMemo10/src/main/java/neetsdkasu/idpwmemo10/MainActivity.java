@@ -32,6 +32,7 @@ public class MainActivity extends Activity
     private static final int REQ_EXPORT_MEMO             = 30;
     private static final int REQ_ADD_NEW_MEMO            = 40;
     private static final int REQ_CHANGE_MEMO_KEYWORD     = 50;
+    private static final int REQ_CHANGE_MEMO_NAME        = 60;
 
     private static final int STATE_IDLE                        = 0;
     private static final int STATE_SUCCESS                     = 1;
@@ -57,6 +58,10 @@ public class MainActivity extends Activity
     private static final int STATE_SUCCESS_CHANGE_MEMO_KEYWORD  = MainActivity.REQ_CHANGE_MEMO_KEYWORD + MainActivity.STATE_SUCCESS;
     private static final int STATE_FAILURE_CHANGE_MEMO_KEYWORD  = MainActivity.REQ_CHANGE_MEMO_KEYWORD + MainActivity.STATE_FAILURE;
     private static final int STATE_CANCELED_CHANGE_MEMO_KEYWORD = MainActivity.REQ_CHANGE_MEMO_KEYWORD + MainActivity.STATE_CANCELED;
+    private static final int STATE_REQ_CHANGE_MEMO_NAME         = MainActivity.REQ_CHANGE_MEMO_NAME;
+    private static final int STATE_SUCCESS_CHANGE_MEMO_NAME     = MainActivity.REQ_CHANGE_MEMO_NAME + MainActivity.STATE_SUCCESS;
+    private static final int STATE_FAILURE_CHANGE_MEMO_NAME     = MainActivity.REQ_CHANGE_MEMO_NAME + MainActivity.STATE_FAILURE;
+    private static final int STATE_CANCELED_CHANGE_MEMO_NAME    = MainActivity.REQ_CHANGE_MEMO_NAME + MainActivity.STATE_CANCELED;
 
     private int state = MainActivity.STATE_IDLE;
 
@@ -75,6 +80,7 @@ public class MainActivity extends Activity
     private ActivityResultManager.Launcher<Uri>    importMemoLauncher     = null;
     private ActivityResultManager.Launcher<String> exportMemoLauncher     = null;
     private ActivityResultManager.Launcher<String> changeMemoKeywordLauncher = null;
+    private ActivityResultManager.Launcher<String> changeMemoNameLauncher = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -106,6 +112,7 @@ public class MainActivity extends Activity
         this.importMemoLauncher = manager.register(new MainActivity.ImportMemoCondacts());
         this.exportMemoLauncher = manager.register(new MainActivity.ExportMemoCondacts());
         this.changeMemoKeywordLauncher = manager.register(new MainActivity.ChangeMemoKeywordCondacts());
+        this.changeMemoNameLauncher = manager.register(new MainActivity.ChangeMemoNameCondacts());
     }
 
     @Override
@@ -129,7 +136,9 @@ public class MainActivity extends Activity
                 this.changeMemoKeywordLauncher.launch(memoName);
             }
         } else if (id == R.id.change_memo_name_menu_item) {
-            // TODO
+            if (this.changeMemoNameLauncher != null) {
+                this.changeMemoNameLauncher.launch(memoName);
+            }
         } else if (id == R.id.delete_memo_menu_item) {
             // TODO
         } else {
@@ -246,6 +255,19 @@ public class MainActivity extends Activity
                 resId = R.string.msg_canceled_change_memo_keyword;
                 break;
 
+            case MainActivity.STATE_REQ_CHANGE_MEMO_NAME:
+                // NO MESSAGE
+                return;
+            case MainActivity.STATE_SUCCESS_CHANGE_MEMO_NAME:
+                resId = R.string.msg_success_change_memo_name;
+                break;
+            case MainActivity.STATE_FAILURE_CHANGE_MEMO_NAME:
+                resId = R.string.msg_failure_change_memo_name;
+                break;
+            case MainActivity.STATE_CANCELED_CHANGE_MEMO_NAME:
+                resId = R.string.msg_canceled_change_memo_name;
+                break;
+
             default:
                 // NO MESSAGE
                 return;
@@ -270,8 +292,12 @@ public class MainActivity extends Activity
                 MainActivity.this.state = MainActivity.STATE_FAILURE_ADD_NEW_MEMO;
                 return;
             }
-            MainActivity.this.state = MainActivity.STATE_SUCCESS_ADD_NEW_MEMO;
             String name = data.getStringExtra(NewMemoActivity.INTENT_EXTRA_NEW_MEMO_NAME);
+            if (name == null) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_ADD_NEW_MEMO;
+                return;
+            }
+            MainActivity.this.state = MainActivity.STATE_SUCCESS_ADD_NEW_MEMO;
             MainActivity.this.listAdapter.setNotifyOnChange(false);
             MainActivity.this.listAdapter.add(name);
             MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
@@ -329,20 +355,27 @@ public class MainActivity extends Activity
         }
         @Override
         public void onOk(Intent data) {
-            boolean hasExtra = data.hasExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME)
-                            && data.hasExtra(ImportMemoActivity.INTENT_EXTRA_OVERWRITE);
-            if (data == null || !hasExtra) {
+            if (data == null || !data.hasExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME)) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_IMPORT_MEMO;
+                return;
+            }
+            String name = data.getStringExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME);
+            if (name == null) {
                 MainActivity.this.state = MainActivity.STATE_FAILURE_IMPORT_MEMO;
                 return;
             }
             MainActivity.this.state = MainActivity.STATE_SUCCESS_IMPORT_MEMO;
-            boolean overwrite = data.getBooleanExtra(ImportMemoActivity.INTENT_EXTRA_OVERWRITE, false);
-            if (!overwrite) {
-                String name = data.getStringExtra(ImportMemoActivity.INTENT_EXTRA_MEMO_NAME);
-                MainActivity.this.listAdapter.setNotifyOnChange(false);
-                MainActivity.this.listAdapter.add(name);
-                MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
-                MainActivity.this.listAdapter.notifyDataSetChanged();
+            MainActivity.this.listAdapter.setNotifyOnChange(false);
+            MainActivity.this.listAdapter.add(name);
+            MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
+            MainActivity.this.listAdapter.notifyDataSetChanged();
+        }
+        @Override
+        public void onUserResult(int resultCode, Intent data) {
+            if (resultCode != ImportMemoActivity.ACTIVITY_RESULT_OVERWRITE || data == null) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_IMPORT_MEMO;
+            } else {
+                MainActivity.this.state = MainActivity.STATE_SUCCESS_IMPORT_MEMO;
             }
         }
     }
@@ -437,6 +470,46 @@ public class MainActivity extends Activity
         @Override
         public void onOk(Intent data) {
             MainActivity.this.state = MainActivity.STATE_SUCCESS_CHANGE_MEMO_KEYWORD;
+        }
+    }
+
+    private final class ChangeMemoNameCondacts extends ActivityResultManager.Condacts<String> {
+        @Override
+        public Intent onCreate(String name) {
+            MainActivity.this.state = MainActivity.STATE_REQ_CHANGE_MEMO_NAME;
+            return new Intent(MainActivity.this, ChangeMemoNameActivity.class)
+                .putExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME, name);
+        }
+        @Override
+        public void onFailedToStart() {
+            MainActivity.this.state = MainActivity.STATE_FAILURE_CHANGE_MEMO_NAME;
+            MainActivity.this.showStateMessage();
+        }
+        @Override
+        public void onCanceled() {
+            MainActivity.this.state = MainActivity.STATE_CANCELED_CHANGE_MEMO_NAME;
+        }
+        @Override
+        public void onOk(Intent data) {
+            boolean hasExtra = data != null
+                            && data.hasExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME)
+                            && data.hasExtra(ChangeMemoNameActivity.INTENT_EXTRA_NEW_MEMO_NAME);
+            if (!hasExtra) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_CHANGE_MEMO_NAME;
+                return;
+            }
+            String curMemoName = data.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME);
+            String newMemoName = data.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_NEW_MEMO_NAME);
+            if (curMemoName == null || newMemoName == null) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_CHANGE_MEMO_NAME;
+                return;
+            }
+            MainActivity.this.state = MainActivity.STATE_SUCCESS_CHANGE_MEMO_NAME;
+            MainActivity.this.listAdapter.setNotifyOnChange(false);
+            MainActivity.this.listAdapter.remove(curMemoName);
+            MainActivity.this.listAdapter.add(newMemoName);
+            MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
+            MainActivity.this.listAdapter.notifyDataSetChanged();
         }
     }
 }

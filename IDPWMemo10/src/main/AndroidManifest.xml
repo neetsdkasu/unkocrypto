@@ -26,6 +26,11 @@
                   android:exported="false"
                   android:parentActivityName="neetsdkasu.idpwmemo10.MainActivity">
         </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.ChangeMemoNameActivity"
+                  android:label="@string/change_memo_name_title"
+                  android:exported="false"
+                  android:parentActivityName="neetsdkasu.idpwmemo10.MainActivity">
+        </activity>
         <activity android:name="neetsdkasu.idpwmemo10.AlertActivity"
                   android:label="@string/alert_title"
                   android:exported="false"

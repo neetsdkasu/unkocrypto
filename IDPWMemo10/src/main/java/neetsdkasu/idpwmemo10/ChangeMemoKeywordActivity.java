@@ -22,11 +22,18 @@ public class ChangeMemoKeywordActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_memo_keyword);
 
+        String memoName = null;
+
         Intent intent = getIntent();
         if (intent != null) {
-            String name = intent.getStringExtra(ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME);
-            TextView memoNameTextView = findViewById(R.id.change_memo_keyword_memo_name);
-            memoNameTextView.setText(name == null ? "???????" : name);
+            memoName = intent.getStringExtra(ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME);
+        }
+
+        TextView memoNameTextView = findViewById(R.id.change_memo_keyword_memo_name);
+        if (memoName == null) {
+            memoNameTextView.setText(R.string.common_text_unknown_name);
+        } else {
+            memoNameTextView.setText(memoName);
         }
     }
 
