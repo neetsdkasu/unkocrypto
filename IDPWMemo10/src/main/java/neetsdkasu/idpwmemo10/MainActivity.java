@@ -161,15 +161,14 @@ public class MainActivity extends Activity
             if (this.addNewMemoLauncher != null) {
                 this.addNewMemoLauncher.launch();
             }
-            return true;
         } else if (id == R.id.import_memo_menu_item) {
             if (this.pickImportFileLauncher != null) {
                 this.pickImportFileLauncher.launch();
             }
-            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
+        return true;
     }
 
     @Override
@@ -181,9 +180,9 @@ public class MainActivity extends Activity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!this.getActivityResultManager().onActivityResult(requestCode, resultCode, data)) {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        super.onActivityResult(requestCode, resultCode, data);
+
+        this.getActivityResultManager().onActivityResult(requestCode, resultCode, data);
     }
 
     private void showStateMessage() {

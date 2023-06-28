@@ -10,6 +10,7 @@ import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import java.io.File;
 import java.nio.file.Files;
 
@@ -31,11 +32,9 @@ public class ChangeMemoNameActivity extends Activity
             memoName = intent.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME);
         }
 
-        EditText curMemoNameEditText = findViewById(R.id.change_memo_name_current_name);
-        if (memoName == null) {
-            curMemoNameEditText.setText(R.string.common_text_unknown_name);
-        } else {
-            curMemoNameEditText.setText(memoName);
+        TextView curMemoNameTextView = findViewById(R.id.change_memo_name_current_name);
+        if (memoName != null) {
+            curMemoNameTextView.setText(memoName);
         }
     }
 

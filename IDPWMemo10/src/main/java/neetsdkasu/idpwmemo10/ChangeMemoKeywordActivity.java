@@ -30,9 +30,7 @@ public class ChangeMemoKeywordActivity extends Activity
         }
 
         TextView memoNameTextView = findViewById(R.id.change_memo_keyword_memo_name);
-        if (memoName == null) {
-            memoNameTextView.setText(R.string.common_text_unknown_name);
-        } else {
+        if (memoName != null) {
             memoNameTextView.setText(memoName);
         }
     }

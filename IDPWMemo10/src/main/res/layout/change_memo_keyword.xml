@@ -8,7 +8,7 @@
       android:id="@+id/change_memo_keyword_memo_name"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text=""
+      android:text="@string/common_text_unknown_name"
       />
   <Space
       android:layout_width="match_parent"

@@ -8,15 +8,16 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="@string/change_memo_name_current_name_text_view_text"
-      android:labelFor="@id/change_memo_name_current_name"
       />
-  <EditText
+  <TextView
       android:id="@+id/change_memo_name_current_name"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
-      android:singleLine="true"
-      android:importantForAutofill="no"
-      android:inputType="none"
+      android:text="@string/common_text_unknown_name"
+      />
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="12sp"
       />
   <TextView
       android:layout_width="match_parent"

@@ -15,6 +15,10 @@
       android:layout_height="wrap_content"
       android:text="@string/common_text_memo_name_allows"
       />
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="12sp"
+      />
   <EditText
       android:id="@+id/new_memo_name"
       android:layout_height="wrap_content"

@@ -10,6 +10,7 @@ import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,11 +30,9 @@ public class ImportMemoActivity extends Activity
 
         String fileName = this.getImportFileName();
 
-        EditText fileNameEditText = findViewById(R.id.import_memo_file_name);
-        if (fileName == null) {
-            fileNameEditText.setText(R.string.common_text_unknown_name);
-        } else {
-            fileNameEditText.setText(fileName);
+        TextView fileNameTextView = findViewById(R.id.import_memo_file_name);
+        if (fileName != null) {
+            fileNameTextView.setText(fileName);
         }
 
         if (fileName != null) {
