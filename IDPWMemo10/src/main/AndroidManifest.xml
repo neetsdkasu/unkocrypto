@@ -27,6 +27,10 @@
                   android:label="@string/change_memo_name_title"
                   android:exported="false">
         </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.DeleteMemoActivity"
+                  android:label="@string/delete_memo_title"
+                  android:exported="false">
+        </activity>
         <activity android:name="neetsdkasu.idpwmemo10.AlertActivity"
                   android:label="@string/alert_title"
                   android:exported="false"

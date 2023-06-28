@@ -33,6 +33,7 @@ public class MainActivity extends Activity
     private static final int REQ_ADD_NEW_MEMO            = 40;
     private static final int REQ_CHANGE_MEMO_KEYWORD     = 50;
     private static final int REQ_CHANGE_MEMO_NAME        = 60;
+    private static final int REQ_DELETE_MEMO             = 70;
 
     private static final int STATE_IDLE                        = 0;
     private static final int STATE_SUCCESS                     = 1;
@@ -62,6 +63,10 @@ public class MainActivity extends Activity
     private static final int STATE_SUCCESS_CHANGE_MEMO_NAME     = MainActivity.REQ_CHANGE_MEMO_NAME + MainActivity.STATE_SUCCESS;
     private static final int STATE_FAILURE_CHANGE_MEMO_NAME     = MainActivity.REQ_CHANGE_MEMO_NAME + MainActivity.STATE_FAILURE;
     private static final int STATE_CANCELED_CHANGE_MEMO_NAME    = MainActivity.REQ_CHANGE_MEMO_NAME + MainActivity.STATE_CANCELED;
+    private static final int STATE_REQ_DELETE_MEMO              = MainActivity.REQ_DELETE_MEMO;
+    private static final int STATE_SUCCESS_DELETE_MEMO          = MainActivity.REQ_DELETE_MEMO + MainActivity.STATE_SUCCESS;
+    private static final int STATE_FAILURE_DELETE_MEMO          = MainActivity.REQ_DELETE_MEMO + MainActivity.STATE_FAILURE;
+    private static final int STATE_CANCELED_DELETE_MEMO         = MainActivity.REQ_DELETE_MEMO + MainActivity.STATE_CANCELED;
 
     private int state = MainActivity.STATE_IDLE;
 
@@ -81,6 +86,7 @@ public class MainActivity extends Activity
     private ActivityResultManager.Launcher<String> exportMemoLauncher     = null;
     private ActivityResultManager.Launcher<String> changeMemoKeywordLauncher = null;
     private ActivityResultManager.Launcher<String> changeMemoNameLauncher = null;
+    private ActivityResultManager.Launcher<String> deleteMemoLauncher     = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -113,6 +119,7 @@ public class MainActivity extends Activity
         this.exportMemoLauncher = manager.register(new MainActivity.ExportMemoCondacts());
         this.changeMemoKeywordLauncher = manager.register(new MainActivity.ChangeMemoKeywordCondacts());
         this.changeMemoNameLauncher = manager.register(new MainActivity.ChangeMemoNameCondacts());
+        this.deleteMemoLauncher = manager.register(new MainActivity.DeleteMemoCondacts());
     }
 
     @Override
@@ -140,7 +147,9 @@ public class MainActivity extends Activity
                 this.changeMemoNameLauncher.launch(memoName);
             }
         } else if (id == R.id.delete_memo_menu_item) {
-            // TODO
+            if (this.deleteMemoLauncher != null) {
+                this.deleteMemoLauncher.launch(memoName);
+            }
         } else {
             return super.onContextItemSelected(item);
         }
@@ -265,6 +274,19 @@ public class MainActivity extends Activity
                 break;
             case MainActivity.STATE_CANCELED_CHANGE_MEMO_NAME:
                 resId = R.string.msg_canceled_change_memo_name;
+                break;
+
+            case MainActivity.STATE_REQ_DELETE_MEMO:
+                // NO MESSAGE
+                return;
+            case MainActivity.STATE_SUCCESS_DELETE_MEMO:
+                resId = R.string.msg_success_delete;
+                break;
+            case MainActivity.STATE_FAILURE_DELETE_MEMO:
+                resId = R.string.msg_failure_delete;
+                break;
+            case MainActivity.STATE_CANCELED_DELETE_MEMO:
+                resId = R.string.msg_canceled_delete;
                 break;
 
             default:
@@ -509,6 +531,38 @@ public class MainActivity extends Activity
             MainActivity.this.listAdapter.add(newMemoName);
             MainActivity.this.listAdapter.sort(String.CASE_INSENSITIVE_ORDER);
             MainActivity.this.listAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private final class DeleteMemoCondacts extends ActivityResultManager.Condacts<String> {
+        @Override
+        public Intent onCreate(String name) {
+            MainActivity.this.state = MainActivity.STATE_REQ_DELETE_MEMO;
+            return new Intent(MainActivity.this, DeleteMemoActivity.class)
+                .putExtra(DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME, name);
+        }
+        @Override
+        public void onFailedToStart() {
+            MainActivity.this.state = MainActivity.STATE_FAILURE_DELETE_MEMO;
+            MainActivity.this.showStateMessage();
+        }
+        @Override
+        public void onCanceled() {
+            MainActivity.this.state = MainActivity.STATE_CANCELED_DELETE_MEMO;
+        }
+        @Override
+        public void onOk(Intent data) {
+            if (data == null || !data.hasExtra(DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME)) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_DELETE_MEMO;
+                return;
+            }
+            String memoName = data.getStringExtra(DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME);
+            if (memoName == null) {
+                MainActivity.this.state = MainActivity.STATE_FAILURE_DELETE_MEMO;
+                return;
+            }
+            MainActivity.this.state = MainActivity.STATE_SUCCESS_DELETE_MEMO;
+            MainActivity.this.listAdapter.remove(memoName);
         }
     }
 }

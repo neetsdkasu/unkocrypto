@@ -33,6 +33,11 @@
     <string name="msg_failure_change_memo_name">Failure Change Name</string>
     <string name="msg_canceled_change_memo_name">Canceled Change Name</string>
 
+    <!-- Delete Messages -->
+    <string name="msg_success_delete">Success Delete</string>
+    <string name="msg_failure_delete">Failure Delete</string>
+    <string name="msg_canceled_delete">Canceled Delete</string>
+
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
@@ -41,6 +46,7 @@
     <string name="msg_not_found_memo_name">Not Found The Memo Name</string>
     <string name="msg_please_switch_on">Please Switch On</string>
     <string name="msg_wrong_current_keyword">Wrong Current Password</string>
+    <string name="msg_not_match_memo_name">Not Match Memo Name</string>
 
     <!-- Common text -->
     <string name="common_text_unknown_name">"??????"</string>
@@ -83,5 +89,13 @@
     <string name="change_memo_name_execute_switch_text">"Do or Do Not ?"</string>
     <string name="change_memo_name_execute_switch_textoff">Do NOT Change</string>
     <string name="change_memo_name_execute_switch_texton">Do Change</string>
+
+    <!-- DeleteMemoActivity -->
+    <string name="delete_memo_title">Delete Memo</string>
+    <string name="delete_memo_memo_name_text_view_text">Delete Target Memo Name</string>
+    <string name="delete_memo_memo_name_confirm_text_view_text">Input The Memo Name For Confirmation</string>
+    <string name="delete_memo_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="delete_memo_execute_switch_textoff">Do NOT Delete</string>
+    <string name="delete_memo_execute_switch_texton">Do Delete</string>
 
 </resources>
