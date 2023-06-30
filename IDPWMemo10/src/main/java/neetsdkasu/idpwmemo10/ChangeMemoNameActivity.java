@@ -14,14 +14,13 @@ import android.widget.TextView;
 import java.io.File;
 import java.nio.file.Files;
 
-public class ChangeMemoNameActivity extends Activity
-{
+public class ChangeMemoNameActivity extends Activity {
+
     static final String INTENT_EXTRA_CUR_MEMO_NAME = "neetsdkasu.idpwmemo10.ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME";
     static final String INTENT_EXTRA_NEW_MEMO_NAME = "neetsdkasu.idpwmemo10.ChangeMemoNameActivity.INTENT_EXTRA_NEW_MEMO_NAME";
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_memo_name);
 

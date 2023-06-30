@@ -20,8 +20,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends Activity
-{
+public class MainActivity extends Activity {
+
     private static final int REQ_PICK_IMPORT_FILE        = 10;
     private static final int REQ_IMPORT_MEMO             = 20;
     private static final int REQ_EXPORT_MEMO             = 30;
@@ -84,8 +84,7 @@ public class MainActivity extends Activity
     private ActivityResultManager.Launcher<String> deleteMemoLauncher     = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 

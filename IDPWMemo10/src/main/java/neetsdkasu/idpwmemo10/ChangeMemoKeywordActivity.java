@@ -12,13 +12,12 @@ import java.nio.file.Files;
 
 import idpwmemo.IDPWMemo;
 
-public class ChangeMemoKeywordActivity extends Activity
-{
+public class ChangeMemoKeywordActivity extends Activity {
+
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME";
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_memo_keyword);
 

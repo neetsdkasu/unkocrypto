@@ -14,13 +14,12 @@ import android.widget.TextView;
 import java.io.File;
 import java.nio.file.Files;
 
-public class DeleteMemoActivity extends Activity
-{
+public class DeleteMemoActivity extends Activity {
+
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME";
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.delete_memo);
 

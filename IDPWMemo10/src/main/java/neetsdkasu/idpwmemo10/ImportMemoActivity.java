@@ -17,14 +17,13 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-public class ImportMemoActivity extends Activity
-{
+public class ImportMemoActivity extends Activity {
+
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.ImportMemoActivity.INTENT_EXTRA_MEMO_NAME";
     static final int ACTIVITY_RESULT_OVERWRITE = Activity.RESULT_FIRST_USER;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.import_memo);
 
