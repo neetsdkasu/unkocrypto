@@ -3,11 +3,9 @@ package neetsdkasu.idpwmemo10;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.provider.OpenableColumns;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,12 +16,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import mt19937ar.MTRandom;
 
 public class MainActivity extends Activity
 {
@@ -106,20 +101,22 @@ public class MainActivity extends Activity
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String fileName = MainActivity.this.listAdapter.getItem(position);
-                Utils.alertShort(MainActivity.this, fileName);
+                String memoName = MainActivity.this.listAdapter.getItem(position);
+                Intent intent = new Intent(MainActivity.this, MemoViewerActivity.class)
+                    .putExtra(MemoViewerActivity.INTENT_EXTRA_MEMO_NAME, memoName);
+                MainActivity.this.startActivity(intent);
             }
         });
         registerForContextMenu(listView);
 
         ActivityResultManager manager = this.getActivityResultManager();
-        this.addNewMemoLauncher = manager.register(new MainActivity.AddNewMemoCondacts());
-        this.pickImportFileLauncher = manager.register(new MainActivity.PickImportFileCondacts());
-        this.importMemoLauncher = manager.register(new MainActivity.ImportMemoCondacts());
-        this.exportMemoLauncher = manager.register(new MainActivity.ExportMemoCondacts());
-        this.changeMemoKeywordLauncher = manager.register(new MainActivity.ChangeMemoKeywordCondacts());
-        this.changeMemoNameLauncher = manager.register(new MainActivity.ChangeMemoNameCondacts());
-        this.deleteMemoLauncher = manager.register(new MainActivity.DeleteMemoCondacts());
+        this.addNewMemoLauncher = manager.register(this.new AddNewMemoCondacts());
+        this.pickImportFileLauncher = manager.register(this.new PickImportFileCondacts());
+        this.importMemoLauncher = manager.register(this.new ImportMemoCondacts());
+        this.exportMemoLauncher = manager.register(this.new ExportMemoCondacts());
+        this.changeMemoKeywordLauncher = manager.register(this.new ChangeMemoKeywordCondacts());
+        this.changeMemoNameLauncher = manager.register(this.new ChangeMemoNameCondacts());
+        this.deleteMemoLauncher = manager.register(this.new DeleteMemoCondacts());
     }
 
     @Override
