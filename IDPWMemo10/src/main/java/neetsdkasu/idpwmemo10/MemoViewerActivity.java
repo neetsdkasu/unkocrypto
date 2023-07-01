@@ -109,6 +109,8 @@ public class MemoViewerActivity extends Activity {
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+        this.valueListAdapter.clear();
+        this.secretListAdapter.clear();
     }
 
     private boolean openMemo() {
@@ -151,7 +153,7 @@ public class MemoViewerActivity extends Activity {
 
     private void showValues() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_value_list).setVisibility(View.VISIBLE);
@@ -160,7 +162,7 @@ public class MemoViewerActivity extends Activity {
 
     private void showSecrets() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_value_list).setVisibility(View.GONE);
@@ -190,6 +192,9 @@ public class MemoViewerActivity extends Activity {
                 this.secretListAdapter.add(this.new ValueItem(i, true, secrets[i]));
             }
             this.secretListAdapter.notifyDataSetChanged();
+
+            Switch valuesSecretsSwitch = findViewById(R.id.memo_viewer_values_secrets_switch);
+            valuesSecretsSwitch.setChecked(false);
 
             this.showValues();
 
