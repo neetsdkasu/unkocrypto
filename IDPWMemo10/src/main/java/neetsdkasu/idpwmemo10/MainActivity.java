@@ -121,58 +121,18 @@ public class MainActivity extends Activity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.memo_list_context_menu, menu);
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int id = item.getItemId();
-        String memoName = this.listAdapter.getItem(info.position);
-        if (id == R.id.export_memo_menu_item) {
-            if (this.exportMemoLauncher != null) {
-                this.exportMemoLauncher.launch(memoName);
-            }
-         } else if (id == R.id.change_memo_keyword_menu_item) {
-            if (this.changeMemoKeywordLauncher != null) {
-                this.changeMemoKeywordLauncher.launch(memoName);
-            }
-        } else if (id == R.id.change_memo_name_menu_item) {
-            if (this.changeMemoNameLauncher != null) {
-                this.changeMemoNameLauncher.launch(memoName);
-            }
-        } else if (id == R.id.delete_memo_menu_item) {
-            if (this.deleteMemoLauncher != null) {
-                this.deleteMemoLauncher.launch(memoName);
-            }
-        } else {
-            return super.onContextItemSelected(item);
-        }
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.new_memo_menu_item) {
-            if (this.addNewMemoLauncher != null) {
-                this.addNewMemoLauncher.launch();
-            }
-        } else if (id == R.id.import_memo_menu_item) {
-            if (this.pickImportFileLauncher != null) {
-                this.pickImportFileLauncher.launch();
-            }
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
         return true;
     }
 
@@ -188,6 +148,56 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         this.getActivityResultManager().onActivityResult(requestCode, resultCode, data);
+    }
+
+    // res/menu/main_menu.xml New-Memo-MenuItem onClick
+    public void onClickNewMemoMenuItem(MenuItem item) {
+        if (this.addNewMemoLauncher != null) {
+            this.addNewMemoLauncher.launch();
+        }
+    }
+
+    // res/menu/main_menu.xml Import-Memo-MenuItem onClick
+    public void onClickImportMemoMenuItem(MenuItem item) {
+        if (this.pickImportFileLauncher != null) {
+            this.pickImportFileLauncher.launch();
+        }
+    }
+
+    // res/menu/memo_list_context_menu.xml Export-Memo-ContextMenuItem onClick
+    public void onClickExportMemoMenuItem(MenuItem item) {
+        if (this.exportMemoLauncher != null) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            String memoName = this.listAdapter.getItem(info.position);
+            this.exportMemoLauncher.launch(memoName);
+        }
+    }
+
+    // res/menu/memo_list_context_menu.xml Change-Memo-Keyword-ContextMenuItem onClick
+    public void onClickChangeMemoKeywordMenuItem(MenuItem item) {
+        if (this.changeMemoKeywordLauncher != null) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            String memoName = this.listAdapter.getItem(info.position);
+            this.changeMemoKeywordLauncher.launch(memoName);
+        }
+    }
+
+    // res/menu/memo_list_context_menu.xml Change-Memo-Name-ContextMenuItem onClick
+    public void onClickChangeMemoNameMenuItem(MenuItem item) {
+        if (this.changeMemoNameLauncher != null) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            String memoName = this.listAdapter.getItem(info.position);
+            this.changeMemoNameLauncher.launch(memoName);
+        }
+    }
+
+    // res/menu/memo_list_context_menu.xml Delete-Memo-ContextMenuItem onClick
+    public void onClickDeleteMemoMenuItem(MenuItem item) {
+        if (this.deleteMemoLauncher != null) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            String memoName = this.listAdapter.getItem(info.position);
+            this.deleteMemoLauncher.launch(memoName);
+        }
     }
 
     private void showStateMessage() {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/add_service_submenu"
+          android:icon="@android:drawable/ic_menu_add"
+          android:title="@string/add_service_submenu_text"
+          android:visible="false"
+          android:showAsAction="ifRoom" >
+      <menu>
+        <item android:title="@string/new_service_menu_item_text"
+              android:onClick="onClickNewServiceMenuItem" />
+        <item android:title="@string/import_service_menu_item_text"
+              android:onClick="onClickImportServiceMenuItem" />
+      </menu>
+    </item>
+    <item android:id="@+id/add_value_menu_item"
+          android:icon="@android:drawable/ic_menu_add"
+          android:title="@string/add_value_menu_item_text"
+          android:onClick="onClickAddValueMenuItem"
+          android:visible="false"
+          android:showAsAction="ifRoom" />
+    <item android:id="@+id/add_secret_menu_item"
+          android:icon="@android:drawable/ic_menu_add"
+          android:title="@string/add_secret_menu_item_text"
+          android:visible="false"
+          android:onClick="onClickAddSecretMenuItem"
+          android:showAsAction="ifRoom" />
+</menu>

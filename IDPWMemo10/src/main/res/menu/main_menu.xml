@@ -4,10 +4,10 @@
           android:title="@string/add_memo_menu_item_text"
           android:showAsAction="ifRoom" >
       <menu>
-        <item android:id="@+id/new_memo_menu_item"
-              android:title="@string/new_memo_menu_item_text" />
-        <item android:id="@+id/import_memo_menu_item"
-              android:title="@string/import_memo_menu_item_text" />
+        <item android:title="@string/new_memo_menu_item_text"
+              android:onClick="onClickNewMemoMenuItem" />
+        <item android:title="@string/import_memo_menu_item_text"
+              android:onClick="onClickImportMemoMenuItem" />
       </menu>
     </item>
 </menu>

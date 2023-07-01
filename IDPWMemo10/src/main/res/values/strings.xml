@@ -107,4 +107,11 @@
     <string name="memo_viewer_values_secrets_switch_textoff">Values</string>
     <string name="memo_viewer_values_secrets_switch_texton">Secrets</string>
 
+    <!-- MemoViewerActivity Option Menu -->
+    <string name="add_service_submenu_text">Add</string>
+    <string name="new_service_menu_item_text">New</string>
+    <string name="import_service_menu_item_text">Import</string>
+    <string name="add_value_menu_item_text">Add</string>
+    <string name="add_secret_menu_item_text">Add</string>
+
 </resources>

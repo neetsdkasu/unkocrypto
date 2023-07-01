@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -88,9 +91,9 @@ public class MemoViewerActivity extends Activity {
         valuesSecretsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged (CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    MemoViewerActivity.this.showSecrets();
+                    MemoViewerActivity.this.showSecretList();
                 } else {
-                    MemoViewerActivity.this.showValues();
+                    MemoViewerActivity.this.showValueList();
                 }
             }
         });
@@ -101,16 +104,132 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.memo_viewer_menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        menu.findItem(R.id.add_service_submenu).setVisible(this.state == MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST);
+        menu.findItem(R.id.add_value_menu_item).setVisible(this.state == MemoViewerActivity.STATE_DISPLAY_VALUE_LIST);
+        menu.findItem(R.id.add_secret_menu_item).setVisible(this.state == MemoViewerActivity.STATE_DISPLAY_SECRET_LIST);
+
+        return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        switch (this.state) {
+            case MemoViewerActivity.STATE_NONE:
+                this.showWaitingKeyword();
+                break;
+            case MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST:
+                this.showServiceList();
+                break;
+            case MemoViewerActivity.STATE_DISPLAY_VALUE_LIST:
+                this.showValueList();
+                break;
+            case MemoViewerActivity.STATE_DISPLAY_SECRET_LIST:
+                this.showSecretList();
+                break;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+    }
+
+    // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
+    public void onClickNewServiceMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "New Service");
+    }
+
+    // res/menu/memo_viewer_menu.xml Import-Service-MenuItem onClick
+    public void onClickImportServiceMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Import Service");
+    }
+
+    // res/menu/memo_viewer_menu.xml Add-Value-MenuItem onClick
+    public void onClickAddValueMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Add Value");
+    }
+
+    // res/menu/memo_viewer_menu.xml Add-Secret-MenuItem onClick
+    public void onClickAddSecretMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Add Secret");
+    }
+
+    // res/layout/memo_viewer.xml Show-Service-List-Button onClick
     public void onClickShowServiceListButton(View view) {
         if (!this.openMemo()) {
             return;
         }
+        this.showServiceList();
+    }
+
+    private void showWaitingKeyword() {
+        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+        this.serviceListAdapter.clear();
+        this.valueListAdapter.clear();
+        this.secretListAdapter.clear();
+        this.state = MemoViewerActivity.STATE_NONE;
+        invalidateOptionsMenu();
+    }
+
+    private void showServiceList() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
         this.valueListAdapter.clear();
         this.secretListAdapter.clear();
+        this.state = MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST;
+        invalidateOptionsMenu();
+    }
+
+    private void showValueList() {
+        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_value_list).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_secret_list).setVisibility(View.GONE);
+        this.state = MemoViewerActivity.STATE_DISPLAY_VALUE_LIST;
+        invalidateOptionsMenu();
+    }
+
+    private void showSecretList() {
+        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_value_list).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_secret_list).setVisibility(View.VISIBLE);
+        this.state = MemoViewerActivity.STATE_DISPLAY_SECRET_LIST;
+        invalidateOptionsMenu();
     }
 
     private boolean openMemo() {
@@ -151,24 +270,6 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
-    private void showValues() {
-        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
-        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
-        findViewById(R.id.memo_viewer_value_list).setVisibility(View.VISIBLE);
-        findViewById(R.id.memo_viewer_secret_list).setVisibility(View.GONE);
-    }
-
-    private void showSecrets() {
-        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
-        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
-        findViewById(R.id.memo_viewer_value_list).setVisibility(View.GONE);
-        findViewById(R.id.memo_viewer_secret_list).setVisibility(View.VISIBLE);
-    }
-
     private void selectService(int index) {
         if (this.idpwMemo == null) {
             Utils.alertShort(this, R.string.msg_internal_error);
@@ -196,7 +297,7 @@ public class MemoViewerActivity extends Activity {
             Switch valuesSecretsSwitch = findViewById(R.id.memo_viewer_values_secrets_switch);
             valuesSecretsSwitch.setChecked(false);
 
-            this.showValues();
+            this.showValueList();
 
         } catch (idpwmemo.IDPWMemoException ex) {
             Utils.alertShort(this, R.string.msg_internal_error);
