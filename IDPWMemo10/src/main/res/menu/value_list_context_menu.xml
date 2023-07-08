@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:onClick="onClickEditValueMenuItem"
+          android:title="@string/edit_value_menu_item_text" />
+    <item android:onClick="onClickDeleteValueMenuItem"
+          android:title="@string/delete_value_menu_item_text" />
+</menu>

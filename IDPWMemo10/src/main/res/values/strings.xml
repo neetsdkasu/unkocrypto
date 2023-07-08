@@ -48,6 +48,7 @@
     <string name="msg_wrong_current_keyword">Wrong Current Password</string>
     <string name="msg_wrong_keyword">Wrong Password</string>
     <string name="msg_not_match_memo_name">Not Match Memo Name</string>
+    <string name="msg_copied">Copied</string>
 
     <!-- Common text -->
     <string name="common_text_unknown_name">"??????"</string>
@@ -113,5 +114,17 @@
     <string name="import_service_menu_item_text">Import</string>
     <string name="add_value_menu_item_text">Add</string>
     <string name="add_secret_menu_item_text">Add</string>
+
+    <!-- ServiceListView Context Menu -->
+    <string name="export_service_menu_item_text">Export</string>
+    <string name="delete_service_menu_item_text">Delete</string>
+
+    <!--ValueListView Context Menu -->
+    <string name="edit_value_menu_item_text">Edit</string>
+    <string name="delete_value_menu_item_text">Delete</string>
+
+    <!--SecretListView Context Menu -->
+    <string name="edit_secret_menu_item_text">Edit</string>
+    <string name="delete_secret_menu_item_text">Delete</string>
 
 </resources>

@@ -1,6 +1,9 @@
 package neetsdkasu.idpwmemo10;
 
 import android.app.Activity;
+import android.content.ClipboardManager;
+import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -37,6 +40,14 @@ public class MemoViewerActivity extends Activity {
     private ArrayAdapter<MemoViewerActivity.ValueItem>   valueListAdapter   = null;
     private ArrayAdapter<MemoViewerActivity.ValueItem>   secretListAdapter  = null;
 
+    private ActivityResultManager activityResultManager = null;
+    private ActivityResultManager getActivityResultManager() {
+        if (this.activityResultManager == null) {
+            this.activityResultManager = new ActivityResultManager(this);
+        }
+        return this.activityResultManager;
+    }
+
     private IDPWMemo idpwMemo = null;
     private String memoName = null;
 
@@ -64,6 +75,8 @@ public class MemoViewerActivity extends Activity {
                 item.show();
             }
         });
+        registerForContextMenu(serviceListView);
+
 
         List<MemoViewerActivity.ValueItem> valueList = new ArrayList<>();
         valueListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, valueList);
@@ -72,9 +85,11 @@ public class MemoViewerActivity extends Activity {
         valueListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ValueItem item = MemoViewerActivity.this.valueListAdapter.getItem(position);
-                // TODO
+                item.copyToClipboard();
             }
         });
+        registerForContextMenu(valueListView);
+
 
         List<MemoViewerActivity.ValueItem> secretList = new ArrayList<>();
         secretListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, secretList);
@@ -83,9 +98,11 @@ public class MemoViewerActivity extends Activity {
         secretListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ValueItem item = MemoViewerActivity.this.secretListAdapter.getItem(position);
-                // TODO
+                item.copyToClipboard();
             }
         });
+        registerForContextMenu(secretListView);
+
 
         Switch valuesSecretsSwitch = findViewById(R.id.memo_viewer_values_secrets_switch);
         valuesSecretsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -101,6 +118,23 @@ public class MemoViewerActivity extends Activity {
         Window window = getWindow();
         if (window != null) {
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+        }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        MenuInflater inflater = getMenuInflater();
+
+        final int id = v.getId();
+
+        if (id == R.id.memo_viewer_service_list) {
+            inflater.inflate(R.menu.service_list_context_menu, menu);
+        } else if (id == R.id.memo_viewer_value_list) {
+            inflater.inflate(R.menu.value_list_context_menu, menu);
+        } else if (id == R.id.memo_viewer_secret_list) {
+            inflater.inflate(R.menu.secret_list_context_menu, menu);
         }
     }
 
@@ -129,6 +163,7 @@ public class MemoViewerActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        // onResumeでUI操作やってよいのだろうか？
         switch (this.state) {
             case MemoViewerActivity.STATE_NONE:
                 this.showWaitingKeyword();
@@ -149,10 +184,18 @@ public class MemoViewerActivity extends Activity {
     protected void onPause() {
         super.onPause();
 
+        // ここでこれらの操作はダメぽそう（UI操作はせずに、状態を保存する操作をしろという話らしい？）
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        this.getActivityResultManager().onActivityResult(requestCode, resultCode, data);
     }
 
     // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
@@ -185,6 +228,42 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         this.showServiceList();
+    }
+
+    // res/menu/service_list_context_menu.xml Export-Service-MenuItem onClick
+    public void onClickExportServiceMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Export Service");
+    }
+
+    // res/menu/service_list_context_menu.xml Delete_Service-MenuItem onClick
+    public void onClickDeleteServiceMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Delete Service");
+    }
+
+    // res/menu/value_list_context_menu.xml Edit-Value-MenuItem onClick
+    public void onClickEditValueMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Edit Value");
+    }
+
+    // res/menu/value_list_context_menu.xml Delete_Value-MenuItem onClick
+    public void onClickDeleteValueMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Delete Value");
+    }
+
+    // res/menu/secret_list_context_menu.xml Edit-Secret-MenuItem onClick
+    public void onClickEditSecretMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Edit Secret");
+    }
+
+    // res/menu/secret_list_context_menu.xml Delete_Secret-MenuItem onClick
+    public void onClickDeleteSecretMenuItem(MenuItem item) {
+        // TODO
+        Utils.alertShort(this, "Delete Secret");
     }
 
     private void showWaitingKeyword() {
@@ -260,6 +339,8 @@ public class MemoViewerActivity extends Activity {
             }
             this.serviceListAdapter.notifyDataSetChanged();
 
+            keywordEditView.setText("");
+
             this.idpwMemo = tmpMemo;
 
             return true;
@@ -304,6 +385,26 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    private void copyToClipboard(boolean secret, String text) {
+
+        ClipboardManager clipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+
+        ClipData clip = ClipData.newPlainText(getString(R.string.app_name), text);
+
+        if (secret) {
+            android.os.PersistableBundle bundle = new android.os.PersistableBundle();
+            bundle.putBoolean("android.content.extra.IS_SENSITIVE", true);
+            clip.getDescription().setExtras(bundle);
+        }
+
+        clipboard.setPrimaryClip(clip);
+
+        // if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+        if (android.os.Build.VERSION.SDK_INT <= 32) {
+            Utils.alertShort(this, R.string.msg_copied);
+        }
+    }
+
     private final class ServiceItem {
         int index;
         String name;
@@ -334,6 +435,9 @@ public class MemoViewerActivity extends Activity {
         @Override
         public String toString() {
             return this.display;
+        }
+        void copyToClipboard() {
+            MemoViewerActivity.this.copyToClipboard(secret, value.value);
         }
     }
 }

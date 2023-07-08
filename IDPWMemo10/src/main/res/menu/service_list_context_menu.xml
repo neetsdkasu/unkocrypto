@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:onClick="onClickExportServiceMenuItem"
+          android:title="@string/export_service_menu_item_text" />
+    <item android:onClick="onClickDeleteServiceMenuItem"
+          android:title="@string/delete_service_menu_item_text" />
+</menu>
