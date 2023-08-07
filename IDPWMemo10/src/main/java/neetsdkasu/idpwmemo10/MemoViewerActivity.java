@@ -21,6 +21,7 @@ import android.widget.Switch;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import idpwmemo.IDPWMemo;
@@ -47,6 +48,8 @@ public class MemoViewerActivity extends Activity {
         }
         return this.activityResultManager;
     }
+
+    private ActivityResultManager.Launcher<Void> addNewServiceLauncher = null;
 
     private IDPWMemo idpwMemo = null;
     private String memoName = null;
@@ -108,9 +111,9 @@ public class MemoViewerActivity extends Activity {
         valuesSecretsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged (CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    MemoViewerActivity.this.showSecretList();
+                    MemoViewerActivity.this.setStateDisplaySecretList();
                 } else {
-                    MemoViewerActivity.this.showValueList();
+                    MemoViewerActivity.this.setStateDisplayValueList();
                 }
             }
         });
@@ -119,6 +122,9 @@ public class MemoViewerActivity extends Activity {
         if (window != null) {
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
         }
+
+        ActivityResultManager manager = this.getActivityResultManager();
+        this.addNewServiceLauncher = manager.register(this.new AddNewServiceCondacts());
     }
 
     @Override
@@ -164,20 +170,7 @@ public class MemoViewerActivity extends Activity {
         super.onResume();
 
         // onResumeでUI操作やってよいのだろうか？
-        switch (this.state) {
-            case MemoViewerActivity.STATE_NONE:
-                this.showWaitingKeyword();
-                break;
-            case MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST:
-                this.showServiceList();
-                break;
-            case MemoViewerActivity.STATE_DISPLAY_VALUE_LIST:
-                this.showValueList();
-                break;
-            case MemoViewerActivity.STATE_DISPLAY_SECRET_LIST:
-                this.showSecretList();
-                break;
-        }
+        this.showCurrentState();
     }
 
     @Override
@@ -200,8 +193,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
     public void onClickNewServiceMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "New Service");
+        if (this.addNewServiceLauncher != null) {
+            this.addNewServiceLauncher.launch();
+        }
     }
 
     // res/menu/memo_viewer_menu.xml Import-Service-MenuItem onClick
@@ -227,7 +221,7 @@ public class MemoViewerActivity extends Activity {
         if (!this.openMemo()) {
             return;
         }
-        this.showServiceList();
+        this.setStateDisplayServiceList();
     }
 
     // res/menu/service_list_context_menu.xml Export-Service-MenuItem onClick
@@ -266,7 +260,29 @@ public class MemoViewerActivity extends Activity {
         Utils.alertShort(this, "Delete Secret");
     }
 
-    private void showWaitingKeyword() {
+    private void showCurrentState() {
+        switch (this.state) {
+            case MemoViewerActivity.STATE_NONE:
+                this.showStateNone();
+                break;
+            case MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST:
+                this.showStateDisplayServiceList();
+                break;
+            case MemoViewerActivity.STATE_DISPLAY_VALUE_LIST:
+                this.showStateDisplayValueList();
+                break;
+            case MemoViewerActivity.STATE_DISPLAY_SECRET_LIST:
+                this.showStateDisplaySecretList();
+                break;
+        }
+    }
+
+    private void setStateNone() {
+        this.state = MemoViewerActivity.STATE_NONE;
+        this.showStateNone();
+    }
+
+    private void showStateNone() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
@@ -274,40 +290,51 @@ public class MemoViewerActivity extends Activity {
         this.serviceListAdapter.clear();
         this.valueListAdapter.clear();
         this.secretListAdapter.clear();
-        this.state = MemoViewerActivity.STATE_NONE;
         invalidateOptionsMenu();
     }
 
-    private void showServiceList() {
+    private void setStateDisplayServiceList() {
+        this.state = MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST;
+        this.showStateDisplayServiceList();
+    }
+
+    private void showStateDisplayServiceList() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
         this.valueListAdapter.clear();
         this.secretListAdapter.clear();
-        this.state = MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST;
         invalidateOptionsMenu();
     }
 
-    private void showValueList() {
+    private void setStateDisplayValueList() {
+        this.state = MemoViewerActivity.STATE_DISPLAY_VALUE_LIST;
+        this.showStateDisplayValueList();
+    }
+
+    private void showStateDisplayValueList() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_value_list).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_secret_list).setVisibility(View.GONE);
-        this.state = MemoViewerActivity.STATE_DISPLAY_VALUE_LIST;
         invalidateOptionsMenu();
     }
 
-    private void showSecretList() {
+    private void setStateDisplaySecretList() {
+        this.state = MemoViewerActivity.STATE_DISPLAY_SECRET_LIST;
+        this.showStateDisplaySecretList();
+    }
+
+    private void showStateDisplaySecretList() {
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_value_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_secret_list).setVisibility(View.VISIBLE);
-        this.state = MemoViewerActivity.STATE_DISPLAY_SECRET_LIST;
         invalidateOptionsMenu();
     }
 
@@ -331,17 +358,11 @@ public class MemoViewerActivity extends Activity {
                 return false;
             }
 
-            this.serviceListAdapter.setNotifyOnChange(false);
-            this.serviceListAdapter.clear();
-            String[] serviceNames = tmpMemo.getServiceNames();
-            for (int i = 0; i < serviceNames.length; i++) {
-                this.serviceListAdapter.add(this.new ServiceItem(i, serviceNames[i]));
-            }
-            this.serviceListAdapter.notifyDataSetChanged();
-
             keywordEditView.setText("");
 
             this.idpwMemo = tmpMemo;
+
+            this.updateServiceList();
 
             return true;
 
@@ -378,7 +399,7 @@ public class MemoViewerActivity extends Activity {
             Switch valuesSecretsSwitch = findViewById(R.id.memo_viewer_values_secrets_switch);
             valuesSecretsSwitch.setChecked(false);
 
-            this.showValueList();
+            this.setStateDisplayValueList();
 
         } catch (idpwmemo.IDPWMemoException ex) {
             Utils.alertShort(this, R.string.msg_internal_error);
@@ -405,6 +426,89 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    private void updateServiceList() {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        try {
+            this.serviceListAdapter.setNotifyOnChange(false);
+            this.serviceListAdapter.clear();
+            String[] serviceNames = this.idpwMemo.getServiceNames();
+            for (int i = 0; i < serviceNames.length; i++) {
+                this.serviceListAdapter.add(this.new ServiceItem(i, serviceNames[i]));
+            }
+            this.serviceListAdapter.sort(this.SERVICE_ITEM_COMPARATOR);
+            this.serviceListAdapter.notifyDataSetChanged();
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
+    private boolean saveMemo() {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return false;
+        }
+        File memoFile = Utils.getMemoFile(this, this.memoName);
+        File cache = new File(getCacheDir(), "memo_viewer_cache.memo");
+        try {
+
+            byte[] data = this.idpwMemo.save();
+
+            if (memoFile.exists()) {
+                // 念のための一時保存（うまくいくか不明だが）
+                Files.deleteIfExists(cache.toPath());
+                Files.move(memoFile.toPath(), cache.toPath());
+            }
+
+            Files.write(memoFile.toPath(), data);
+
+            Files.deleteIfExists(cache.toPath());
+
+            return true;
+        } catch (Exception ex) {
+            try {
+                Files.deleteIfExists(memoFile.toPath());
+                if (cache.exists()) {
+                    Files.move(cache.toPath(), memoFile.toPath());
+                }
+            } catch (Exception ex2) {}
+
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return false;
+        }
+    }
+
+    private void addNewService(String newServiceName) {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_failure_new_service);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST) {
+            Utils.alertShort(this, R.string.msg_failure_new_service);
+            return;
+        }
+        try {
+
+            this.idpwMemo.addNewService(newServiceName);
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_new_service);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateServiceList();
+
+            Utils.alertShort(this, R.string.msg_success_new_service);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
     private final class ServiceItem {
         int index;
         String name;
@@ -418,6 +522,9 @@ public class MemoViewerActivity extends Activity {
         }
         void show() {
             MemoViewerActivity.this.selectService(this.index);
+        }
+        String getName() {
+            return this.name;
         }
     }
 
@@ -438,6 +545,36 @@ public class MemoViewerActivity extends Activity {
         }
         void copyToClipboard() {
             MemoViewerActivity.this.copyToClipboard(secret, value.value);
+        }
+    }
+
+    private final Comparator<MemoViewerActivity.ServiceItem> SERVICE_ITEM_COMPARATOR = new Comparator<MemoViewerActivity.ServiceItem>() {
+        public int compare(MemoViewerActivity.ServiceItem item1, MemoViewerActivity.ServiceItem item2) {
+            return String.CASE_INSENSITIVE_ORDER.compare(item1.getName(), item2.getName());
+        }
+    };
+
+    private final class AddNewServiceCondacts extends ActivityResultManager.Condacts<Void> {
+        @Override
+        public Intent onCreate(Void obj) {
+            return new Intent(MemoViewerActivity.this, NewServiceActivity.class);
+        }
+        @Override
+        public void onCanceled() {
+            Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_new_service);
+        }
+        @Override
+        public void onOk(Intent data) {
+            if (data == null || !data.hasExtra(NewServiceActivity.INTENT_EXTRA_NEW_SERVICE_NAME)) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            String newServiceName = data.getStringExtra(NewServiceActivity.INTENT_EXTRA_NEW_SERVICE_NAME);
+            if (newServiceName == null) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            MemoViewerActivity.this.addNewService(newServiceName);
         }
     }
 }

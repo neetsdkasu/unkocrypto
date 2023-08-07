@@ -38,6 +38,11 @@
     <string name="msg_failure_delete">Failure Delete</string>
     <string name="msg_canceled_delete">Canceled Delete</string>
 
+    <!-- New Service Messages -->
+    <string name="msg_success_new_service">Success New Service</string>
+    <string name="msg_failure_new_service">Failure New Service</string>
+    <string name="msg_canceled_new_service">Canceled New Service</string>
+
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
@@ -49,6 +54,7 @@
     <string name="msg_wrong_keyword">Wrong Password</string>
     <string name="msg_not_match_memo_name">Not Match Memo Name</string>
     <string name="msg_copied">Copied</string>
+    <string name="msg_wrong_service_name">Wrong Service Name</string>
 
     <!-- Common text -->
     <string name="common_text_unknown_name">"??????"</string>
@@ -126,5 +132,9 @@
     <!--SecretListView Context Menu -->
     <string name="edit_secret_menu_item_text">Edit</string>
     <string name="delete_secret_menu_item_text">Delete</string>
+
+    <!-- newServiceActivity -->
+    <string name="new_service_title">New Service</string>
+    <string name="new_service_name_text">New Service Name</string>
 
 </resources>

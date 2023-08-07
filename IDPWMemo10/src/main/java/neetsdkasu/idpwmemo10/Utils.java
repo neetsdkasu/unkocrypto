@@ -55,6 +55,13 @@ final class Utils {
         return name.chars().allMatch(Utils.memoNameCharacterChecker);
     }
 
+    static boolean isValidServiceName(String name) {
+        if (name == null) {
+            return false;
+        }
+        return name.trim().length() > 0;
+    }
+
     static void alertShort(Context c, int msgResId) {
         Toast.makeText(c, msgResId, Toast.LENGTH_SHORT).show();
     }
