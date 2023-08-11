@@ -3,6 +3,9 @@ package neetsdkasu.idpwmemo10;
 import android.content.Context;
 import android.widget.Toast;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.IntPredicate;
 
 final class Utils {
@@ -69,4 +72,17 @@ final class Utils {
     static void alertShort(Context c, String msg) {
         Toast.makeText(c, msg, Toast.LENGTH_SHORT).show();
     }
+
+    private static final String[] VALUE_TYPES = new String[8];
+    static {
+        for (int i = 0; i < Utils.VALUE_TYPES.length; i++) {
+            Utils.VALUE_TYPES[i] = idpwmemo.Value.typeName(i);
+        }
+    }
+    static final List<String> VALUE_TYPE_LIST = Collections.unmodifiableList(Arrays.asList(Utils.VALUE_TYPES));
+
+    static boolean isValidValueType(int valueType) {
+        return Utils.inRange(valueType, 0, VALUE_TYPES.length - 1);
+    }
+
 }

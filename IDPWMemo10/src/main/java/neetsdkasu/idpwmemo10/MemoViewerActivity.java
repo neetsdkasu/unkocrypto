@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.Switch;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -41,15 +42,20 @@ public class MemoViewerActivity extends Activity {
     private ArrayAdapter<MemoViewerActivity.ValueItem>   valueListAdapter   = null;
     private ArrayAdapter<MemoViewerActivity.ValueItem>   secretListAdapter  = null;
 
-    private ActivityResultManager activityResultManager = null;
-    private ActivityResultManager getActivityResultManager() {
-        if (this.activityResultManager == null) {
-            this.activityResultManager = new ActivityResultManager(this);
-        }
-        return this.activityResultManager;
-    }
+    private final ActivityResultManager activityResultManager;
 
-    private ActivityResultManager.Launcher<Void> addNewServiceLauncher = null;
+    private final ActivityResultManager.Launcher<Void> addNewServiceLauncher;
+    private final ActivityResultManager.Launcher<Void> addNewValueLauncher;
+    private final ActivityResultManager.Launcher<Void> addNewSecretLauncher;
+
+    {
+        this.activityResultManager = new ActivityResultManager(this);
+        ActivityResultManager manager = this.activityResultManager;
+
+        this.addNewServiceLauncher = manager.register(this.new AddNewServiceCondacts());
+        this.addNewValueLauncher   = manager.register(this.new AddNewValueCondacts());
+        this.addNewSecretLauncher  = manager.register(this.new AddNewSecretCondacts());
+    }
 
     private IDPWMemo idpwMemo = null;
     private String memoName = null;
@@ -122,9 +128,6 @@ public class MemoViewerActivity extends Activity {
         if (window != null) {
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
         }
-
-        ActivityResultManager manager = this.getActivityResultManager();
-        this.addNewServiceLauncher = manager.register(this.new AddNewServiceCondacts());
     }
 
     @Override
@@ -188,7 +191,7 @@ public class MemoViewerActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        this.getActivityResultManager().onActivityResult(requestCode, resultCode, data);
+        this.activityResultManager.onActivityResult(requestCode, resultCode, data);
     }
 
     // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
@@ -206,14 +209,16 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/memo_viewer_menu.xml Add-Value-MenuItem onClick
     public void onClickAddValueMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "Add Value");
+        if (this.addNewValueLauncher != null) {
+            this.addNewValueLauncher.launch();
+        }
     }
 
     // res/menu/memo_viewer_menu.xml Add-Secret-MenuItem onClick
     public void onClickAddSecretMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "Add Secret");
+        if (this.addNewSecretLauncher != null) {
+            this.addNewSecretLauncher.launch();
+        }
     }
 
     // res/layout/memo_viewer.xml Show-Service-List-Button onClick
@@ -380,21 +385,9 @@ public class MemoViewerActivity extends Activity {
         try {
             this.idpwMemo.selectService(index);
 
-            this.valueListAdapter.setNotifyOnChange(false);
-            this.valueListAdapter.clear();
-            idpwmemo.Value[] values = this.idpwMemo.getValues();
-            for (int i = 0; i < values.length; i++) {
-                this.valueListAdapter.add(this.new ValueItem(i, false, values[i]));
-            }
-            this.valueListAdapter.notifyDataSetChanged();
+            this.updateValueList();
 
-            this.secretListAdapter.setNotifyOnChange(false);
-            this.secretListAdapter.clear();
-            idpwmemo.Value[] secrets = this.idpwMemo.getSecrets();
-            for (int i = 0; i < secrets.length; i++) {
-                this.secretListAdapter.add(this.new ValueItem(i, true, secrets[i]));
-            }
-            this.secretListAdapter.notifyDataSetChanged();
+            this.updateSecretList();
 
             Switch valuesSecretsSwitch = findViewById(R.id.memo_viewer_values_secrets_switch);
             valuesSecretsSwitch.setChecked(false);
@@ -431,19 +424,42 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
-        try {
-            this.serviceListAdapter.setNotifyOnChange(false);
-            this.serviceListAdapter.clear();
-            String[] serviceNames = this.idpwMemo.getServiceNames();
-            for (int i = 0; i < serviceNames.length; i++) {
-                this.serviceListAdapter.add(this.new ServiceItem(i, serviceNames[i]));
-            }
-            this.serviceListAdapter.sort(this.SERVICE_ITEM_COMPARATOR);
-            this.serviceListAdapter.notifyDataSetChanged();
-
-        } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+        this.serviceListAdapter.setNotifyOnChange(false);
+        this.serviceListAdapter.clear();
+        String[] serviceNames = this.idpwMemo.getServiceNames();
+        for (int i = 0; i < serviceNames.length; i++) {
+            this.serviceListAdapter.add(this.new ServiceItem(i, serviceNames[i]));
         }
+        this.serviceListAdapter.sort(this.SERVICE_ITEM_COMPARATOR);
+        this.serviceListAdapter.notifyDataSetChanged();
+    }
+
+    private void updateValueList() {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        this.valueListAdapter.setNotifyOnChange(false);
+        this.valueListAdapter.clear();
+        idpwmemo.Value[] values = this.idpwMemo.getValues();
+        for (int i = 0; i < values.length; i++) {
+            this.valueListAdapter.add(this.new ValueItem(i, false, values[i]));
+        }
+        this.valueListAdapter.notifyDataSetChanged();
+    }
+
+    private void updateSecretList() {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        this.secretListAdapter.setNotifyOnChange(false);
+        this.secretListAdapter.clear();
+        idpwmemo.Value[] secrets = this.idpwMemo.getSecrets();
+        for (int i = 0; i < secrets.length; i++) {
+            this.secretListAdapter.add(this.new ValueItem(i, true, secrets[i]));
+        }
+        this.secretListAdapter.notifyDataSetChanged();
     }
 
     private boolean saveMemo() {
@@ -509,6 +525,92 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    private void addValue(int valueType, String value) {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_failure_new_value);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_DISPLAY_VALUE_LIST) {
+            Utils.alertShort(this, R.string.msg_failure_new_value);
+            return;
+        }
+        if (!Utils.isValidValueType(valueType)) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        if (value == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        try {
+            idpwmemo.Value[] values = this.idpwMemo.getValues();
+
+            ArrayList<idpwmemo.Value> valueList = new ArrayList<>(Arrays.asList(values));
+
+            valueList.add(new idpwmemo.Value(valueType, value));
+
+            this.idpwMemo.setValues(valueList.toArray(new idpwmemo.Value[0]));
+
+            this.idpwMemo.updateSelectedService();
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_new_value);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateValueList();
+
+            Utils.alertShort(this, R.string.msg_success_new_value);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
+    private void addSecret(int valueType, String value) {
+        if (this.idpwMemo == null) {
+            Utils.alertShort(this, R.string.msg_failure_new_secret);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_DISPLAY_SECRET_LIST) {
+            Utils.alertShort(this, R.string.msg_failure_new_secret);
+            return;
+        }
+        if (!Utils.isValidValueType(valueType)) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        if (value == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        try {
+            idpwmemo.Value[] values = this.idpwMemo.getSecrets();
+
+            ArrayList<idpwmemo.Value> valueList = new ArrayList<>(Arrays.asList(values));
+
+            valueList.add(new idpwmemo.Value(valueType, value));
+
+            this.idpwMemo.setSecrets(valueList.toArray(new idpwmemo.Value[0]));
+
+            this.idpwMemo.updateSelectedService();
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_new_value);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateSecretList();
+
+            Utils.alertShort(this, R.string.msg_success_new_secret);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
     private final class ServiceItem {
         int index;
         String name;
@@ -544,7 +646,13 @@ public class MemoViewerActivity extends Activity {
             return this.display;
         }
         void copyToClipboard() {
-            MemoViewerActivity.this.copyToClipboard(secret, value.value);
+            MemoViewerActivity.this.copyToClipboard(this.secret, this.value.value);
+        }
+        boolean isSecret() {
+            return this.secret;
+        }
+        int getIndex() {
+            return index;
         }
     }
 
@@ -575,6 +683,66 @@ public class MemoViewerActivity extends Activity {
                 return;
             }
             MemoViewerActivity.this.addNewService(newServiceName);
+        }
+    }
+
+    private final class AddNewValueCondacts extends ActivityResultManager.Condacts<Void> {
+        @Override
+        public Intent onCreate(Void obj) {
+            return new Intent(MemoViewerActivity.this, NewValueActivity.class)
+                .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false);
+        }
+        @Override
+        public void onCanceled() {
+            Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_new_value);
+        }
+        @Override
+        public void onOk(Intent data) {
+            boolean hasExtra = data != null
+                && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET)
+                && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
+                && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
+            if (!hasExtra) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            if (data.getBooleanExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, true)) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            int valueType = data.getIntExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE, -1);
+            String value = data.getStringExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
+            MemoViewerActivity.this.addValue(valueType, value);
+        }
+    }
+
+    private final class AddNewSecretCondacts extends ActivityResultManager.Condacts<Void> {
+        @Override
+        public Intent onCreate(Void obj) {
+            return new Intent(MemoViewerActivity.this, NewValueActivity.class)
+                .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, true);
+        }
+        @Override
+        public void onCanceled() {
+            Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_new_secret);
+        }
+        @Override
+        public void onOk(Intent data) {
+            boolean hasExtra = data != null
+                && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET)
+                && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
+                && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
+            if (!hasExtra) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            if (!data.getBooleanExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false)) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            int valueType = data.getIntExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE, -1);
+            String value = data.getStringExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
+            MemoViewerActivity.this.addSecret(valueType, value);
         }
     }
 }

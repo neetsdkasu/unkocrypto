@@ -43,6 +43,16 @@
     <string name="msg_failure_new_service">Failure New Service</string>
     <string name="msg_canceled_new_service">Canceled New Service</string>
 
+    <!-- New Value Messages -->
+    <string name="msg_success_new_value">Success New Value</string>
+    <string name="msg_failure_new_value">Failure New Value</string>
+    <string name="msg_canceled_new_value">Canceled New Value</string>
+
+    <!-- New Secret Messages -->
+    <string name="msg_success_new_secret">Success New Secret</string>
+    <string name="msg_failure_new_secret">Failure New Secret</string>
+    <string name="msg_canceled_new_secret">Canceled New Secret</string>
+
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
@@ -133,8 +143,15 @@
     <string name="edit_secret_menu_item_text">Edit</string>
     <string name="delete_secret_menu_item_text">Delete</string>
 
-    <!-- newServiceActivity -->
+    <!-- NewServiceActivity -->
     <string name="new_service_title">New Service</string>
     <string name="new_service_name_text">New Service Name</string>
+
+    <!-- NewValueActivity -->
+    <string name="new_value_title">New Value</string>
+    <string name="new_secret_title">New Secret</string>
+    <string name="new_value_type_text">Type</string>
+    <string name="new_value_value_text">Value</string>
+    <string name="new_secret_secret_text">Secret</string>
 
 </resources>

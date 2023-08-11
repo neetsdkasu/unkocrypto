@@ -20,7 +20,7 @@ public class NewServiceActivity extends Activity {
         setContentView(R.layout.new_service);
     }
 
-    // res/layout/new_memo.xml Button onClick
+    // res/layout/new_service.xml Button onClick
     public void onClickOkButton(View v) {
 
         EditText nameEditText = findViewById(R.id.new_service_name);
