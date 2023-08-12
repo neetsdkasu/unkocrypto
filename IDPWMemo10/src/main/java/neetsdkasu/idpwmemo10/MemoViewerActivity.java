@@ -146,6 +146,11 @@ public class MemoViewerActivity extends Activity {
             inflater.inflate(R.menu.service_list_context_menu, menu);
         } else if (id == R.id.memo_viewer_value_list) {
             inflater.inflate(R.menu.value_list_context_menu, menu);
+            if (menuInfo instanceof AdapterView.AdapterContextMenuInfo) {
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+                MemoViewerActivity.ValueItem valueItem = this.valueListAdapter.getItem(info.position);
+                menu.findItem(R.id.delete_value_menu_item).setEnabled(!valueItem.isKeeping());
+            }
         } else if (id == R.id.memo_viewer_secret_list) {
             inflater.inflate(R.menu.secret_list_context_menu, menu);
         }

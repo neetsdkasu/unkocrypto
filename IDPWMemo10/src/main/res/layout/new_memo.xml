@@ -27,6 +27,10 @@
       android:importantForAutofill="no"
       android:inputType="text"
       />
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="12sp"
+      />
   <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
