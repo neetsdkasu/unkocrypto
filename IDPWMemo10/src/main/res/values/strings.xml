@@ -54,7 +54,7 @@
     <string name="msg_canceled_new_secret">Canceled New Secret</string>
 
     <!-- Edit Value Messages -->
-    <string name="msg_success_edit_value">Success Edut Value</string>
+    <string name="msg_success_edit_value">Success Edit Value</string>
     <string name="msg_failure_edit_value">Failure Edit Value</string>
     <string name="msg_canceled_edit_value">Canceled Edit Value</string>
 
@@ -62,6 +62,16 @@
     <string name="msg_success_edit_secret">Success Edit Secret</string>
     <string name="msg_failure_edit_secret">Failure Edit Secret</string>
     <string name="msg_canceled_edit_secret">Canceled Edit Secret</string>
+
+    <!-- Delete Value Messages -->
+    <string name="msg_success_delete_value">Success Delete Value</string>
+    <string name="msg_failure_delete_value">Failure Delete Value</string>
+    <string name="msg_canceled_delete_value">Canceled Delete Value</string>
+
+    <!-- Delete Secret Messages -->
+    <string name="msg_success_delete_secret">Success Delete Secret</string>
+    <string name="msg_failure_delete_secret">Failure Delete Secret</string>
+    <string name="msg_canceled_delete_secret">Canceled Delete Secret</string>
 
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
@@ -176,5 +186,15 @@
     <string name="edit_new_value_value_text">New Value</string>
     <string name="edit_new_secret_secret_text">New Secret</string>
     <string name="edit_new_service_name_text">New Service Name</string>
+
+    <!-- DeleteValueActivity -->
+    <string name="delete_value_title">Delete Value</string>
+    <string name="delete_secret_title">Delete Secret</string>
+    <string name="delete_value_type_text">Type</string>
+    <string name="delete_value_value_text">Value</string>
+    <string name="delete_secret_secret_text">Secret</string>
+    <string name="delete_value_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="delete_value_execute_switch_textoff">Do NOT Delete</string>
+    <string name="delete_value_execute_switch_texton">Do Delete</string>
 
 </resources>

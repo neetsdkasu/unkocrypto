@@ -34,7 +34,7 @@ public class ChangeMemoKeywordActivity extends Activity {
         }
     }
 
-    // res/layout/new_memo.xml Button onClick
+    // res/layout/change_memo_keyword.xml Button onClick
     public void onClickOkButton(View v) {
 
         Switch executeSwitch = findViewById(R.id.change_memo_keyword_execute_switch);

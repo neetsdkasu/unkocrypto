@@ -9,8 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
 
 import idpwmemo.IDPWMemo;

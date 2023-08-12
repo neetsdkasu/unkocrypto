@@ -2,11 +2,7 @@ package neetsdkasu.idpwmemo10;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
-import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -36,7 +32,7 @@ public class DeleteMemoActivity extends Activity {
         }
     }
 
-    // res/layout/import_memo.xml Button onClick
+    // res/layout/delete_memo.xml Button onClick
     public void onClickOkButton(View v) {
 
         Intent intent = getIntent();

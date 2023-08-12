@@ -49,6 +49,8 @@ public class MemoViewerActivity extends Activity {
     private final ActivityResultManager.Launcher<Void> addNewSecretLauncher;
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> editValueLauncher;
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> editSecretLauncher;
+    private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> deleteValueLauncher;
+    private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> deleteSecretLauncher;
 
     {
         this.activityResultManager = new ActivityResultManager(this);
@@ -59,6 +61,8 @@ public class MemoViewerActivity extends Activity {
         this.addNewSecretLauncher  = manager.register(this.new AddNewSecretCondacts());
         this.editValueLauncher     = manager.register(this.new EditValueCondacts());
         this.editSecretLauncher    = manager.register(this.new EditSecretCondacts());
+        this.deleteValueLauncher   = manager.register(this.new DeleteValueCondacts());
+        this.deleteSecretLauncher  = manager.register(this.new DeleteSecretCondacts());
     }
 
     private IDPWMemo idpwMemo = null;
@@ -253,8 +257,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/value_list_context_menu.xml Delete_Value-MenuItem onClick
     public void onClickDeleteValueMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "Delete Value");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MemoViewerActivity.ValueItem valueItem = this.valueListAdapter.getItem(info.position);
+        this.deleteValueLauncher.launch(valueItem);
     }
 
     // res/menu/secret_list_context_menu.xml Edit-Secret-MenuItem onClick
@@ -266,8 +271,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/secret_list_context_menu.xml Delete_Secret-MenuItem onClick
     public void onClickDeleteSecretMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "Delete Secret");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MemoViewerActivity.ValueItem valueItem = this.secretListAdapter.getItem(info.position);
+        this.deleteSecretLauncher.launch(valueItem);
     }
 
     private void showCurrentState() {
@@ -734,6 +740,85 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    private void deleteValue(int itemIndex) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
+            Utils.alertShort(this, R.string.msg_failure_delete_value);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_DISPLAY_VALUE_LIST) {
+            Utils.alertShort(this, R.string.msg_failure_delete_value);
+            return;
+        }
+        if (!Utils.inRange(itemIndex, 0, this.valueListAdapter.getCount() - 1)) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        try {
+            idpwmemo.Value[] values = this.idpwMemo.getValues();
+
+            ArrayList<idpwmemo.Value> valueList = new ArrayList<>(Arrays.asList(values));
+
+            valueList.remove(itemIndex);
+
+            this.idpwMemo.setValues(valueList.toArray(new idpwmemo.Value[0]));
+
+
+            this.idpwMemo.updateSelectedService();
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_delete_value);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateValueList();
+
+            Utils.alertShort(this, R.string.msg_success_delete_value);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
+    private void deleteSecret(int itemIndex) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
+            Utils.alertShort(this, R.string.msg_failure_delete_secret);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_DISPLAY_SECRET_LIST) {
+            Utils.alertShort(this, R.string.msg_failure_delete_secret);
+            return;
+        }
+        if (!Utils.inRange(itemIndex, 0, this.secretListAdapter.getCount() - 1)) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        try {
+            idpwmemo.Value[] values = this.idpwMemo.getSecrets();
+
+            ArrayList<idpwmemo.Value> valueList = new ArrayList<>(Arrays.asList(values));
+
+            valueList.remove(itemIndex);
+
+            this.idpwMemo.setSecrets(valueList.toArray(new idpwmemo.Value[0]));
+
+            this.idpwMemo.updateSelectedService();
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_delete_secret);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateSecretList();
+
+            Utils.alertShort(this, R.string.msg_success_delete_secret);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
     private final class ServiceItem {
         int index;
         String name;
@@ -956,4 +1041,65 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    private final class DeleteValueCondacts extends ActivityResultManager.Condacts<MemoViewerActivity.ValueItem> {
+        @Override
+        public Intent onCreate(MemoViewerActivity.ValueItem item) {
+            return new Intent(MemoViewerActivity.this, DeleteValueActivity.class)
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, item.isSecret())
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, item.getIndex())
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE, item.getValueType())
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE, item.getValue());
+        }
+        @Override
+        public void onCanceled() {
+            Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_delete_value);
+        }
+        @Override
+        public void onOk(Intent data) {
+            boolean hasExtra = data != null
+                && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
+                && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX);
+            if (!hasExtra) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            if (data.getBooleanExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, true)) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            int itemIndex = data.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
+            MemoViewerActivity.this.deleteValue(itemIndex);
+        }
+    }
+
+    private final class DeleteSecretCondacts extends ActivityResultManager.Condacts<MemoViewerActivity.ValueItem> {
+        @Override
+        public Intent onCreate(MemoViewerActivity.ValueItem item) {
+            return new Intent(MemoViewerActivity.this, DeleteValueActivity.class)
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, item.isSecret())
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, item.getIndex())
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE, item.getValueType())
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE, item.getValue());
+        }
+        @Override
+        public void onCanceled() {
+            Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_delete_secret);
+        }
+        @Override
+        public void onOk(Intent data) {
+            boolean hasExtra = data != null
+                && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
+                && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX);
+            if (!hasExtra) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            if (!data.getBooleanExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, false)) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            int itemIndex = data.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
+            MemoViewerActivity.this.deleteSecret(itemIndex);
+        }
+    }
 }
