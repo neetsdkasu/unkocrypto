@@ -143,6 +143,26 @@ public final class IDPWMemo
         }
     }
 
+    public boolean isIdle()
+    {
+        return encodedPasswordV1 == null || encodedPasswordV2 == null;
+    }
+
+    public boolean hasMemo()
+    {
+        return memo != null;
+    }
+
+    public int getSelectedServiceIndex()
+    {
+        return serviceIndex;
+    }
+
+    public boolean hasSelectedService()
+    {
+        return serviceIndex >= 0;
+    }
+
     public int getServiceCount()
     {
         if (memo == null)
