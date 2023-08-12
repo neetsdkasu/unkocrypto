@@ -43,6 +43,10 @@
                   android:label="@string/new_value_title"
                   android:exported="false">
         </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.EditValueActivity"
+                  android:label="@string/edit_value_title"
+                  android:exported="false">
+        </activity>
         <activity android:name="neetsdkasu.idpwmemo10.AlertActivity"
                   android:label="@string/alert_title"
                   android:exported="false"

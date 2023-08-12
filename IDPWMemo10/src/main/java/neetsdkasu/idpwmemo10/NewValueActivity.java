@@ -17,9 +17,9 @@ import idpwmemo.IDPWMemo;
 
 public class NewValueActivity extends Activity {
 
-    static final String INTENT_EXTRA_NEW_VALUE_IS_SECRET = "neetsdkasu.idpwmemo10.NewServiceActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET";
-    static final String INTENT_EXTRA_NEW_VALUE_TYPE      = "neetsdkasu.idpwmemo10.NewServiceActivity.INTENT_EXTRA_NEW_VALUE_TYPE";
-    static final String INTENT_EXTRA_NEW_VALUE_VALUE     = "neetsdkasu.idpwmemo10.NewServiceActivity.INTENT_EXTRA_NEW_VALUE_VALUE";
+    static final String INTENT_EXTRA_NEW_VALUE_IS_SECRET = "neetsdkasu.idpwmemo10.NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET";
+    static final String INTENT_EXTRA_NEW_VALUE_TYPE      = "neetsdkasu.idpwmemo10.NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE";
+    static final String INTENT_EXTRA_NEW_VALUE_VALUE     = "neetsdkasu.idpwmemo10.NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE";
 
     private boolean isSecret = false;
 

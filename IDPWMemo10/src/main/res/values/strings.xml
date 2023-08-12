@@ -53,6 +53,16 @@
     <string name="msg_failure_new_secret">Failure New Secret</string>
     <string name="msg_canceled_new_secret">Canceled New Secret</string>
 
+    <!-- Edit Value Messages -->
+    <string name="msg_success_edit_value">Success Edut Value</string>
+    <string name="msg_failure_edit_value">Failure Edit Value</string>
+    <string name="msg_canceled_edit_value">Canceled Edit Value</string>
+
+    <!-- Edit Secret Messages -->
+    <string name="msg_success_edit_secret">Success Edit Secret</string>
+    <string name="msg_failure_edit_secret">Failure Edit Secret</string>
+    <string name="msg_canceled_edit_secret">Canceled Edit Secret</string>
+
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
@@ -153,5 +163,18 @@
     <string name="new_value_type_text">Type</string>
     <string name="new_value_value_text">Value</string>
     <string name="new_secret_secret_text">Secret</string>
+
+    <!-- EditValueActivity -->
+    <string name="edit_value_title">Edit Value</string>
+    <string name="edit_secret_title">Edit Secret</string>
+    <string name="edit_service_name_title">Edit Service Name</string>
+    <string name="old_value_type_text">Old Type</string>
+    <string name="old_value_value_text">Old Value</string>
+    <string name="old_secret_secret_text">Old Secret</string>
+    <string name="old_service_name_text">Old Service Name</string>
+    <string name="edit_new_value_type_text">New Type</string>
+    <string name="edit_new_value_value_text">New Value</string>
+    <string name="edit_new_secret_secret_text">New Secret</string>
+    <string name="edit_new_service_name_text">New Service Name</string>
 
 </resources>
