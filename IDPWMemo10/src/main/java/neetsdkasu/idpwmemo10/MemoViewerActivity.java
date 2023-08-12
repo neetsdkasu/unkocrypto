@@ -425,7 +425,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void updateServiceList() {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -440,7 +440,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void updateValueList() {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -460,7 +460,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void updateSecretList() {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -509,7 +509,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void addNewService(String newServiceName) {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
             Utils.alertShort(this, R.string.msg_failure_new_service);
             return;
         }
@@ -537,7 +537,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void addValue(int valueType, String value) {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_new_value);
             return;
         }
@@ -580,7 +580,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void addSecret(int valueType, String value) {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_new_secret);
             return;
         }
@@ -623,7 +623,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void editValue(int itemIndex, boolean keeping, int valueType, String value) {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_edit_value);
             return;
         }
@@ -681,7 +681,7 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void editSecret(int itemIndex, boolean keeping, int valueType, String value) {
-        if (this.idpwMemo == null) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_edit_secret);
             return;
         }
