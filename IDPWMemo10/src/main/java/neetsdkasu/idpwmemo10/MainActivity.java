@@ -67,21 +67,28 @@ public class MainActivity extends Activity {
 
     private ArrayAdapter<String> listAdapter = null;
 
-    private ActivityResultManager activityResultManager = null;
-    private ActivityResultManager getActivityResultManager() {
-        if (this.activityResultManager == null) {
-            this.activityResultManager = new ActivityResultManager(this);
-        }
-        return this.activityResultManager;
-    }
+    private final ActivityResultManager activityResultManager;
 
-    private ActivityResultManager.Launcher<Void>   addNewMemoLauncher     = null;
-    private ActivityResultManager.Launcher<Void>   pickImportFileLauncher = null;
-    private ActivityResultManager.Launcher<Uri>    importMemoLauncher     = null;
-    private ActivityResultManager.Launcher<String> exportMemoLauncher     = null;
-    private ActivityResultManager.Launcher<String> changeMemoKeywordLauncher = null;
-    private ActivityResultManager.Launcher<String> changeMemoNameLauncher = null;
-    private ActivityResultManager.Launcher<String> deleteMemoLauncher     = null;
+    private final ActivityResultManager.Launcher<Void>   addNewMemoLauncher;
+    private final ActivityResultManager.Launcher<Void>   pickImportFileLauncher;
+    private final ActivityResultManager.Launcher<Uri>    importMemoLauncher;
+    private final ActivityResultManager.Launcher<String> exportMemoLauncher;
+    private final ActivityResultManager.Launcher<String> changeMemoKeywordLauncher;
+    private final ActivityResultManager.Launcher<String> changeMemoNameLauncher;
+    private final ActivityResultManager.Launcher<String> deleteMemoLauncher;
+
+    {
+        this.activityResultManager = new ActivityResultManager(this);
+        ActivityResultManager manager = this.activityResultManager;
+
+        this.addNewMemoLauncher        = manager.register(this.new AddNewMemoCondacts());
+        this.pickImportFileLauncher    = manager.register(this.new PickImportFileCondacts());
+        this.importMemoLauncher        = manager.register(this.new ImportMemoCondacts());
+        this.exportMemoLauncher        = manager.register(this.new ExportMemoCondacts());
+        this.changeMemoKeywordLauncher = manager.register(this.new ChangeMemoKeywordCondacts());
+        this.changeMemoNameLauncher    = manager.register(this.new ChangeMemoNameCondacts());
+        this.deleteMemoLauncher        = manager.register(this.new DeleteMemoCondacts());
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,15 +114,6 @@ public class MainActivity extends Activity {
             }
         });
         registerForContextMenu(listView);
-
-        ActivityResultManager manager = this.getActivityResultManager();
-        this.addNewMemoLauncher = manager.register(this.new AddNewMemoCondacts());
-        this.pickImportFileLauncher = manager.register(this.new PickImportFileCondacts());
-        this.importMemoLauncher = manager.register(this.new ImportMemoCondacts());
-        this.exportMemoLauncher = manager.register(this.new ExportMemoCondacts());
-        this.changeMemoKeywordLauncher = manager.register(this.new ChangeMemoKeywordCondacts());
-        this.changeMemoNameLauncher = manager.register(this.new ChangeMemoNameCondacts());
-        this.deleteMemoLauncher = manager.register(this.new DeleteMemoCondacts());
     }
 
     @Override
@@ -147,57 +145,45 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        this.getActivityResultManager().onActivityResult(requestCode, resultCode, data);
+        this.activityResultManager.onActivityResult(requestCode, resultCode, data);
     }
 
     // res/menu/main_menu.xml New-Memo-MenuItem onClick
     public void onClickNewMemoMenuItem(MenuItem item) {
-        if (this.addNewMemoLauncher != null) {
-            this.addNewMemoLauncher.launch();
-        }
+        this.addNewMemoLauncher.launch();
     }
 
     // res/menu/main_menu.xml Import-Memo-MenuItem onClick
     public void onClickImportMemoMenuItem(MenuItem item) {
-        if (this.pickImportFileLauncher != null) {
-            this.pickImportFileLauncher.launch();
-        }
+        this.pickImportFileLauncher.launch();
     }
 
     // res/menu/memo_list_context_menu.xml Export-Memo-ContextMenuItem onClick
     public void onClickExportMemoMenuItem(MenuItem item) {
-        if (this.exportMemoLauncher != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String memoName = this.listAdapter.getItem(info.position);
-            this.exportMemoLauncher.launch(memoName);
-        }
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        String memoName = this.listAdapter.getItem(info.position);
+        this.exportMemoLauncher.launch(memoName);
     }
 
     // res/menu/memo_list_context_menu.xml Change-Memo-Keyword-ContextMenuItem onClick
     public void onClickChangeMemoKeywordMenuItem(MenuItem item) {
-        if (this.changeMemoKeywordLauncher != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String memoName = this.listAdapter.getItem(info.position);
-            this.changeMemoKeywordLauncher.launch(memoName);
-        }
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        String memoName = this.listAdapter.getItem(info.position);
+        this.changeMemoKeywordLauncher.launch(memoName);
     }
 
     // res/menu/memo_list_context_menu.xml Change-Memo-Name-ContextMenuItem onClick
     public void onClickChangeMemoNameMenuItem(MenuItem item) {
-        if (this.changeMemoNameLauncher != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String memoName = this.listAdapter.getItem(info.position);
-            this.changeMemoNameLauncher.launch(memoName);
-        }
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        String memoName = this.listAdapter.getItem(info.position);
+        this.changeMemoNameLauncher.launch(memoName);
     }
 
     // res/menu/memo_list_context_menu.xml Delete-Memo-ContextMenuItem onClick
     public void onClickDeleteMemoMenuItem(MenuItem item) {
-        if (this.deleteMemoLauncher != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String memoName = this.listAdapter.getItem(info.position);
-            this.deleteMemoLauncher.launch(memoName);
-        }
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        String memoName = this.listAdapter.getItem(info.position);
+        this.deleteMemoLauncher.launch(memoName);
     }
 
     private void showStateMessage() {

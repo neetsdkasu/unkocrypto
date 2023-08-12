@@ -200,9 +200,7 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
     public void onClickNewServiceMenuItem(MenuItem item) {
-        if (this.addNewServiceLauncher != null) {
-            this.addNewServiceLauncher.launch();
-        }
+        this.addNewServiceLauncher.launch();
     }
 
     // res/menu/memo_viewer_menu.xml Import-Service-MenuItem onClick
@@ -213,16 +211,12 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/memo_viewer_menu.xml Add-Value-MenuItem onClick
     public void onClickAddValueMenuItem(MenuItem item) {
-        if (this.addNewValueLauncher != null) {
-            this.addNewValueLauncher.launch();
-        }
+        this.addNewValueLauncher.launch();
     }
 
     // res/menu/memo_viewer_menu.xml Add-Secret-MenuItem onClick
     public void onClickAddSecretMenuItem(MenuItem item) {
-        if (this.addNewSecretLauncher != null) {
-            this.addNewSecretLauncher.launch();
-        }
+        this.addNewSecretLauncher.launch();
     }
 
     // res/layout/memo_viewer.xml Show-Service-List-Button onClick
@@ -247,11 +241,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/value_list_context_menu.xml Edit-Value-MenuItem onClick
     public void onClickEditValueMenuItem(MenuItem item) {
-        if (this.editValueLauncher != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            MemoViewerActivity.ValueItem valueItem = this.valueListAdapter.getItem(info.position);
-            this.editValueLauncher.launch(valueItem);
-        }
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MemoViewerActivity.ValueItem valueItem = this.valueListAdapter.getItem(info.position);
+        this.editValueLauncher.launch(valueItem);
     }
 
     // res/menu/value_list_context_menu.xml Delete_Value-MenuItem onClick
@@ -262,11 +254,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/secret_list_context_menu.xml Edit-Secret-MenuItem onClick
     public void onClickEditSecretMenuItem(MenuItem item) {
-        if (this.editSecretLauncher != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            MemoViewerActivity.ValueItem valueItem = this.secretListAdapter.getItem(info.position);
-            this.editSecretLauncher.launch(valueItem);
-        }
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MemoViewerActivity.ValueItem valueItem = this.secretListAdapter.getItem(info.position);
+        this.editSecretLauncher.launch(valueItem);
     }
 
     // res/menu/secret_list_context_menu.xml Delete_Secret-MenuItem onClick
