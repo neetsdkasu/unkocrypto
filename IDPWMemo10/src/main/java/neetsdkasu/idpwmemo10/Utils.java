@@ -3,6 +3,7 @@ package neetsdkasu.idpwmemo10;
 import android.content.Context;
 import android.widget.Toast;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -83,6 +84,16 @@ final class Utils {
 
     static boolean isValidValueType(int valueType) {
         return Utils.inRange(valueType, 0, VALUE_TYPES.length - 1);
+    }
+
+    @android.annotation.SuppressLint("SimpleDateFormat")
+    private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("yyMMdd:HHmm");
+
+    static String formatDate(long time) {
+        if (time == 0L) {
+            return "000000:0000";
+        }
+        return DATE_FMT.format(new java.util.Date(time));
     }
 
 }

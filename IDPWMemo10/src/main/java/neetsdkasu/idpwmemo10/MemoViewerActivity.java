@@ -230,6 +230,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/layout/memo_viewer.xml Show-Service-List-Button onClick
     public void onClickShowServiceListButton(View view) {
+        if (this.idpwMemo != null && this.idpwMemo.hasMemo()) {
+            this.updateServiceList();
+        }
         if (!this.openMemo()) {
             return;
         }
@@ -437,9 +440,9 @@ public class MemoViewerActivity extends Activity {
         }
         this.serviceListAdapter.setNotifyOnChange(false);
         this.serviceListAdapter.clear();
-        String[] serviceNames = this.idpwMemo.getServiceNames();
-        for (int i = 0; i < serviceNames.length; i++) {
-            this.serviceListAdapter.add(this.new ServiceItem(i, serviceNames[i]));
+        idpwmemo.Service[] services = this.idpwMemo.getServices();
+        for (int i = 0; i < services.length; i++) {
+            this.serviceListAdapter.add(this.new ServiceItem(i, services[i]));
         }
         this.serviceListAdapter.sort(this.SERVICE_ITEM_COMPARATOR);
         this.serviceListAdapter.notifyDataSetChanged();
@@ -675,10 +678,6 @@ public class MemoViewerActivity extends Activity {
 
             this.updateValueList();
 
-            if (keeping) {
-                this.updateServiceList();
-            }
-
             Utils.alertShort(this, R.string.msg_success_edit_value);
 
         } catch (idpwmemo.IDPWMemoException ex) {
@@ -821,20 +820,27 @@ public class MemoViewerActivity extends Activity {
 
     private final class ServiceItem {
         int index;
+        idpwmemo.Service service;
         String name;
-        ServiceItem(int index, String name) {
+        String display;
+        ServiceItem(int index, idpwmemo.Service service) {
             this.index = index;
-            this.name = name;
+            this.service = service;
+            this.name = service.getServiceName();
+            this.display = this.name + " [" + Utils.formatDate(service.getTime()) + "]";
         }
         @Override
         public String toString() {
-            return this.name;
+            return this.display;
         }
         void show() {
             MemoViewerActivity.this.selectService(this.index);
         }
         String getName() {
             return this.name;
+        }
+        int getIndex() {
+            return this.index;
         }
     }
 
@@ -877,7 +883,11 @@ public class MemoViewerActivity extends Activity {
 
     private final Comparator<MemoViewerActivity.ServiceItem> SERVICE_ITEM_COMPARATOR = new Comparator<MemoViewerActivity.ServiceItem>() {
         public int compare(MemoViewerActivity.ServiceItem item1, MemoViewerActivity.ServiceItem item2) {
-            return String.CASE_INSENSITIVE_ORDER.compare(item1.getName(), item2.getName());
+            int cmp = String.CASE_INSENSITIVE_ORDER.compare(item1.getName(), item2.getName());
+            if (cmp == 0) {
+                cmp = Integer.compare(item1.getIndex(), item2.getIndex());
+            }
+            return cmp;
         }
     };
 
