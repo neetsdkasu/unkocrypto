@@ -51,6 +51,10 @@
                   android:label="@string/delete_value_title"
                   android:exported="false">
         </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.DeleteServiceActivity"
+                  android:label="@string/delete_service_title"
+                  android:exported="false">
+        </activity>
         <activity android:name="neetsdkasu.idpwmemo10.AlertActivity"
                   android:label="@string/alert_title"
                   android:exported="false"

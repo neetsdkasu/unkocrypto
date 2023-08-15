@@ -51,6 +51,7 @@ public class MemoViewerActivity extends Activity {
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> editSecretLauncher;
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> deleteValueLauncher;
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> deleteSecretLauncher;
+    private final ActivityResultManager.Launcher<MemoViewerActivity.ServiceItem> deleteServiceLauncher;
 
     {
         this.activityResultManager = new ActivityResultManager(this);
@@ -63,6 +64,7 @@ public class MemoViewerActivity extends Activity {
         this.editSecretLauncher    = manager.register(this.new EditSecretCondacts());
         this.deleteValueLauncher   = manager.register(this.new DeleteValueCondacts());
         this.deleteSecretLauncher  = manager.register(this.new DeleteSecretCondacts());
+        this.deleteServiceLauncher = manager.register(this.new DeleteServiceCondacts());
     }
 
     private IDPWMemo idpwMemo = null;
@@ -247,8 +249,9 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/service_list_context_menu.xml Delete_Service-MenuItem onClick
     public void onClickDeleteServiceMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "Delete Service");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MemoViewerActivity.ServiceItem serviceItem = this.serviceListAdapter.getItem(info.position);
+        this.deleteServiceLauncher.launch(serviceItem);
     }
 
     // res/menu/value_list_context_menu.xml Edit-Value-MenuItem onClick
@@ -640,7 +643,7 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_failure_edit_value);
             return;
         }
-        if (!Utils.inRange(itemIndex, 0, this.valueListAdapter.getCount() - 1)) {
+        if (!Utils.inSize(itemIndex, this.valueListAdapter.getCount())) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -694,7 +697,7 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_failure_edit_secret);
             return;
         }
-        if (!Utils.inRange(itemIndex, 0, this.secretListAdapter.getCount() - 1)) {
+        if (!Utils.inSize(itemIndex, this.secretListAdapter.getCount())) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -748,7 +751,7 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_failure_delete_value);
             return;
         }
-        if (!Utils.inRange(itemIndex, 0, this.valueListAdapter.getCount() - 1)) {
+        if (!Utils.inSize(itemIndex, this.valueListAdapter.getCount())) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -788,7 +791,7 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_failure_delete_secret);
             return;
         }
-        if (!Utils.inRange(itemIndex, 0, this.secretListAdapter.getCount() - 1)) {
+        if (!Utils.inSize(itemIndex, this.secretListAdapter.getCount())) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
         }
@@ -818,6 +821,53 @@ public class MemoViewerActivity extends Activity {
         }
     }
 
+    private void deleteService(int index, String name, long lastupdate) {
+        if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
+            Utils.alertShort(this, R.string.msg_failure_delete_service);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_DISPLAY_SERVICE_LIST) {
+            Utils.alertShort(this, R.string.msg_failure_delete_service);
+            return;
+        }
+        if (name == null) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        if (!Utils.inSize(index, this.serviceListAdapter.getCount())) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        try {
+            idpwmemo.Service service = this.idpwMemo.getService(index);
+
+            if (!name.equals(service.getServiceName())) {
+                Utils.alertShort(this, R.string.msg_internal_error);
+                return;
+            }
+
+            if (lastupdate != service.getTime()) {
+                Utils.alertShort(this, R.string.msg_internal_error);
+                return;
+            }
+
+            this.idpwMemo.removeService(index);
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_delete_service);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateServiceList();
+
+            Utils.alertShort(this, R.string.msg_success_delete_service);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
     private final class ServiceItem {
         int index;
         idpwmemo.Service service;
@@ -841,6 +891,9 @@ public class MemoViewerActivity extends Activity {
         }
         int getIndex() {
             return this.index;
+        }
+        long getLastupdate() {
+            return this.service.getTime();
         }
     }
 
@@ -1110,6 +1163,35 @@ public class MemoViewerActivity extends Activity {
             }
             int itemIndex = data.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
             MemoViewerActivity.this.deleteSecret(itemIndex);
+        }
+    }
+
+    private final class DeleteServiceCondacts extends ActivityResultManager.Condacts<MemoViewerActivity.ServiceItem> {
+        @Override
+        public Intent onCreate(MemoViewerActivity.ServiceItem item) {
+            return new Intent(MemoViewerActivity.this, DeleteServiceActivity.class)
+                .putExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX, item.getIndex())
+                .putExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME, item.getName())
+                .putExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, item.getLastupdate());
+        }
+        @Override
+        public void onCanceled() {
+            Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_delete_service);
+        }
+        @Override
+        public void onOk(Intent data) {
+            boolean hasExtra = data != null
+                && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX)
+                && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME)
+                && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE);
+            if (!hasExtra) {
+                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                return;
+            }
+            int index = data.getIntExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX, -1);
+            String serviceName = data.getStringExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME);
+            long lastupdate = data.getLongExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, -1L);
+            MemoViewerActivity.this.deleteService(index, serviceName, lastupdate);
         }
     }
 }

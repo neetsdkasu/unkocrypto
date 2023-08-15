@@ -73,6 +73,11 @@
     <string name="msg_failure_delete_secret">Failure Delete Secret</string>
     <string name="msg_canceled_delete_secret">Canceled Delete Secret</string>
 
+    <!-- Delete Service Messages -->
+    <string name="msg_success_delete_service">Success Delete Service</string>
+    <string name="msg_failure_delete_service">Failure Delete Service</string>
+    <string name="msg_canceled_delete_service">Canceled Delete Service</string>
+
     <!-- some Messages -->
     <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
@@ -196,5 +201,13 @@
     <string name="delete_value_execute_switch_text">"Do or Do Not ?"</string>
     <string name="delete_value_execute_switch_textoff">Do NOT Delete</string>
     <string name="delete_value_execute_switch_texton">Do Delete</string>
+
+    <!-- DeleteServiceActivity -->
+    <string name="delete_service_title">Delete Service</string>
+    <string name="delete_service_name_text">Name</string>
+    <string name="delete_service_lastupdate_text">Lastupdate</string>
+    <string name="delete_service_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="delete_service_execute_switch_textoff">Do NOT Delete</string>
+    <string name="delete_service_execute_switch_texton">Do Delete</string>
 
 </resources>

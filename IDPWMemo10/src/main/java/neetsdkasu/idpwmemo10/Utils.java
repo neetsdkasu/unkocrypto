@@ -31,6 +31,10 @@ final class Utils {
         return min <= value && value <= max;
     }
 
+    static boolean inSize(int value, int size) {
+        return Utils.inRange(value, 0, size - 1);
+    }
+
     static boolean isValidMemoNameCharacter(int ch) {
         return ('A' <= ch && ch <= 'Z')
             || ('a' <= ch && ch <= 'z')
@@ -83,7 +87,7 @@ final class Utils {
     static final List<String> VALUE_TYPE_LIST = Collections.unmodifiableList(Arrays.asList(Utils.VALUE_TYPES));
 
     static boolean isValidValueType(int valueType) {
-        return Utils.inRange(valueType, 0, VALUE_TYPES.length - 1);
+        return Utils.inSize(valueType, VALUE_TYPES.length);
     }
 
     @android.annotation.SuppressLint("SimpleDateFormat")
