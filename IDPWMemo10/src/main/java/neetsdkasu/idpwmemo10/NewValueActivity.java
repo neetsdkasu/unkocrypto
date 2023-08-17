@@ -60,6 +60,11 @@ public class NewValueActivity extends Activity {
         EditText valueEditText = findViewById(R.id.new_value_value);
         String value = valueEditText.getText().toString();
 
+        if (!Utils.isValidValue(value)) {
+            Utils.alertShort(this, this.isSecret ? R.string.msg_secret_is_required : R.string.msg_value_is_required);
+            return;
+        }
+
         Intent intent = new Intent()
             .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, this.isSecret)
             .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE, valueType)

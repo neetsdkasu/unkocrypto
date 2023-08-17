@@ -106,6 +106,11 @@ public class EditValueActivity extends Activity {
         EditText editNewValueEditText = findViewById(R.id.edit_new_value_value);
         String value = editNewValueEditText.getText().toString();
 
+        if (!Utils.isValidValue(value)) {
+            Utils.alertShort(this, this.isSecret ? R.string.msg_secret_is_required : R.string.msg_value_is_required);
+            return;
+        }
+
         if (this.keeping && !Utils.isValidServiceName(value)) {
             Utils.alertShort(this, R.string.msg_wrong_service_name);
             return;

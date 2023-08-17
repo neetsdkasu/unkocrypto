@@ -72,6 +72,13 @@ final class Utils {
         return name.trim().length() > 0;
     }
 
+    static boolean isValidValue(String value) {
+        if (value == null) {
+            return false;
+        }
+        return value.trim().length() > 0;
+    }
+
     static void alertShort(Context c, int msgResId) {
         Toast.makeText(c, msgResId, Toast.LENGTH_SHORT).show();
     }
