@@ -1,6 +1,7 @@
 package neetsdkasu.idpwmemo10;
 
 import android.content.Context;
+import android.util.Base64;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -117,6 +118,15 @@ final class Utils {
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 }
             }
+        }
+    }
+
+    static byte[] decodeBase64(String src) {
+        try {
+            return Base64.decode(src, Base64.DEFAULT);
+        } catch (Exception ex) {
+            // wrong src
+            return null;
         }
     }
 

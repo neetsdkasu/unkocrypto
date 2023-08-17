@@ -80,5 +80,62 @@
         android:layout_height="match_parent"
         />
   </LinearLayout>
+  <LinearLayout
+      android:id="@+id/memo_viewer_import_panel"
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      >
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="12sp"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/memo_viewer_import_keyword_text"
+        android:labelFor="@id/memo_viewer_import_keyword"
+        />
+    <EditText
+        android:id="@+id/memo_viewer_import_keyword"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:singleLine="true"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:imeOptions="actionDone"
+        />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="12sp"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/import_service_button_text"
+        android:onClick="onClickImportServiceButton"
+        />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="12sp"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/memo_viewer_import_data_text"
+        android:labelFor="@id/memo_viewer_import_data"
+        />
+    <EditText
+        android:id="@+id/memo_viewer_import_data"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:singleLine="false"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:importantForAutofill="no"
+        android:imeOptions="actionDone"
+        />
+  </LinearLayout>
 </LinearLayout>
 

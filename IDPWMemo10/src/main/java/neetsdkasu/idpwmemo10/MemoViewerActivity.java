@@ -35,6 +35,7 @@ public class MemoViewerActivity extends Activity {
     private static final int STATE_DISPLAY_SERVICE_LIST = 1;
     private static final int STATE_DISPLAY_VALUE_LIST   = 2;
     private static final int STATE_DISPLAY_SECRET_LIST  = 3;
+    private static final int STATE_IMPORT_SERVICE       = 4;
 
     private int state = MemoViewerActivity.STATE_NONE;
 
@@ -200,6 +201,7 @@ public class MemoViewerActivity extends Activity {
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_import_panel).setVisibility(View.GONE);
     }
 
     @Override
@@ -216,8 +218,7 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/memo_viewer_menu.xml Import-Service-MenuItem onClick
     public void onClickImportServiceMenuItem(MenuItem item) {
-        // TODO
-        Utils.alertShort(this, "Import Service");
+        this.setStateImportService();
     }
 
     // res/menu/memo_viewer_menu.xml Add-Value-MenuItem onClick
@@ -283,9 +284,18 @@ public class MemoViewerActivity extends Activity {
         this.deleteSecretLauncher.launch(valueItem);
     }
 
+    // res/layout/memo_viewer.xml Import-Service-Button onClick
+    public void onClickImportServiceButton(View view) {
+        this.hideInputMethod();
+
+        this.importService();
+    }
+
     private void hideInputMethod() {
         EditText keywordEditText = findViewById(R.id.memo_viewer_keyword);
-        Utils.hideInputMethod(this, keywordEditText);
+        EditText importKeywordEditText = findViewById(R.id.memo_viewer_import_keyword);
+        EditText importDataEditText = findViewById(R.id.memo_viewer_import_data);
+        Utils.hideInputMethod(this, keywordEditText, importKeywordEditText, importDataEditText);
     }
 
     private void showCurrentState() {
@@ -302,11 +312,18 @@ public class MemoViewerActivity extends Activity {
             case MemoViewerActivity.STATE_DISPLAY_SECRET_LIST:
                 this.showStateDisplaySecretList();
                 break;
+            case MemoViewerActivity.STATE_IMPORT_SERVICE:
+                this.showStateIMportService();
+                break;
+            default:
+                Utils.alertShort(this, R.string.msg_internal_error);
+                break;
         }
     }
 
     private void setStateNone() {
         this.state = MemoViewerActivity.STATE_NONE;
+        this.idpwMemo = null;
         this.showStateNone();
     }
 
@@ -315,6 +332,7 @@ public class MemoViewerActivity extends Activity {
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_import_panel).setVisibility(View.GONE);
         this.serviceListAdapter.clear();
         this.valueListAdapter.clear();
         this.secretListAdapter.clear();
@@ -331,8 +349,23 @@ public class MemoViewerActivity extends Activity {
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_import_panel).setVisibility(View.GONE);
         this.valueListAdapter.clear();
         this.secretListAdapter.clear();
+        invalidateOptionsMenu();
+    }
+
+    private void setStateImportService() {
+        this.state = MemoViewerActivity.STATE_IMPORT_SERVICE;
+        this.showStateIMportService();
+    }
+
+    private void showStateIMportService() {
+        findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_values_panel).setVisibility(View.GONE);
+        findViewById(R.id.memo_viewer_import_panel).setVisibility(View.VISIBLE);
         invalidateOptionsMenu();
     }
 
@@ -346,6 +379,7 @@ public class MemoViewerActivity extends Activity {
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_import_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_value_list).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_secret_list).setVisibility(View.GONE);
         invalidateOptionsMenu();
@@ -361,6 +395,7 @@ public class MemoViewerActivity extends Activity {
         findViewById(R.id.memo_viewer_show_service_list_button).setVisibility(View.VISIBLE);
         findViewById(R.id.memo_viewer_service_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_values_panel).setVisibility(View.VISIBLE);
+        findViewById(R.id.memo_viewer_import_panel).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_value_list).setVisibility(View.GONE);
         findViewById(R.id.memo_viewer_secret_list).setVisibility(View.VISIBLE);
         invalidateOptionsMenu();
@@ -770,7 +805,6 @@ public class MemoViewerActivity extends Activity {
 
             this.idpwMemo.setValues(valueList.toArray(new idpwmemo.Value[0]));
 
-
             this.idpwMemo.updateSelectedService();
 
             if (!this.saveMemo()) {
@@ -871,6 +905,61 @@ public class MemoViewerActivity extends Activity {
 
         } catch (idpwmemo.IDPWMemoException ex) {
             Utils.alertShort(this, R.string.msg_internal_error);
+        }
+    }
+
+    private void importService() {
+        if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+        if (this.state != MemoViewerActivity.STATE_IMPORT_SERVICE) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+
+        EditText importKeywordEditText = findViewById(R.id.memo_viewer_import_keyword);
+        String importKeyword = importKeywordEditText.getText().toString();
+
+        EditText importDataEditText = findViewById(R.id.memo_viewer_import_data);
+        String importData = importDataEditText.getText().toString();
+
+        byte[] data = Utils.decodeBase64(importData);
+        if (data == null) {
+            Utils.alertShort(this, R.string.msg_invalid_import_data);
+            return;
+        }
+
+        try {
+            IDPWMemo src = new IDPWMemo();
+            src.setPassword(importKeyword);
+            if (!src.loadMemo(data)) {
+                Utils.alertShort(this, R.string.msg_wrong_keyword_or_invalid_data);
+                return;
+            }
+
+            int count = src.getServiceCount();
+            for (int i = 0; i < count; i++) {
+                src.selectService(i);
+                idpwMemo.addService(src);
+            }
+
+            if (!this.saveMemo()) {
+                Utils.alertShort(this, R.string.msg_failure_import_service);
+                this.setStateNone();
+                return;
+            }
+
+            this.updateServiceList();
+            this.setStateDisplayServiceList();
+
+            importKeywordEditText.setText("");
+            importDataEditText.setText("");
+
+            Utils.alertShort(this, R.string.msg_success_import_service);
+
+        } catch (idpwmemo.IDPWMemoException ex) {
+            Utils.alertShort(this, R.string.msg_failure_import_service);
         }
     }
 
