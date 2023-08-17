@@ -27,7 +27,7 @@
       android:singleLine="true"
       android:importantForAutofill="no"
       android:inputType="text"
-      android:imeOptions="actionNone"
+      android:imeOptions="actionNext"
       />
   <Space
       android:layout_width="match_parent"

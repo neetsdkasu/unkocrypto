@@ -1,6 +1,8 @@
 package neetsdkasu.idpwmemo10;
 
 import android.content.Context;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -98,6 +100,17 @@ final class Utils {
             return "000000:0000";
         }
         return DATE_FMT.format(new java.util.Date(time));
+    }
+
+    static void hideInputMethod(Context context, TextView... views) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            for (TextView view : views) {
+                if (imm.isActive(view) && view.isInTouchMode()) {
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+        }
     }
 
 }

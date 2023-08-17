@@ -52,6 +52,8 @@ public class NewValueActivity extends Activity {
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         Spinner valueTypeSpinner = findViewById(R.id.new_value_type);
         int valueType = valueTypeSpinner.getSelectedItemPosition();
 
@@ -66,4 +68,9 @@ public class NewValueActivity extends Activity {
         setResult(RESULT_OK, intent);
         finish();
     }
-}
+
+
+    private void hideInputMethod() {
+        EditText valueEditText = findViewById(R.id.new_value_value);
+        Utils.hideInputMethod(this, valueEditText);
+    }}

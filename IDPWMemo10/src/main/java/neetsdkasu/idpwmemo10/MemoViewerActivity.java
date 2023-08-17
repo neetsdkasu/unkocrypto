@@ -232,6 +232,7 @@ public class MemoViewerActivity extends Activity {
 
     // res/layout/memo_viewer.xml Show-Service-List-Button onClick
     public void onClickShowServiceListButton(View view) {
+        this.hideInputMethod();
         if (this.idpwMemo != null && this.idpwMemo.hasMemo()) {
             this.updateServiceList();
         }
@@ -280,6 +281,11 @@ public class MemoViewerActivity extends Activity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ValueItem valueItem = this.secretListAdapter.getItem(info.position);
         this.deleteSecretLauncher.launch(valueItem);
+    }
+
+    private void hideInputMethod() {
+        EditText keywordEditText = findViewById(R.id.memo_viewer_keyword);
+        Utils.hideInputMethod(this, keywordEditText);
     }
 
     private void showCurrentState() {
@@ -366,8 +372,8 @@ public class MemoViewerActivity extends Activity {
             return true;
         }
 
-        EditText keywordEditView = findViewById(R.id.memo_viewer_keyword);
-        String keyword = keywordEditView.getText().toString();
+        EditText keywordEditText = findViewById(R.id.memo_viewer_keyword);
+        String keyword = keywordEditText.getText().toString();
 
         try {
             File memoFile = Utils.getMemoFile(this, this.memoName);
@@ -380,7 +386,7 @@ public class MemoViewerActivity extends Activity {
                 return false;
             }
 
-            keywordEditView.setText("");
+            keywordEditText.setText("");
 
             this.idpwMemo = tmpMemo;
 

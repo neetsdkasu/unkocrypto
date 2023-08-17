@@ -23,6 +23,8 @@ public class NewServiceActivity extends Activity {
     // res/layout/new_service.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         EditText nameEditText = findViewById(R.id.new_service_name);
         String name = nameEditText.getText().toString();
 
@@ -36,5 +38,10 @@ public class NewServiceActivity extends Activity {
 
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText nameEditText = findViewById(R.id.new_service_name);
+        Utils.hideInputMethod(this, nameEditText);
     }
 }

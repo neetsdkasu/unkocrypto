@@ -36,6 +36,8 @@ public class ChangeMemoNameActivity extends Activity {
     // res/layout/change_memo_name.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         Intent intent = getIntent();
         if (intent == null) {
             Utils.alertShort(this, R.string.msg_internal_error);
@@ -87,5 +89,10 @@ public class ChangeMemoNameActivity extends Activity {
 
         setResult(RESULT_OK, result);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText nameEditText = findViewById(R.id.change_memo_name_new_name);
+        Utils.hideInputMethod(this, nameEditText);
     }
 }

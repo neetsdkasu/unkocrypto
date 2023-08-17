@@ -98,6 +98,8 @@ public class EditValueActivity extends Activity {
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         Spinner editNewValueTypeSpinner = findViewById(R.id.edit_new_value_type);
         int valueType = editNewValueTypeSpinner.getSelectedItemPosition();
 
@@ -118,5 +120,10 @@ public class EditValueActivity extends Activity {
 
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText editNewValueEditText = findViewById(R.id.edit_new_value_value);
+        Utils.hideInputMethod(this, editNewValueEditText);
     }
 }

@@ -43,6 +43,8 @@ public class ImportMemoActivity extends Activity {
     // res/layout/import_memo.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         EditText nameEditText = findViewById(R.id.import_memo_name);
         String name = nameEditText.getText().toString();
 
@@ -107,6 +109,11 @@ public class ImportMemoActivity extends Activity {
 
         setResult(overwrite ? ImportMemoActivity.ACTIVITY_RESULT_OVERWRITE : RESULT_OK, result);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText nameEditText = findViewById(R.id.import_memo_name);
+        Utils.hideInputMethod(this, nameEditText);
     }
 
     private String getImportFileName() {

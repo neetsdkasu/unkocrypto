@@ -35,6 +35,8 @@ public class DeleteMemoActivity extends Activity {
     // res/layout/delete_memo.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         Intent intent = getIntent();
         if (intent == null) {
             Utils.alertShort(this, R.string.msg_internal_error);
@@ -78,5 +80,10 @@ public class DeleteMemoActivity extends Activity {
 
         setResult(RESULT_OK, result);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText confrimMemoNameEditText = findViewById(R.id.delete_memo_memo_name_confirm);
+        Utils.hideInputMethod(this, confrimMemoNameEditText);
     }
 }

@@ -37,6 +37,8 @@ public class ChangeMemoKeywordActivity extends Activity {
     // res/layout/change_memo_keyword.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         Switch executeSwitch = findViewById(R.id.change_memo_keyword_execute_switch);
         if (!executeSwitch.isChecked()) {
             Utils.alertShort(this, R.string.msg_please_switch_on);
@@ -102,5 +104,11 @@ public class ChangeMemoKeywordActivity extends Activity {
 
         setResult(RESULT_OK);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText curKeywordEditView = findViewById(R.id.change_memo_keyword_old_keyword);
+        EditText newKeywordEditView = findViewById(R.id.change_memo_keyword_new_keyword);
+        Utils.hideInputMethod(this, curKeywordEditView, newKeywordEditView);
     }
 }

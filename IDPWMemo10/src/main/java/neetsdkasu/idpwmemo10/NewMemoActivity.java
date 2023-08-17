@@ -23,6 +23,8 @@ public class NewMemoActivity extends Activity {
     // res/layout/new_memo.xml Button onClick
     public void onClickOkButton(View v) {
 
+        this.hideInputMethod();
+
         EditText nameEditText = findViewById(R.id.new_memo_name);
         String name = nameEditText.getText().toString();
 
@@ -64,5 +66,11 @@ public class NewMemoActivity extends Activity {
 
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void hideInputMethod() {
+        EditText nameEditText = findViewById(R.id.new_memo_name);
+        EditText keywordEditText = findViewById(R.id.new_memo_keyword);
+        Utils.hideInputMethod(this, nameEditText, keywordEditText);
     }
 }
