@@ -6,6 +6,7 @@ import java.io.IOException;
 
 final class Memo
 {
+    static final int MIN_VERSION = 1;
     static final int VERSION = 2;
 
     static final Service[] EMPTY_SERVICES = new Service[0];
@@ -80,7 +81,7 @@ final class Memo
     static Memo load(DataInput in) throws IOException
     {
         int version = in.readInt();
-        if (version < 0 || version > VERSION)
+        if (version < MIN_VERSION || version > VERSION)
         {
             throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN_MEMO_VERSION);
         }
