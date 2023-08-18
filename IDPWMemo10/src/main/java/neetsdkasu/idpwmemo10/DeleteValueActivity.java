@@ -31,7 +31,7 @@ public class DeleteValueActivity extends Activity {
             this.isSecret = intent.getBooleanExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, false);
             this.itemIndex = intent.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
             valueType = intent.getIntExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE, -1);
-            value = intent.getStringExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE);
+            value = Utils.ifNullToBlank(intent.getStringExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE));
         }
 
         if (this.isSecret) {
@@ -45,7 +45,7 @@ public class DeleteValueActivity extends Activity {
         valueTypeTextView.setText(idpwmemo.Value.typeName(valueType));
 
         TextView valueTextView = findViewById(R.id.delete_value_value);
-        valueTextView.setText(value == null ? "" : value);
+        valueTextView.setText(value);
 
         Window window = getWindow();
         if (window != null) {

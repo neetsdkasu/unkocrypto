@@ -27,17 +27,13 @@ public class ImportMemoActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.import_memo);
 
-        String fileName = this.getImportFileName();
+        String fileName = Utils.ifNullToBlank(this.getImportFileName());
 
         TextView fileNameTextView = findViewById(R.id.import_memo_file_name);
-        if (fileName != null) {
-            fileNameTextView.setText(fileName);
-        }
+        fileNameTextView.setText(fileName);
 
-        if (fileName != null) {
-            EditText nameEditText = findViewById(R.id.import_memo_name);
-            nameEditText.setText(this.trimFileNameForMemoName(fileName));
-        }
+        EditText nameEditText = findViewById(R.id.import_memo_name);
+        nameEditText.setText(this.trimFileNameForMemoName(fileName));
     }
 
     // res/layout/import_memo.xml Button onClick

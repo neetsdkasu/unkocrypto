@@ -19,17 +19,15 @@ public class DeleteMemoActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.delete_memo);
 
-        String memoName = null;
+        String memoName = "";
 
         Intent intent = getIntent();
         if (intent != null) {
-            memoName = intent.getStringExtra(DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME);
+            memoName = Utils.ifNullToBlank(intent.getStringExtra(DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME));
         }
 
         TextView memoNameTextView = findViewById(R.id.delete_memo_memo_name);
-        if (memoName != null) {
-            memoNameTextView.setText(memoName);
-        }
+        memoNameTextView.setText(memoName);
     }
 
     // res/layout/delete_memo.xml Button onClick

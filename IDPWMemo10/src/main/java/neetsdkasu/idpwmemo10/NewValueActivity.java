@@ -11,8 +11,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.List;
 
-import idpwmemo.IDPWMemo;
-
 public class NewValueActivity extends Activity {
 
     static final String INTENT_EXTRA_NEW_VALUE_IS_SECRET = "neetsdkasu.idpwmemo10.NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET";

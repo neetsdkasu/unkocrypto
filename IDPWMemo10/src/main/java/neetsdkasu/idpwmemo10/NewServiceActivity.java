@@ -8,8 +8,6 @@ import android.widget.EditText;
 import java.io.File;
 import java.nio.file.Files;
 
-import idpwmemo.IDPWMemo;
-
 public class NewServiceActivity extends Activity {
 
     static final String INTENT_EXTRA_NEW_SERVICE_NAME = "neetsdkasu.idpwmemo10.NewServiceActivity.INTENT_EXTRA_NEW_SERVICE_NAME";

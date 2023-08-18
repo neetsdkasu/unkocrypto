@@ -1,7 +1,10 @@
 package neetsdkasu.idpwmemo10;
 
+import android.app.Activity;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.Context;
-import android.util.Base64;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -110,8 +113,15 @@ final class Utils {
         return DATE_FMT.format(new java.util.Date(time));
     }
 
-    static void hideInputMethod(Context context, TextView... views) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+    static void clearFocus(Activity activity) {
+        View focus = activity.getCurrentFocus();
+        if (focus != null && focus.isInTouchMode()) {
+            focus.clearFocus();
+        }
+    }
+
+    static void hideInputMethod(Activity activity, TextView... views) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             for (TextView view : views) {
                 if (imm.isActive(view) && view.isInTouchMode()) {
@@ -119,15 +129,54 @@ final class Utils {
                 }
             }
         }
+        Utils.clearFocus(activity);
+    }
+
+    static void copyToClipboard(Context context, boolean secret, String text) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+
+        ClipData clip = ClipData.newPlainText(context.getString(R.string.app_name), text);
+
+        if (secret) {
+            android.os.PersistableBundle bundle = new android.os.PersistableBundle();
+            bundle.putBoolean("android.content.extra.IS_SENSITIVE", true);
+            clip.getDescription().setExtras(bundle);
+        }
+
+        clipboard.setPrimaryClip(clip);
+
+        // if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+        if (android.os.Build.VERSION.SDK_INT <= 32) {
+            Utils.alertShort(context, R.string.msg_copied);
+        }
     }
 
     static byte[] decodeBase64(String src) {
         try {
-            return Base64.decode(src, Base64.DEFAULT);
+            // return java.util.Base64.getMimeDecoder().decode(src);
+            return android.util.Base64.decode(src, android.util.Base64.DEFAULT);
         } catch (Exception ex) {
             // wrong src
             return null;
         }
+    }
+
+    static String encodeBase64(byte[] src) {
+        try {
+            // return java.util.Base64.getMimeEncoder().encodeToString(src);
+            return android.util.Base64.encodeToString(src, android.util.Base64.DEFAULT);
+        } catch (Exception ex) {
+            // wrong src
+            return null;
+        }
+    }
+
+    static String ifNullToDefault(String str, String defaultStr) {
+        return str == null ? defaultStr : str;
+    }
+
+    static String ifNullToBlank(String s) {
+        return Utils.ifNullToDefault(s, "");
     }
 
 }

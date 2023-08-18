@@ -26,11 +26,8 @@ public class DeleteServiceActivity extends Activity {
         Intent intent = getIntent();
         if (intent != null) {
             this.index = intent.getIntExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX, -1);
-            this.serviceName = intent.getStringExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME);
+            this.serviceName = Utils.ifNullToBlank(intent.getStringExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME));
             this.lastupdate = intent.getLongExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, 0L);
-            if (this.serviceName == null) {
-                this.serviceName = "";
-            }
         }
 
         TextView serviceNameTextView = findViewById(R.id.delete_service_name);

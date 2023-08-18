@@ -40,10 +40,7 @@ public class EditValueActivity extends Activity {
             this.isSecret = intent.getBooleanExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET, false);
             this.itemIndex = intent.getIntExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
             this.oldValueType = intent.getIntExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE, -1);
-            this.oldValue = intent.getStringExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE);
-            if (this.oldValue == null) {
-                this.oldValue = "";
-            }
+            this.oldValue = Utils.ifNullToBlank(intent.getStringExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE));
         }
 
         if (this.keeping) {

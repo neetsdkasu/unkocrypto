@@ -159,6 +159,10 @@
     <string name="memo_viewer_import_keyword_text">Import Password</string>
     <string name="import_service_button_text">Do Import</string>
     <string name="memo_viewer_import_data_text">Import Data (Base64)</string>
+    <string name="memo_viewer_export_service_name_text">Service Name</string>
+    <string name="memo_viewer_export_service_lastupdate_text">Lastupdate</string>
+    <string name="memo_viewer_export_keyword_text">Export Password</string>
+    <string name="export_service_button_text">Do Export</string>
 
     <!-- MemoViewerActivity Option Menu -->
     <string name="add_service_submenu_text">Add</string>
@@ -220,5 +224,14 @@
     <string name="delete_service_execute_switch_text">"Do or Do Not ?"</string>
     <string name="delete_service_execute_switch_textoff">Do NOT Delete</string>
     <string name="delete_service_execute_switch_texton">Do Delete</string>
+
+    <!-- ExportServiceActivity -->
+    <string name="export_service_title">Export Service</string>
+    <string name="export_service_name_text">Service Name</string>
+    <string name="export_service_lastupdate_text">Lastupdate</string>
+    <string name="copy_export_keyword_button_text">Copy Password</string>
+    <string name="export_keyword_text">Export Password</string>
+    <string name="copy_export_data_button_text">Copy Data</string>
+    <string name="export_data_text">Export Data (Base64)</string>
 
 </resources>

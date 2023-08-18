@@ -20,17 +20,15 @@ public class ChangeMemoNameActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_memo_name);
 
-        String memoName = null;
+        String memoName = "";
 
         Intent intent = getIntent();
         if (intent != null) {
-            memoName = intent.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME);
+            memoName = Utils.ifNullToBlank(intent.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME));
         }
 
         TextView curMemoNameTextView = findViewById(R.id.change_memo_name_current_name);
-        if (memoName != null) {
-            curMemoNameTextView.setText(memoName);
-        }
+        curMemoNameTextView.setText(memoName);
     }
 
     // res/layout/change_memo_name.xml Button onClick
