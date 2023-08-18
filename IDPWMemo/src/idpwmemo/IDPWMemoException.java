@@ -11,6 +11,7 @@ public class IDPWMemoException extends RuntimeException
     public static final int CAUSE_NOT_SET_PASSWORD      = 3;  // almost user program's bug
     public static final int CAUSE_NOT_SET_MEMO          = 4;  // almost user program's bug
     public static final int CAUSE_NOT_SELECT_SERVICE    = 5;  // almost user program's bug
+    public static final int CAUSE_INVALID_DATA          = 6;  // DATA is not IDPWMemo format
 
     private static String causeToText(int cause)
     {
@@ -30,6 +31,8 @@ public class IDPWMemoException extends RuntimeException
                 return "NOT SET MEMO";
             case CAUSE_NOT_SELECT_SERVICE:
                 return "NOT SELECT SERVICE";
+            case CAUSE_INVALID_DATA:
+                return "INVALID DATA";
             default:
                 return "UNKNOWN (" + cause + ")";
         }
