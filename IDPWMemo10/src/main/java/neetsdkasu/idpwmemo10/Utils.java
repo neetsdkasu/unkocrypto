@@ -91,7 +91,8 @@ final class Utils {
         Toast.makeText(c, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private static final String[] VALUE_TYPES = new String[8];
+    private static final int VALUE_TYPE_COUNT = 8; // マジックナンバー（？）よくない、IDPWMemoのほうで用意すべきなのでは？
+    private static final String[] VALUE_TYPES = new String[Utils.VALUE_TYPE_COUNT];
     static {
         for (int i = 0; i < Utils.VALUE_TYPES.length; i++) {
             Utils.VALUE_TYPES[i] = idpwmemo.Value.typeName(i);
@@ -100,7 +101,7 @@ final class Utils {
     static final List<String> VALUE_TYPE_LIST = Collections.unmodifiableList(Arrays.asList(Utils.VALUE_TYPES));
 
     static boolean isValidValueType(int valueType) {
-        return Utils.inSize(valueType, VALUE_TYPES.length);
+        return idpwmemo.Value.isValidType(valueType);
     }
 
     @android.annotation.SuppressLint("SimpleDateFormat")
