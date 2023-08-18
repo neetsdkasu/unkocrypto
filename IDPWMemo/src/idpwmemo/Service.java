@@ -250,8 +250,16 @@ public final class Service
         byte[] secrets;
 
         time = in.readLong();
+        if (time < 0L)
+        {
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_INVALID_DATA);
+        }
 
         int vlen = in.readInt();
+        if (vlen < 0)
+        {
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_INVALID_DATA);
+        }
         values = new Value[vlen];
         for (int i = 0; i < vlen; i++)
         {
@@ -259,6 +267,10 @@ public final class Service
         }
 
         int slen = in.readInt();
+        if (slen < 0)
+        {
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_INVALID_DATA);
+        }
         secrets = new byte[slen];
         in.readFully(secrets);
 

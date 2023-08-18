@@ -16,6 +16,10 @@ public final class Value
     public static final int REMINDER_ANSWER   = 6;
     public static final int DESCRIPTION       = 7;
 
+    public static boolean isValidType(int type) {
+        return 0 <= type && type <= 7;
+    }
+
     public static String typeName(int type)
     {
         switch (type)
@@ -97,6 +101,10 @@ public final class Value
     static Value load(DataInput in) throws IOException
     {
         byte type = in.readByte();
+        if (!Value.isValidType((int)type))
+        {
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_INVALID_DATA);
+        }
         String value = in.readUTF();
         return new Value(type, value);
     }
