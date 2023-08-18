@@ -80,11 +80,15 @@ final class Memo
     static Memo load(DataInput in) throws IOException
     {
         int version = in.readInt();
-        if (version > VERSION)
+        if (version < 0 || version > VERSION)
         {
             throw new IDPWMemoException(IDPWMemoException.CAUSE_UNKNOWN_MEMO_VERSION);
         }
         int count = in.readInt();
+        if (count < 0)
+        {
+            throw new IDPWMemoException(IDPWMemoException.CAUSE_INVALID_DATA);
+        }
         Service[] services = new Service[count];
         if (version == 1)
         {
