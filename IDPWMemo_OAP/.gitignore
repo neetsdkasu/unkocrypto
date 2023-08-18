@@ -1,6 +1,5 @@
-/bin/*.jar
 /*classes/
-/*lib/
+/tmplib/
 
 /bin/*.cmd
 /*.pro
