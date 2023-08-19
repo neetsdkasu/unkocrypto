@@ -45,7 +45,7 @@ public class DeleteValueActivity extends Activity {
 
             this.statusOk = this.itemIndex >= 0
                 && Utils.isValidValueType(valueType)
-                && Utils.isNotBlank(value);
+                && Utils.isValidValue(value);
         }
 
         if (this.statusOk) {

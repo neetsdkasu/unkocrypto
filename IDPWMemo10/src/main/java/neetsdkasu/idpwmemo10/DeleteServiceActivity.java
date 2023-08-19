@@ -40,7 +40,7 @@ public class DeleteServiceActivity extends Activity {
             this.lastupdate = intent.getLongExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, -1L);
 
             this.statusOk = this.index >= 0
-                && Utils.isNotBlank(this.serviceName)
+                && Utils.isValidServiceName(this.serviceName)
                 && this.lastupdate >= 0L;
         }
 
