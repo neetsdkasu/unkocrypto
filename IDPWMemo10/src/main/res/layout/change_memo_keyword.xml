@@ -53,6 +53,7 @@
       android:layout_height="12sp"
       />
   <Button
+      android:id="@+id/change_memo_keyword_execute_button"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="@string/ok_button_text"

@@ -99,6 +99,7 @@
     <string name="common_text_unknown_name">"??????"</string>
     <string name="common_text_new_memo_name">New Memo Name (length &lt;= 50)</string>
     <string name="common_text_memo_name_allows">allows: a&#8211;z A&#8211;Z 0&#8211;9 and -_()[]</string>
+    <string name="common_text_status_error_title">"[ERROR!]"</string>
 
     <!-- MainActivity Option Menu -->
     <string name="add_memo_menu_item_text">Add</string>
