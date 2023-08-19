@@ -73,14 +73,14 @@ final class Utils {
         if (name == null) {
             return false;
         }
-        return name.trim().length() > 0;
+        return !name.trim().isEmpty();
     }
 
     static boolean isValidValue(String value) {
         if (value == null) {
             return false;
         }
-        return value.trim().length() > 0;
+        return !value.trim().isEmpty();
     }
 
     static void alertShort(Context c, int msgResId) {
@@ -133,6 +133,8 @@ final class Utils {
         Utils.clearFocus(activity);
     }
 
+    private static final int BUILD_VERSIONS_CODES_S_V2 = 32;
+
     static void copyToClipboard(Context context, boolean secret, String text) {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
@@ -147,7 +149,7 @@ final class Utils {
         clipboard.setPrimaryClip(clip);
 
         // if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-        if (android.os.Build.VERSION.SDK_INT <= 32) {
+        if (android.os.Build.VERSION.SDK_INT <= BUILD_VERSIONS_CODES_S_V2) {
             Utils.alertShort(context, R.string.msg_copied);
         }
     }
@@ -173,11 +175,14 @@ final class Utils {
     }
 
     static String ifNullToDefault(String str, String defaultStr) {
-        return str == null ? defaultStr : str;
+        return str == null ? defaultStr.toString() : str;
     }
 
     static String ifNullToBlank(String s) {
         return Utils.ifNullToDefault(s, "");
     }
 
+    static boolean isNullOrBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
 }
