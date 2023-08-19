@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -15,6 +16,9 @@ public class ChangeMemoNameActivity extends Activity {
     static final String INTENT_EXTRA_CUR_MEMO_NAME = "neetsdkasu.idpwmemo10.ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME";
     static final String INTENT_EXTRA_NEW_MEMO_NAME = "neetsdkasu.idpwmemo10.ChangeMemoNameActivity.INTENT_EXTRA_NEW_MEMO_NAME";
 
+    // 想定のIntentを受け取ったときtrueでアプリは正常状態、それ以外falseでアプリは異常状態
+    private boolean statusOk = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,16 +27,34 @@ public class ChangeMemoNameActivity extends Activity {
         String memoName = "";
 
         Intent intent = getIntent();
-        if (intent != null) {
-            memoName = Utils.ifNullToBlank(intent.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME));
-        }
 
-        TextView curMemoNameTextView = findViewById(R.id.change_memo_name_current_name);
-        curMemoNameTextView.setText(memoName);
+        this.statusOk = intent != null
+            && intent.hasExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME);
+
+        if (this.statusOk) {
+
+            memoName = Utils.ifNullToBlank(intent.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME));
+
+            TextView curMemoNameTextView = findViewById(R.id.change_memo_name_current_name);
+            curMemoNameTextView.setText(memoName);
+
+        } else {
+
+            setTitle(R.string.common_text_status_error_title);
+            Button exceuteButton = findViewById(R.id.change_memo_name_execute_button);
+            exceuteButton.setEnabled(false);
+            Switch executeSwitch = findViewById(R.id.change_memo_name_execute_switch);
+            executeSwitch.setEnabled(false);
+
+        }
     }
 
     // res/layout/change_memo_name.xml Button onClick
     public void onClickOkButton(View v) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
 
         this.hideInputMethod();
 
