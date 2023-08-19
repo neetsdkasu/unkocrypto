@@ -71,10 +71,7 @@ public class DeleteValueActivity extends Activity {
 
         }
 
-        Window window = getWindow();
-        if (window != null) {
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
-        }
+        Utils.setSecure(this);
     }
 
     // res/layout/delete_value.xml Button onClick

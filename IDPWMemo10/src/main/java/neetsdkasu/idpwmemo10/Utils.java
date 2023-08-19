@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,6 +107,13 @@ final class Utils {
             return "000000:0000";
         }
         return DATE_FMT.format(new java.util.Date(time));
+    }
+
+    static void setSecure(Activity activity) {
+        Window window = activity.getWindow();
+        if (window != null) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+        }
     }
 
     static void clearFocus(Activity activity) {

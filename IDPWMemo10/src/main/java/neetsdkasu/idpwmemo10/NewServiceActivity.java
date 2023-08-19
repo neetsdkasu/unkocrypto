@@ -14,6 +14,8 @@ public class NewServiceActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_service);
+
+        Utils.setSecure(this);
     }
 
     // res/layout/new_service.xml Button onClick

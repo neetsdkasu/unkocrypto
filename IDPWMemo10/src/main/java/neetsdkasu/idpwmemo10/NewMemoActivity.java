@@ -18,6 +18,8 @@ public class NewMemoActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_memo);
+
+        Utils.setSecure(this);
     }
 
     // res/layout/new_memo.xml Button onClick

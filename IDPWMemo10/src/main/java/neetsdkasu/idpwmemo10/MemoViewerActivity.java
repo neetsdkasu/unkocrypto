@@ -11,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
@@ -154,10 +153,7 @@ public class MemoViewerActivity extends Activity {
 
         }
 
-        Window window = getWindow();
-        if (window != null) {
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
-        }
+        Utils.setSecure(this);
     }
 
     @Override

@@ -51,6 +51,8 @@ public class ChangeMemoKeywordActivity extends Activity {
             findViewById(R.id.change_memo_keyword_execute_switch).setEnabled(false);
 
         }
+
+        Utils.setSecure(this);
     }
 
     // res/layout/change_memo_keyword.xml Button onClick
