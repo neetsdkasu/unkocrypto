@@ -22,22 +22,57 @@ public class ImportMemoActivity extends Activity {
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.ImportMemoActivity.INTENT_EXTRA_MEMO_NAME";
     static final int ACTIVITY_RESULT_OVERWRITE = Activity.RESULT_FIRST_USER;
 
+    // 想定のIntentを受け取ったときtrueでアプリは正常状態、それ以外falseでアプリは異常状態
+    private boolean statusOk = false;
+
+    Uri fileUri = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.import_memo);
 
-        String fileName = Utils.ifNullToBlank(this.getImportFileName());
+        Intent intent = getIntent();
 
-        TextView fileNameTextView = findViewById(R.id.import_memo_file_name);
-        fileNameTextView.setText(fileName);
+        this.statusOk = intent != null;
 
-        EditText nameEditText = findViewById(R.id.import_memo_name);
-        nameEditText.setText(this.trimFileNameForMemoName(fileName));
+        if (this.statusOk) {
+            this.fileUri = intent.getData();
+
+            this.statusOk = this.fileUri != null;
+        }
+
+        String fileName = "";
+
+        if (this.statusOk) {
+            fileName = this.getFileNameFromUri(this.fileUri);
+
+            // ファイル名が空白文字で構成されてる場合は検出できないことになるが…そんなファイル使わんだろ
+            this.statusOk = Utils.isNotBlank(fileName);
+        }
+
+        if (this.statusOk) {
+
+            TextView fileNameTextView = findViewById(R.id.import_memo_file_name);
+            fileNameTextView.setText(fileName);
+
+            EditText nameEditText = findViewById(R.id.import_memo_name);
+            nameEditText.setText(this.trimFileNameForMemoName(fileName));
+
+        } else {
+
+            setTitle(R.string.common_text_status_error_title);
+            findViewById(R.id.import_memo_execute_button).setEnabled(false);
+
+        }
     }
 
     // res/layout/import_memo.xml Button onClick
     public void onClickOkButton(View v) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
 
         this.hideInputMethod();
 
@@ -64,16 +99,7 @@ public class ImportMemoActivity extends Activity {
             return;
         }
 
-        Intent intent = getIntent();
-        if (intent == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
-            return;
-        }
-        Uri uri = intent.getData();
-        if (uri == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
-            return;
-        }
+        Uri uri = this.fileUri;
 
         File cache = new File(getCacheDir(), "import_orverride_cache.memo");
 
@@ -112,15 +138,7 @@ public class ImportMemoActivity extends Activity {
         Utils.hideInputMethod(this, nameEditText);
     }
 
-    private String getImportFileName() {
-        Intent intent = getIntent();
-        if (intent == null) {
-            return null;
-        }
-        Uri uri = intent.getData();
-        if (uri == null) {
-            return null;
-        }
+    private String getFileNameFromUri(Uri uri) {
         try {
             try (Cursor returnCursor = getContentResolver().query(uri, null, null, null, null)) {
                 int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
