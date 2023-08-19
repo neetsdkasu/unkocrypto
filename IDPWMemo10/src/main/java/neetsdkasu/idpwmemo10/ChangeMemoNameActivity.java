@@ -35,7 +35,7 @@ public class ChangeMemoNameActivity extends Activity {
 
             this.memoName = intent.getStringExtra(ChangeMemoNameActivity.INTENT_EXTRA_CUR_MEMO_NAME);
 
-            this.statusOk = !Utils.isNullOrBlank(this.memoName)
+            this.statusOk = Utils.isNotBlank(this.memoName)
                 && Utils.getMemoFile(this, this.memoName).exists();
         }
 

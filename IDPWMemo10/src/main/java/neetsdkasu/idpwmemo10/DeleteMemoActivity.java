@@ -34,7 +34,7 @@ public class DeleteMemoActivity extends Activity {
 
             this.memoName = intent.getStringExtra(DeleteMemoActivity.INTENT_EXTRA_MEMO_NAME);
 
-            this.statusOk = !Utils.isNullOrBlank(this.memoName)
+            this.statusOk = Utils.isNotBlank(this.memoName)
                 && Utils.getMemoFile(this, this.memoName).exists();
         }
 
