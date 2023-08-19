@@ -17,6 +17,9 @@ public class NewValueActivity extends Activity {
     static final String INTENT_EXTRA_NEW_VALUE_TYPE      = "neetsdkasu.idpwmemo10.NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE";
     static final String INTENT_EXTRA_NEW_VALUE_VALUE     = "neetsdkasu.idpwmemo10.NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE";
 
+    // 想定のIntentを受け取ったときtrueでアプリは正常状態、それ以外falseでアプリは異常状態
+    private boolean statusOk = false;
+
     private boolean isSecret = false;
 
     @Override
@@ -25,21 +28,35 @@ public class NewValueActivity extends Activity {
         setContentView(R.layout.new_value);
 
         Intent intent = getIntent();
-        if (intent != null) {
-            this.isSecret = intent.getBooleanExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false);
-        }
 
-        if (this.isSecret) {
-            setTitle(R.string.new_secret_title);
-            TextView valueTextTextView = findViewById(R.id.new_value_value_text);
-            valueTextTextView.setText(R.string.new_secret_secret_text);
+        this.statusOk = intent != null
+            && intent.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET);
+
+        if (this.statusOk) {
+            this.isSecret = intent.getBooleanExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false);
         }
 
         List<String> valueTypeList = Utils.VALUE_TYPE_LIST;
         ArrayAdapter<String> valueTypeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, valueTypeList);
         Spinner valueTypeSpinner = findViewById(R.id.new_value_type);
         valueTypeSpinner.setAdapter(valueTypeAdapter);
-        valueTypeSpinner.setSelection(this.isSecret ? idpwmemo.Value.PASSWORD : idpwmemo.Value.ID);
+
+        if (this.statusOk) {
+
+            valueTypeSpinner.setSelection(this.isSecret ? idpwmemo.Value.PASSWORD : idpwmemo.Value.ID);
+
+            if (this.isSecret) {
+                setTitle(R.string.new_secret_title);
+                TextView valueTextTextView = findViewById(R.id.new_value_value_text);
+                valueTextTextView.setText(R.string.new_secret_secret_text);
+            }
+
+        } else {
+
+            setTitle(R.string.common_text_status_error_title);
+            findViewById(R.id.new_value_execute_button).setEnabled(false);
+
+        }
 
         Window window = getWindow();
         if (window != null) {
@@ -49,6 +66,10 @@ public class NewValueActivity extends Activity {
 
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
 
         this.hideInputMethod();
 
@@ -71,7 +92,6 @@ public class NewValueActivity extends Activity {
         setResult(RESULT_OK, intent);
         finish();
     }
-
 
     private void hideInputMethod() {
         EditText valueEditText = findViewById(R.id.new_value_value);
