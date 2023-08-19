@@ -4,10 +4,6 @@
 
     <string name="ok_button_text">OK</string>
 
-    <!-- AlertAtivity -->
-    <string name="alert_title">ALERT DIALOG</string>
-    <string name="alert_message">Hi! This is Alert!</string>
-
     <!-- Import Messages -->
     <string name="msg_success_import">Success Import</string>
     <string name="msg_failure_import">Failure Import</string>
