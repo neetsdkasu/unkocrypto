@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -48,10 +47,8 @@ public class ChangeMemoKeywordActivity extends Activity {
         } else {
 
             setTitle(R.string.common_text_status_error_title);
-            Button excuteButton = findViewById(R.id.change_memo_keyword_execute_button);
-            excuteButton.setEnabled(false);
-            Switch executeSwitch = findViewById(R.id.change_memo_keyword_execute_switch);
-            executeSwitch.setEnabled(false);
+            findViewById(R.id.change_memo_keyword_execute_button).setEnabled(false);
+            findViewById(R.id.change_memo_keyword_execute_switch).setEnabled(false);
 
         }
     }

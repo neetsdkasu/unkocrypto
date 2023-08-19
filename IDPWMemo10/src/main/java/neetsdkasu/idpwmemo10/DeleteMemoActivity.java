@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -46,10 +45,8 @@ public class DeleteMemoActivity extends Activity {
         } else {
 
             setTitle(R.string.common_text_status_error_title);
-            Button executeButton = findViewById(R.id.delete_memo_execute_button);
-            executeButton.setEnabled(false);
-            Switch executeSwitch = findViewById(R.id.delete_memo_execute_switch);
-            executeSwitch.setEnabled(false);
+            findViewById(R.id.delete_memo_execute_button).setEnabled(false);
+            findViewById(R.id.delete_memo_execute_switch).setEnabled(false);
 
         }
     }
