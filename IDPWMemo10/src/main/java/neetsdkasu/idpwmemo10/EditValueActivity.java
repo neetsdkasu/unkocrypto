@@ -23,7 +23,10 @@ public class EditValueActivity extends Activity {
     static final String INTENT_EXTRA_NEW_VALUE_TYPE  = "neetsdkasu.idpwmemo10.EditValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE";
     static final String INTENT_EXTRA_NEW_VALUE_VALUE = "neetsdkasu.idpwmemo10.EditValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE";
 
-    private boolean keeping = false;
+    // 想定のIntentを受け取ったときtrueでアプリは正常状態、それ以外falseでアプリは異常状態
+    private boolean statusOk = false;
+
+    private boolean keeping = false; // ServiceNameの変更時にValueTypeを維持するためのフラグ
     private boolean isSecret = false;
     private int itemIndex = -1;
     private int oldValueType = -1;
@@ -35,56 +38,76 @@ public class EditValueActivity extends Activity {
         setContentView(R.layout.edit_value);
 
         Intent intent = getIntent();
-        if (intent != null) {
+
+        this.statusOk = intent != null
+            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_KEEPING)
+            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET)
+            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX)
+            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE)
+            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE);
+
+        if (this.statusOk) {
             this.keeping = intent.getBooleanExtra(EditValueActivity.INTENT_EXTRA_KEEPING, false);
             this.isSecret = intent.getBooleanExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET, false);
             this.itemIndex = intent.getIntExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
             this.oldValueType = intent.getIntExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE, -1);
-            this.oldValue = Utils.ifNullToBlank(intent.getStringExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE));
+            this.oldValue = intent.getStringExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE);
+
+            this.statusOk = this.itemIndex >= 0
+                && Utils.isValidValueType(this.oldValueType)
+                && Utils.isValidValue(this.oldValue)
+                && (!this.keeping
+                    || (!this.isSecret
+                        && this.oldValueType == idpwmemo.Value.SERVICE_NAME
+                        && Utils.isValidServiceName(this.oldValue)));
         }
-
-        if (this.keeping) {
-            setTitle(R.string.edit_service_name_title);
-
-            TextView oldValueTextTextView = findViewById(R.id.old_value_value_text);
-            oldValueTextTextView.setText(R.string.old_service_name_text);
-
-            TextView editNewValueTextTextView = findViewById(R.id.edit_new_value_value_text);
-            editNewValueTextTextView.setText(R.string.edit_new_service_name_text);
-        }
-
-        if (this.isSecret) {
-            setTitle(R.string.edit_secret_title);
-
-            TextView oldValueTextTextView = findViewById(R.id.old_value_value_text);
-            oldValueTextTextView.setText(R.string.old_secret_secret_text);
-
-            TextView editNewValueTextTextView = findViewById(R.id.edit_new_value_value_text);
-            editNewValueTextTextView.setText(R.string.edit_new_secret_secret_text);
-        }
-
-        TextView oldValueTypeTextView = findViewById(R.id.old_value_type);
-        oldValueTypeTextView.setText(idpwmemo.Value.typeName(this.oldValueType));
-
-        TextView oldValueTextView = findViewById(R.id.old_value_value);
-        oldValueTextView.setText(this.oldValue);
 
         List<String> valueTypeList = Utils.VALUE_TYPE_LIST;
         ArrayAdapter<String> valueTypeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, valueTypeList);
         Spinner editNewValueTypeSpinner = findViewById(R.id.edit_new_value_type);
         editNewValueTypeSpinner.setAdapter(valueTypeAdapter);
-        if (Utils.isValidValueType(this.oldValueType)) {
-            editNewValueTypeSpinner.setSelection(this.oldValueType);
-        } else {
-            editNewValueTypeSpinner.setSelection(this.isSecret ? idpwmemo.Value.PASSWORD : idpwmemo.Value.ID);
-        }
-        if (this.keeping) {
-            editNewValueTypeSpinner.setSelection(idpwmemo.Value.SERVICE_NAME);
-            editNewValueTypeSpinner.setEnabled(false);
-        }
 
-        EditText editNewValueEditText = findViewById(R.id.edit_new_value_value);
-        editNewValueEditText.setText(this.oldValue);
+        if (this.statusOk) {
+
+            editNewValueTypeSpinner.setSelection(this.oldValueType);
+
+            TextView oldValueTypeTextView = findViewById(R.id.old_value_type);
+            oldValueTypeTextView.setText(idpwmemo.Value.typeName(this.oldValueType));
+
+            TextView oldValueTextView = findViewById(R.id.old_value_value);
+            oldValueTextView.setText(this.oldValue);
+
+            EditText editNewValueEditText = findViewById(R.id.edit_new_value_value);
+            editNewValueEditText.setText(this.oldValue);
+
+            if (this.keeping) {
+                setTitle(R.string.edit_service_name_title);
+
+                TextView oldValueTextTextView = findViewById(R.id.old_value_value_text);
+                oldValueTextTextView.setText(R.string.old_service_name_text);
+
+                TextView editNewValueTextTextView = findViewById(R.id.edit_new_value_value_text);
+                editNewValueTextTextView.setText(R.string.edit_new_service_name_text);
+
+                editNewValueTypeSpinner.setEnabled(false);
+            }
+
+            if (this.isSecret) {
+                setTitle(R.string.edit_secret_title);
+
+                TextView oldValueTextTextView = findViewById(R.id.old_value_value_text);
+                oldValueTextTextView.setText(R.string.old_secret_secret_text);
+
+                TextView editNewValueTextTextView = findViewById(R.id.edit_new_value_value_text);
+                editNewValueTextTextView.setText(R.string.edit_new_secret_secret_text);
+            }
+
+        } else {
+
+            setTitle(R.string.common_text_status_error_title);
+            findViewById(R.id.edit_value_execute_button).setEnabled(false);
+
+        }
 
         Window window = getWindow();
         if (window != null) {
@@ -94,6 +117,10 @@ public class EditValueActivity extends Activity {
 
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
 
         this.hideInputMethod();
 

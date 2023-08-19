@@ -29,6 +29,7 @@
       android:id="@+id/old_value_value"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:textIsSelectable="true"
       android:text=""
       />
   <Space
@@ -79,6 +80,7 @@
       android:layout_height="12sp"
       />
   <Button
+      android:id="@+id/edit_value_execute_button"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="@string/ok_button_text"
