@@ -32,6 +32,9 @@ public class MemoViewerActivity extends Activity {
 
     static final String INTENT_EXTRA_MEMO_NAME = "neetsdkasu.idpwmemo10.MemoViewerActivity.INTENT_EXTRA_MEMO_NAME";
 
+    // 想定のIntentを受け取ったときtrueでアプリは正常状態、それ以外falseでアプリは異常状態
+    private boolean statusOk = false;
+
     private static final int STATE_NONE                 = 0;
     private static final int STATE_DISPLAY_SERVICE_LIST = 1;
     private static final int STATE_DISPLAY_VALUE_LIST   = 2;
@@ -79,11 +82,16 @@ public class MemoViewerActivity extends Activity {
         setContentView(R.layout.memo_viewer);
 
         Intent intent = getIntent();
-        if (intent != null) {
-            this.memoName = intent.getStringExtra(MemoViewerActivity.INTENT_EXTRA_MEMO_NAME);
-        }
 
-        setTitle(Utils.ifNullToDefault(this.memoName, "[[ERROR!]]"));
+        this.statusOk = intent != null
+            && intent.hasExtra(MemoViewerActivity.INTENT_EXTRA_MEMO_NAME);
+
+        if (this.statusOk) {
+            this.memoName = intent.getStringExtra(MemoViewerActivity.INTENT_EXTRA_MEMO_NAME);
+
+            this.statusOk = Utils.isValidMemoName(this.memoName)
+                && Utils.getMemoFile(this, this.memoName).exists();
+        }
 
         List<MemoViewerActivity.ServiceItem> serviceList = new ArrayList<>();
         serviceListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, serviceList);
@@ -134,6 +142,17 @@ public class MemoViewerActivity extends Activity {
                 }
             }
         });
+
+        if (this.statusOk) {
+
+            setTitle(this.memoName);
+
+        } else {
+
+            setTitle(R.string.common_text_status_error_title);
+            findViewById(R.id.memo_viewer_show_service_list_button).setEnabled(false);
+
+        }
 
         Window window = getWindow();
         if (window != null) {
@@ -188,6 +207,12 @@ public class MemoViewerActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        if (!this.statusOk) {
+            this.setStateNone();
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+
         // onResumeでUI操作やってよいのだろうか？
         this.showCurrentState();
     }
@@ -209,31 +234,56 @@ public class MemoViewerActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
+
         this.activityResultManager.onActivityResult(requestCode, resultCode, data);
     }
 
     // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
     public void onClickNewServiceMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.addNewServiceLauncher.launch();
     }
 
     // res/menu/memo_viewer_menu.xml Import-Service-MenuItem onClick
     public void onClickImportServiceMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.setStateImportService();
     }
 
     // res/menu/memo_viewer_menu.xml Add-Value-MenuItem onClick
     public void onClickAddValueMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.addNewValueLauncher.launch();
     }
 
     // res/menu/memo_viewer_menu.xml Add-Secret-MenuItem onClick
     public void onClickAddSecretMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.addNewSecretLauncher.launch();
     }
 
     // res/layout/memo_viewer.xml Show-Service-List-Button onClick
     public void onClickShowServiceListButton(View view) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.hideInputMethod();
         if (this.idpwMemo != null && this.idpwMemo.hasMemo()) {
             this.updateServiceList();
@@ -246,6 +296,10 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/service_list_context_menu.xml Export-Service-MenuItem onClick
     public void onClickExportServiceMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ServiceItem serviceItem = this.serviceListAdapter.getItem(info.position);
 
@@ -267,6 +321,10 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/service_list_context_menu.xml Delete_Service-MenuItem onClick
     public void onClickDeleteServiceMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ServiceItem serviceItem = this.serviceListAdapter.getItem(info.position);
         this.deleteServiceLauncher.launch(serviceItem);
@@ -274,6 +332,10 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/value_list_context_menu.xml Edit-Value-MenuItem onClick
     public void onClickEditValueMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ValueItem valueItem = this.valueListAdapter.getItem(info.position);
         this.editValueLauncher.launch(valueItem);
@@ -281,6 +343,10 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/value_list_context_menu.xml Delete_Value-MenuItem onClick
     public void onClickDeleteValueMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ValueItem valueItem = this.valueListAdapter.getItem(info.position);
         this.deleteValueLauncher.launch(valueItem);
@@ -288,6 +354,10 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/secret_list_context_menu.xml Edit-Secret-MenuItem onClick
     public void onClickEditSecretMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ValueItem valueItem = this.secretListAdapter.getItem(info.position);
         this.editSecretLauncher.launch(valueItem);
@@ -295,6 +365,10 @@ public class MemoViewerActivity extends Activity {
 
     // res/menu/secret_list_context_menu.xml Delete_Secret-MenuItem onClick
     public void onClickDeleteSecretMenuItem(MenuItem item) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         MemoViewerActivity.ValueItem valueItem = this.secretListAdapter.getItem(info.position);
         this.deleteSecretLauncher.launch(valueItem);
@@ -302,15 +376,21 @@ public class MemoViewerActivity extends Activity {
 
     // res/layout/memo_viewer.xml Import-Service-Button onClick
     public void onClickImportServiceButton(View view) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.hideInputMethod();
-
         this.importService();
     }
 
     // res/layout/memo_viewer.xml Export-Service-Button onClick
     public void onClickExportServiceButton(View view) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         this.hideInputMethod();
-
         this.exportService();
     }
 
@@ -453,7 +533,7 @@ public class MemoViewerActivity extends Activity {
         if (this.idpwMemo != null) {
             return true;
         }
-        
+
         if (this.memoName == null) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return false;
@@ -594,6 +674,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void addNewService(String newServiceName) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
             Utils.alertShort(this, R.string.msg_failure_new_service);
             return;
@@ -622,6 +706,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void addValue(int valueType, String value) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_new_value);
             return;
@@ -665,6 +753,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void addSecret(int valueType, String value) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_new_secret);
             return;
@@ -708,6 +800,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void editValue(int itemIndex, boolean keeping, int valueType, String value) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_edit_value);
             return;
@@ -762,6 +858,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void editSecret(int itemIndex, boolean keeping, int valueType, String value) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_edit_secret);
             return;
@@ -816,6 +916,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void deleteValue(int itemIndex) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_delete_value);
             return;
@@ -855,6 +959,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void deleteSecret(int itemIndex) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_failure_delete_secret);
             return;
@@ -894,6 +1002,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void deleteService(int index, String name, long lastupdate) {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
             Utils.alertShort(this, R.string.msg_failure_delete_service);
             return;
@@ -941,6 +1053,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void importService() {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
@@ -996,6 +1112,10 @@ public class MemoViewerActivity extends Activity {
     }
 
     private void exportService() {
+        if (!this.statusOk) {
+            Utils.alertShort(this, R.string.msg_internal_error);
+            return;
+        }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
             Utils.alertShort(this, R.string.msg_internal_error);
             return;
