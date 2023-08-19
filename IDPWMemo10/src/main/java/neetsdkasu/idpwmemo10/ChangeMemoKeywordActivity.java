@@ -20,12 +20,12 @@ public class ChangeMemoKeywordActivity extends Activity {
     // 想定のIntentを受け取ったときtrueでアプリは正常状態、それ以外falseでアプリは異常状態
     private boolean statusOk = false;
 
+    private String memoName = "";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_memo_keyword);
-
-        String memoName = "";
 
         Intent intent = getIntent();
 
@@ -34,7 +34,13 @@ public class ChangeMemoKeywordActivity extends Activity {
 
         if (this.statusOk) {
 
-            memoName = Utils.ifNullToBlank(intent.getStringExtra(ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME));
+            this.memoName = intent.getStringExtra(ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME);
+
+            this.statusOk = !Utils.isNullOrBlank(this.memoName)
+                && Utils.getMemoFile(this, this.memoName).exists();
+        }
+
+        if (this.statusOk) {
 
             TextView memoNameTextView = findViewById(R.id.change_memo_keyword_memo_name);
             memoNameTextView.setText(memoName);
@@ -65,19 +71,7 @@ public class ChangeMemoKeywordActivity extends Activity {
             return;
         }
 
-        Intent intent = getIntent();
-        if (intent == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
-            return;
-        }
-
-        String memoName = intent.getStringExtra(ChangeMemoKeywordActivity.INTENT_EXTRA_MEMO_NAME);
-        if (memoName == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
-            return;
-        }
-
-        File memoFile = Utils.getMemoFile(this, memoName);
+        File memoFile = Utils.getMemoFile(this, this.memoName);
         if (!memoFile.exists()) {
             Utils.alertShort(this, R.string.msg_not_found_memo_name);
             return;
