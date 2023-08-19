@@ -70,17 +70,11 @@ final class Utils {
     }
 
     static boolean isValidServiceName(String name) {
-        if (name == null) {
-            return false;
-        }
-        return !name.trim().isEmpty();
+        return Utils.isNotBlank(name);
     }
 
     static boolean isValidValue(String value) {
-        if (value == null) {
-            return false;
-        }
-        return !value.trim().isEmpty();
+        return Utils.isNotBlank(value);
     }
 
     static void alertShort(Context c, int msgResId) {
@@ -184,5 +178,9 @@ final class Utils {
 
     static boolean isNullOrBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    static boolean isNotBlank(String s) {
+        return !Utils.isNullOrBlank(s);
     }
 }
