@@ -94,6 +94,7 @@
     <string name="msg_secret_is_required">Secret Is Required</string>
     <string name="msg_invalid_import_data">Invalid Import Data</string>
     <string name="msg_wrong_keyword_or_invalid_data">Wrong Password or Invalid Data</string>
+    <string name="msg_time_is_up">"Time's Up"</string>
 
     <!-- Common text -->
     <string name="common_text_unknown_name">"??????"</string>

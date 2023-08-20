@@ -75,6 +75,8 @@ public class MemoViewerActivity extends Activity {
     private IDPWMemo idpwMemo = null;
     private String memoName = null;
 
+    private final TimeLimitChecker tlChecker = new TimeLimitChecker();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -209,6 +211,12 @@ public class MemoViewerActivity extends Activity {
             return;
         }
 
+        if (this.tlChecker.isOver()) {
+            this.setStateNone();
+            Utils.alertShort(this, R.string.msg_time_is_up);
+            return;
+        }
+
         // onResumeでUI操作やってよいのだろうか？
         this.showCurrentState();
     }
@@ -216,6 +224,8 @@ public class MemoViewerActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+
+        this.tlChecker.clear();
 
         // ここでこれらの操作はダメぽそう（UI操作はせずに、状態を保存する操作をしろという話らしい？）
         findViewById(R.id.memo_viewer_keyword_panel).setVisibility(View.GONE);
