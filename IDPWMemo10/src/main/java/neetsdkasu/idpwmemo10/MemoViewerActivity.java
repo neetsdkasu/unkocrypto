@@ -1254,6 +1254,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             if (data == null || !data.hasExtra(NewServiceActivity.INTENT_EXTRA_NEW_SERVICE_NAME)) {
                 Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
                 return;
@@ -1279,6 +1280,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET)
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
@@ -1309,6 +1311,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET)
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
@@ -1343,6 +1346,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_KEEPING)
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET)
@@ -1381,6 +1385,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_KEEPING)
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET)
@@ -1418,6 +1423,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX);
@@ -1449,6 +1455,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX);
@@ -1479,6 +1486,7 @@ public class MemoViewerActivity extends Activity {
         }
         @Override
         public void onOk(Intent data) {
+            MemoViewerActivity.this.tlChecker.clear();
             boolean hasExtra = data != null
                 && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX)
                 && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME)
