@@ -212,6 +212,8 @@ public class MemoViewerActivity extends Activity {
         }
 
         if (this.tlChecker.isOver()) {
+            EditText keywordEditText = findViewById(R.id.memo_viewer_keyword);
+            keywordEditText.setText("");
             this.setStateNone();
             Utils.alertShort(this, R.string.msg_time_is_up);
             return;
