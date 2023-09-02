@@ -21,6 +21,8 @@ public class ChangeMemoKeywordActivity extends Activity {
 
     private String memoName = "";
 
+    private final TimeLimitChecker tlChecker = new TimeLimitChecker();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +55,31 @@ public class ChangeMemoKeywordActivity extends Activity {
         }
 
         Utils.setSecure(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!this.statusOk) {
+            return;
+        }
+
+        if (this.tlChecker.isOver()) {
+            this.clearKeywords();
+            Utils.alertShort(this, R.string.msg_time_is_up);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (!this.statusOk) {
+            return;
+        }
+
+        this.tlChecker.clear();
     }
 
     // res/layout/change_memo_keyword.xml Button onClick
@@ -123,5 +150,12 @@ public class ChangeMemoKeywordActivity extends Activity {
         EditText curKeywordEditView = findViewById(R.id.change_memo_keyword_old_keyword);
         EditText newKeywordEditView = findViewById(R.id.change_memo_keyword_new_keyword);
         Utils.hideInputMethod(this, curKeywordEditView, newKeywordEditView);
+    }
+
+    private void clearKeywords() {
+        EditText curKeywordEditView = findViewById(R.id.change_memo_keyword_old_keyword);
+        curKeywordEditView.setText("");
+        EditText newKeywordEditView = findViewById(R.id.change_memo_keyword_new_keyword);
+        newKeywordEditView.setText("");
     }
 }

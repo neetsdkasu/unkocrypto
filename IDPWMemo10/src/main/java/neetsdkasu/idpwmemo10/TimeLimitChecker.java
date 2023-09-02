@@ -9,15 +9,28 @@ class TimeLimitChecker {
 
     long timeLimit = 0L;
 
+    boolean hasSuperLimit = false;
+    long superLimit = 0L;
+
     TimeLimitChecker() {
         this.clear();
     }
 
-    void clear() {
+    long clear() {
         this.timeLimit = System.currentTimeMillis() + TIME_LIMIT;
+        return this.timeLimit;
     }
 
     boolean isOver() {
-       return this.timeLimit < System.currentTimeMillis();
+        long time = System.currentTimeMillis();
+        if (this.hasSuperLimit) {
+            return this.superLimit < time;
+        }
+        return this.timeLimit < time;
+    }
+
+    void setSuperLimit(long newSuperLimit) {
+        this.superLimit = newSuperLimit;
+        this.hasSuperLimit = true;
     }
 }

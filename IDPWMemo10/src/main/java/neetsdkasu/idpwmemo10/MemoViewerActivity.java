@@ -1246,7 +1246,8 @@ public class MemoViewerActivity extends Activity {
     private final class AddNewServiceCondacts extends ActivityResultManager.Condacts<Void> {
         @Override
         public Intent onCreate(Void obj) {
-            return new Intent(MemoViewerActivity.this, NewServiceActivity.class);
+            return new Intent(MemoViewerActivity.this, NewServiceActivity.class)
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1272,7 +1273,8 @@ public class MemoViewerActivity extends Activity {
         @Override
         public Intent onCreate(Void obj) {
             return new Intent(MemoViewerActivity.this, NewValueActivity.class)
-                .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false);
+                .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false)
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1303,7 +1305,8 @@ public class MemoViewerActivity extends Activity {
         @Override
         public Intent onCreate(Void obj) {
             return new Intent(MemoViewerActivity.this, NewValueActivity.class)
-                .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, true);
+                .putExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, true)
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1338,7 +1341,8 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET, item.isSecret())
                 .putExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX, item.getIndex())
                 .putExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE, item.getValueType())
-                .putExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE, item.getValue());
+                .putExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE, item.getValue())
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1377,7 +1381,8 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET, item.isSecret())
                 .putExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX, item.getIndex())
                 .putExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE, item.getValueType())
-                .putExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE, item.getValue());
+                .putExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE, item.getValue())
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1415,7 +1420,8 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, item.isSecret())
                 .putExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, item.getIndex())
                 .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE, item.getValueType())
-                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE, item.getValue());
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE, item.getValue())
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1447,7 +1453,8 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, item.isSecret())
                 .putExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, item.getIndex())
                 .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE, item.getValueType())
-                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE, item.getValue());
+                .putExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE, item.getValue())
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {
@@ -1478,7 +1485,8 @@ public class MemoViewerActivity extends Activity {
             return new Intent(MemoViewerActivity.this, DeleteServiceActivity.class)
                 .putExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX, item.getIndex())
                 .putExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME, item.getName())
-                .putExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, item.getLastupdate());
+                .putExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, item.getLastupdate())
+                .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
         public void onCanceled() {

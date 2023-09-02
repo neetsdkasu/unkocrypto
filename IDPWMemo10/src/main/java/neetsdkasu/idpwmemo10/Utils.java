@@ -20,6 +20,8 @@ final class Utils {
 
     private Utils() {}
 
+    static final String INTENT_EXTRA_TIME_LIMIT = "neetsdkasu.idpwmemo10.Utils.INTENT_EXTRA_TIME_LIMIT";
+
     static final String MEMO_DIR = "memo";
     static final String EXTENSION = ".memo";
 

@@ -20,6 +20,8 @@ public class DeleteServiceActivity extends Activity {
     private String serviceName = "";
     private long lastupdate = 0L;
 
+    private final TimeLimitChecker tlChecker = new TimeLimitChecker();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,13 +32,17 @@ public class DeleteServiceActivity extends Activity {
         this.statusOk = intent != null
             && intent.hasExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX)
             && intent.hasExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME)
-            && intent.hasExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE);
+            && intent.hasExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE)
+            && intent.hasExtra(Utils.INTENT_EXTRA_TIME_LIMIT);
 
         if (this.statusOk) {
 
             this.index = intent.getIntExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX, -1);
             this.serviceName = intent.getStringExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME);
             this.lastupdate = intent.getLongExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, -1L);
+
+            long superLimit = intent.getLongExtra(Utils.INTENT_EXTRA_TIME_LIMIT, 0L);
+            this.tlChecker.setSuperLimit(superLimit);
 
             this.statusOk = this.index >= 0
                 && Utils.isValidServiceName(this.serviceName)
@@ -62,6 +68,16 @@ public class DeleteServiceActivity extends Activity {
         Utils.setSecure(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (this.tlChecker.isOver()) {
+            this.breakOff();
+            Utils.alertShort(this, R.string.msg_time_is_up);
+        }
+    }
+
     // res/layout/delete_service.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
@@ -82,5 +98,18 @@ public class DeleteServiceActivity extends Activity {
 
         setResult(RESULT_OK, result);
         finish();
+    }
+
+    private void breakOff() {
+        this.statusOk = false;
+
+        TextView serviceNameTextView = findViewById(R.id.delete_service_name);
+        serviceNameTextView.setText("");
+
+        TextView lastupdateTextView = findViewById(R.id.delete_service_lastupdate);
+        lastupdateTextView.setText("");
+
+        findViewById(R.id.delete_service_execute_button).setEnabled(false);
+        findViewById(R.id.delete_service_execute_switch).setEnabled(false);
     }
 }
