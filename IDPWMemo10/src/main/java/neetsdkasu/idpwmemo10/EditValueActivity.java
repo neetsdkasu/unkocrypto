@@ -31,6 +31,8 @@ public class EditValueActivity extends Activity {
     private int oldValueType = -1;
     private String oldValue = "";
 
+    private final TimeLimitChecker tlChecker = new TimeLimitChecker();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +45,8 @@ public class EditValueActivity extends Activity {
             && intent.hasExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET)
             && intent.hasExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX)
             && intent.hasExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE)
-            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE);
+            && intent.hasExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE)
+            && intent.hasExtra(Utils.INTENT_EXTRA_TIME_LIMIT);
 
         if (this.statusOk) {
             this.keeping = intent.getBooleanExtra(EditValueActivity.INTENT_EXTRA_KEEPING, false);
@@ -51,6 +54,9 @@ public class EditValueActivity extends Activity {
             this.itemIndex = intent.getIntExtra(EditValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
             this.oldValueType = intent.getIntExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_TYPE, -1);
             this.oldValue = intent.getStringExtra(EditValueActivity.INTENT_EXTRA_OLD_VALUE_VALUE);
+
+            long superLimit = intent.getLongExtra(Utils.INTENT_EXTRA_TIME_LIMIT, 0L);
+            this.tlChecker.setSuperLimit(superLimit);
 
             this.statusOk = this.itemIndex >= 0
                 && Utils.isValidValueType(this.oldValueType)
@@ -111,6 +117,20 @@ public class EditValueActivity extends Activity {
         Utils.setSecure(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!this.statusOk) {
+            return;
+        }
+
+        if (this.tlChecker.isOver()) {
+            this.breakOff();
+            Utils.alertShort(this, R.string.msg_time_is_up);
+        }
+    }
+
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
@@ -150,5 +170,20 @@ public class EditValueActivity extends Activity {
     private void hideInputMethod() {
         EditText editNewValueEditText = findViewById(R.id.edit_new_value_value);
         Utils.hideInputMethod(this, editNewValueEditText);
+    }
+
+    private void breakOff() {
+        this.statusOk = false;
+
+        TextView oldValueTypeTextView = findViewById(R.id.old_value_type);
+        oldValueTypeTextView.setText("");
+
+        TextView oldValueTextView = findViewById(R.id.old_value_value);
+        oldValueTextView.setText("");
+
+        EditText editNewValueEditText = findViewById(R.id.edit_new_value_value);
+        editNewValueEditText.setText("");
+
+        findViewById(R.id.edit_value_execute_button).setEnabled(false);
     }
 }
