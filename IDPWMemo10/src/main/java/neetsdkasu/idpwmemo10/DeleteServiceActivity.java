@@ -72,6 +72,10 @@ public class DeleteServiceActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        if (!this.statusOk) {
+            return;
+        }
+
         if (this.tlChecker.isOver()) {
             this.breakOff();
             Utils.alertShort(this, R.string.msg_time_is_up);

@@ -21,6 +21,8 @@ public class DeleteValueActivity extends Activity {
     private boolean isSecret = false;
     private int itemIndex = -1;
 
+    private final TimeLimitChecker tlChecker = new TimeLimitChecker();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,13 +37,17 @@ public class DeleteValueActivity extends Activity {
             && intent.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
             && intent.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX)
             && intent.hasExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE)
-            && intent.hasExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE);
+            && intent.hasExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE)
+            && intent.hasExtra(Utils.INTENT_EXTRA_TIME_LIMIT);
 
         if (this.statusOk) {
             this.isSecret = intent.getBooleanExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, false);
             this.itemIndex = intent.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
             valueType = intent.getIntExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_TYPE, -1);
             value = intent.getStringExtra(DeleteValueActivity.INTENT_EXTRA_VALUE_VALUE);
+
+            long superLimit = intent.getLongExtra(Utils.INTENT_EXTRA_TIME_LIMIT, 0L);
+            this.tlChecker.setSuperLimit(superLimit);
 
             this.statusOk = this.itemIndex >= 0
                 && Utils.isValidValueType(valueType)
@@ -74,6 +80,21 @@ public class DeleteValueActivity extends Activity {
         Utils.setSecure(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!this.statusOk) {
+            return;
+        }
+
+        if (this.tlChecker.isOver()) {
+            this.breakOff();
+            Utils.alertShort(this, R.string.msg_time_is_up);
+        }
+    }
+
+
     // res/layout/delete_value.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
@@ -93,5 +114,18 @@ public class DeleteValueActivity extends Activity {
 
         setResult(RESULT_OK, result);
         finish();
+    }
+
+    private void breakOff() {
+        this.statusOk = false;
+
+        TextView valueTypeTextView = findViewById(R.id.delete_value_type);
+        valueTypeTextView.setText("");
+
+        TextView valueTextView = findViewById(R.id.delete_value_value);
+        valueTextView.setText("");
+
+        findViewById(R.id.delete_value_execute_button).setEnabled(false);
+        findViewById(R.id.delete_value_execute_switch).setEnabled(false);
     }
 }
