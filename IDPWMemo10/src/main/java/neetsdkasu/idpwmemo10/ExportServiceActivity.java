@@ -22,6 +22,8 @@ public class ExportServiceActivity extends Activity {
     private String exportKeyword = "";
     private String exportData = "";
 
+    private final TimeLimitChecker tlChecker = new TimeLimitChecker();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,13 +38,17 @@ public class ExportServiceActivity extends Activity {
             && intent.hasExtra(ExportServiceActivity.INTENT_EXTRA_SERVICE_NAME)
             && intent.hasExtra(ExportServiceActivity.INTENT_EXTRA_LASTUPDATE)
             && intent.hasExtra(ExportServiceActivity.INTENT_EXTRA_KEYWORD)
-            && intent.hasExtra(ExportServiceActivity.INTENT_EXTRA_DATA);
+            && intent.hasExtra(ExportServiceActivity.INTENT_EXTRA_DATA)
+            && intent.hasExtra(Utils.INTENT_EXTRA_TIME_LIMIT);
 
         if (this.statusOk) {
             serviceName = intent.getStringExtra(ExportServiceActivity.INTENT_EXTRA_SERVICE_NAME);
             lastupdate = intent.getLongExtra(ExportServiceActivity.INTENT_EXTRA_LASTUPDATE, -1L);
             this.exportKeyword = intent.getStringExtra(ExportServiceActivity.INTENT_EXTRA_KEYWORD);
             this.exportData = intent.getStringExtra(ExportServiceActivity.INTENT_EXTRA_DATA);
+
+            long superLimit = intent.getLongExtra(Utils.INTENT_EXTRA_TIME_LIMIT, 0L);
+            this.tlChecker.setSuperLimit(superLimit);
 
             this.statusOk = Utils.isValidServiceName(serviceName)
                 && lastupdate >= 0L
@@ -72,7 +78,43 @@ public class ExportServiceActivity extends Activity {
 
         }
 
+        if (this.statusOk && !this.tlChecker.isOver()) {
+            setResult(RESULT_CANCELED, new Intent());
+        } else {
+            setResult(RESULT_CANCELED, null);
+        }
+
         Utils.setSecure(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // onStartからonResumeやonPauseをスキップしてonStopに至るLifeCycleのケースがあるらしい
+
+        if (!this.statusOk) {
+            return;
+        }
+
+        if (this.tlChecker.isOver()) {
+            setResult(RESULT_CANCELED, null);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!this.statusOk) {
+            return;
+        }
+
+        if (this.tlChecker.isOver()) {
+            setResult(RESULT_CANCELED, null);
+            this.breakOff();
+            Utils.alertShort(this, R.string.msg_time_is_up);
+        }
     }
 
     // res/layout/export_service.xml Copy-Password Button onClick
@@ -93,5 +135,24 @@ public class ExportServiceActivity extends Activity {
         }
         Utils.clearFocus(this);
         Utils.copyToClipboard(this, false, Utils.ifNullToBlank(this.exportData));
+    }
+
+    private void breakOff() {
+        this.statusOk = false;
+
+        TextView serviceNameTextView = findViewById(R.id.export_service_name);
+        serviceNameTextView.setText("");
+
+        TextView lastupdateTextView = findViewById(R.id.export_service_lastupdate);
+        lastupdateTextView.setText("");
+
+        TextView exportKeywordTextView = findViewById(R.id.export_keyword);
+        exportKeywordTextView.setText("");
+
+        TextView exportDataTextView = findViewById(R.id.export_data);
+        exportDataTextView.setText("");
+
+        findViewById(R.id.copy_export_keyword_button).setEnabled(false);
+        findViewById(R.id.copy_export_data_button).setEnabled(false);
     }
 }

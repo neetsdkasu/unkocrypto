@@ -296,7 +296,7 @@ public class MainActivity extends Activity {
             return new Intent(MainActivity.this, NewMemoActivity.class);
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_ADD_NEW_MEMO;
         }
         @Override
@@ -333,7 +333,7 @@ public class MainActivity extends Activity {
             MainActivity.this.showStateMessage();
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_PICK_IMPORT_FILE;
         }
         @Override
@@ -363,7 +363,7 @@ public class MainActivity extends Activity {
             return new Intent(MainActivity.this, ImportMemoActivity.class).setData(uri);
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_IMPORT_MEMO;
         }
         @Override
@@ -428,7 +428,7 @@ public class MainActivity extends Activity {
             MainActivity.this.showStateMessage();
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_EXPORT_MEMO;
         }
         @Override
@@ -477,7 +477,7 @@ public class MainActivity extends Activity {
             MainActivity.this.showStateMessage();
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_CHANGE_MEMO_KEYWORD;
         }
         @Override
@@ -499,7 +499,7 @@ public class MainActivity extends Activity {
             MainActivity.this.showStateMessage();
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_CHANGE_MEMO_NAME;
         }
         @Override
@@ -539,7 +539,7 @@ public class MainActivity extends Activity {
             MainActivity.this.showStateMessage();
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             MainActivity.this.state = MainActivity.STATE_CANCELED_DELETE_MEMO;
         }
         @Override

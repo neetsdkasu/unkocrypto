@@ -57,6 +57,7 @@ public class MemoViewerActivity extends Activity {
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> deleteValueLauncher;
     private final ActivityResultManager.Launcher<MemoViewerActivity.ValueItem> deleteSecretLauncher;
     private final ActivityResultManager.Launcher<MemoViewerActivity.ServiceItem> deleteServiceLauncher;
+    private final ActivityResultManager.Launcher<MemoViewerActivity.ExportService> exportServiceLauncher;
 
     {
         this.activityResultManager = new ActivityResultManager(this);
@@ -70,6 +71,7 @@ public class MemoViewerActivity extends Activity {
         this.deleteValueLauncher   = manager.register(this.new DeleteValueCondacts());
         this.deleteSecretLauncher  = manager.register(this.new DeleteSecretCondacts());
         this.deleteServiceLauncher = manager.register(this.new DeleteServiceCondacts());
+        this.exportServiceLauncher = manager.register(this.new ExportServiceCondacts());
     }
 
     private IDPWMemo idpwMemo = null;
@@ -1160,13 +1162,9 @@ public class MemoViewerActivity extends Activity {
             return;
         }
 
-        Intent intent = new Intent(this, ExportServiceActivity.class)
-            .putExtra(ExportServiceActivity.INTENT_EXTRA_SERVICE_NAME, serviceName)
-            .putExtra(ExportServiceActivity.INTENT_EXTRA_LASTUPDATE, lastupdate)
-            .putExtra(ExportServiceActivity.INTENT_EXTRA_KEYWORD, exportKeyword)
-            .putExtra(ExportServiceActivity.INTENT_EXTRA_DATA, exportData);
+        MemoViewerActivity.ExportService exportService = this.new ExportService(serviceName, lastupdate, exportKeyword, exportData);
 
-        startActivity(intent);
+        this.exportServiceLauncher.launch(exportService);
     }
 
     private final class ServiceItem {
@@ -1252,7 +1250,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_new_service);
         }
         @Override
@@ -1279,7 +1277,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_new_value);
         }
         @Override
@@ -1311,7 +1309,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_new_secret);
         }
         @Override
@@ -1347,7 +1345,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_edit_value);
         }
         @Override
@@ -1387,7 +1385,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_edit_secret);
         }
         @Override
@@ -1426,7 +1424,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_delete_value);
         }
         @Override
@@ -1459,7 +1457,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_delete_secret);
         }
         @Override
@@ -1491,7 +1489,7 @@ public class MemoViewerActivity extends Activity {
                 .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
         }
         @Override
-        public void onCanceled() {
+        public void onCanceled(Intent data) {
             Utils.alertShort(MemoViewerActivity.this, R.string.msg_canceled_delete_service);
         }
         @Override
@@ -1509,6 +1507,49 @@ public class MemoViewerActivity extends Activity {
             String serviceName = data.getStringExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME);
             long lastupdate = data.getLongExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE, -1L);
             MemoViewerActivity.this.deleteService(index, serviceName, lastupdate);
+        }
+    }
+
+    private final class ExportService {
+        final String serviceName;
+        final long lastupdate;
+        final String exportKeyword;
+        final String exportData;
+        ExportService(String serviceName, long lastupdate, String exportKeyword, String exportData) {
+            this.serviceName = serviceName;
+            this.lastupdate = lastupdate;
+            this.exportKeyword = exportKeyword;
+            this.exportData = exportData;
+        }
+        String getServiceName() {
+            return this.serviceName;
+        }
+        long getLastupdate() {
+            return this.lastupdate;
+        }
+        String getExportKeyword() {
+            return this.exportKeyword;
+        }
+        String getExportData() {
+            return this.exportData;
+        }
+    }
+
+    private final class ExportServiceCondacts extends ActivityResultManager.Condacts<MemoViewerActivity.ExportService> {
+        @Override
+        public Intent onCreate(MemoViewerActivity.ExportService item) {
+            return new Intent(MemoViewerActivity.this, ExportServiceActivity.class)
+            .putExtra(ExportServiceActivity.INTENT_EXTRA_SERVICE_NAME, item.getServiceName())
+            .putExtra(ExportServiceActivity.INTENT_EXTRA_LASTUPDATE, item.getLastupdate())
+            .putExtra(ExportServiceActivity.INTENT_EXTRA_KEYWORD, item.getExportKeyword())
+            .putExtra(ExportServiceActivity.INTENT_EXTRA_DATA, item.getExportData())
+            .putExtra(Utils.INTENT_EXTRA_TIME_LIMIT, MemoViewerActivity.this.tlChecker.clear());
+        }
+        @Override
+        public void onCanceled(Intent data) {
+            if (data != null) {
+                MemoViewerActivity.this.tlChecker.clear();
+            }
         }
     }
 }

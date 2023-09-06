@@ -13,7 +13,7 @@ final class ActivityResultManager {
     }
 
     private static interface ResultListener {
-        void onCanceled();
+        void onCanceled(Intent data);
         void onOk(Intent data);
         void onUserResult(int resultCode, Intent data);
     }
@@ -22,7 +22,7 @@ final class ActivityResultManager {
                                                  ActivityResultManager.ResultListener {
         public abstract Intent onCreate(T arg);
         public void onFailedToStart() {}
-        public void onCanceled() {}
+        public void onCanceled(Intent data) {}
         public void onOk(Intent data) {}
         public void onUserResult(int resultCode, Intent data) {}
     }
@@ -112,7 +112,7 @@ final class ActivityResultManager {
         if (resultCode == Activity.RESULT_OK) {
             listener.onOk(data);
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            listener.onCanceled();
+            listener.onCanceled(data);
         } else {
             listener.onUserResult(resultCode, data);
         }
