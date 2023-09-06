@@ -120,7 +120,7 @@ public class ExportServiceActivity extends Activity {
     // res/layout/export_service.xml Copy-Password Button onClick
     public void onClickCopyKeywordButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.G_01);
             return;
         }
         Utils.clearFocus(this);
@@ -130,7 +130,7 @@ public class ExportServiceActivity extends Activity {
     // res/layout/export_service.xml Copy-Data Button onClick
     public void onClickCopyDataButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.G_02);
             return;
         }
         Utils.clearFocus(this);

@@ -98,7 +98,7 @@ public class DeleteValueActivity extends Activity {
     // res/layout/delete_value.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.E_01);
             return;
         }
 

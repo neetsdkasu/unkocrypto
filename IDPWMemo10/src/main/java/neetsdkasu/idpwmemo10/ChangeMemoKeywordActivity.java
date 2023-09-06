@@ -85,7 +85,7 @@ public class ChangeMemoKeywordActivity extends Activity {
     // res/layout/change_memo_keyword.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.A_01);
             return;
         }
 
@@ -138,7 +138,7 @@ public class ChangeMemoKeywordActivity extends Activity {
                 }
                 Files.deleteIfExists(cache.toPath());
             } catch (Exception ex2) {}
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.A_02);
             return;
         }
 

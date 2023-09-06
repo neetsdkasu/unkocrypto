@@ -85,7 +85,7 @@ public class DeleteServiceActivity extends Activity {
     // res/layout/delete_service.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.D_01);
             return;
         }
 

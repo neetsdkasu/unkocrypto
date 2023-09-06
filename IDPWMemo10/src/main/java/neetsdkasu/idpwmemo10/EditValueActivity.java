@@ -134,7 +134,7 @@ public class EditValueActivity extends Activity {
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.F_01);
             return;
         }
 

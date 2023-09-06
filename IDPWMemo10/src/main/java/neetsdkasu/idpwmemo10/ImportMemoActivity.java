@@ -70,7 +70,7 @@ public class ImportMemoActivity extends Activity {
     // res/layout/import_memo.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.H_01);
             return;
         }
 
@@ -122,7 +122,7 @@ public class ImportMemoActivity extends Activity {
                     Files.move(cache.toPath(), file.toPath());
                 }
             } catch (Exception ex2) {}
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.H_02);
             return;
         }
 

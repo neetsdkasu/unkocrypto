@@ -80,6 +80,10 @@ final class Utils {
         return Utils.isNotBlank(value);
     }
 
+    static void internalError(Context c, IE ie) {
+        Utils.alertShort(c, "Internal Error: " + ie.toString());
+    }
+
     static void alertShort(Context c, int msgResId) {
         Toast.makeText(c, msgResId, Toast.LENGTH_SHORT).show();
     }

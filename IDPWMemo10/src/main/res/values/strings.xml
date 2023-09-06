@@ -79,7 +79,6 @@
     <string name="msg_failure_import_service">Failure Import Service</string>
 
     <!-- some Messages -->
-    <string name="msg_internal_error">Internal Error</string>
     <string name="msg_wrong_memo_name">This Name Is Wrong</string>
     <string name="msg_memo_name_already_exists">This Name Already Exists</string>
     <string name="msg_failure_create_memo">Failure Create Memo</string>

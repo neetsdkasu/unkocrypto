@@ -209,7 +209,7 @@ public class MemoViewerActivity extends Activity {
 
         if (!this.statusOk) {
             this.setStateNone();
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_01);
             return;
         }
 
@@ -245,7 +245,7 @@ public class MemoViewerActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_02);
             return;
         }
 
@@ -255,7 +255,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/memo_viewer_menu.xml New-Service-MenuItem onClick
     public void onClickNewServiceMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_03);
             return;
         }
         this.addNewServiceLauncher.launch();
@@ -264,7 +264,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/memo_viewer_menu.xml Import-Service-MenuItem onClick
     public void onClickImportServiceMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_04);
             return;
         }
         this.setStateImportService();
@@ -273,7 +273,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/memo_viewer_menu.xml Add-Value-MenuItem onClick
     public void onClickAddValueMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_05);
             return;
         }
         this.addNewValueLauncher.launch();
@@ -282,7 +282,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/memo_viewer_menu.xml Add-Secret-MenuItem onClick
     public void onClickAddSecretMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_06);
             return;
         }
         this.addNewSecretLauncher.launch();
@@ -291,7 +291,7 @@ public class MemoViewerActivity extends Activity {
     // res/layout/memo_viewer.xml Show-Service-List-Button onClick
     public void onClickShowServiceListButton(View view) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_07);
             return;
         }
         this.hideInputMethod();
@@ -307,7 +307,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/service_list_context_menu.xml Export-Service-MenuItem onClick
     public void onClickExportServiceMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_08);
             return;
         }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -325,14 +325,14 @@ public class MemoViewerActivity extends Activity {
             this.setStateExportService();
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_09);
         }
     }
 
     // res/menu/service_list_context_menu.xml Delete_Service-MenuItem onClick
     public void onClickDeleteServiceMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_10);
             return;
         }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -343,7 +343,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/value_list_context_menu.xml Edit-Value-MenuItem onClick
     public void onClickEditValueMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_11);
             return;
         }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -354,7 +354,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/value_list_context_menu.xml Delete_Value-MenuItem onClick
     public void onClickDeleteValueMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_12);
             return;
         }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -365,7 +365,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/secret_list_context_menu.xml Edit-Secret-MenuItem onClick
     public void onClickEditSecretMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_13);
             return;
         }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -376,7 +376,7 @@ public class MemoViewerActivity extends Activity {
     // res/menu/secret_list_context_menu.xml Delete_Secret-MenuItem onClick
     public void onClickDeleteSecretMenuItem(MenuItem item) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_14);
             return;
         }
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -387,7 +387,7 @@ public class MemoViewerActivity extends Activity {
     // res/layout/memo_viewer.xml Import-Service-Button onClick
     public void onClickImportServiceButton(View view) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_15);
             return;
         }
         this.hideInputMethod();
@@ -397,7 +397,7 @@ public class MemoViewerActivity extends Activity {
     // res/layout/memo_viewer.xml Export-Service-Button onClick
     public void onClickExportServiceButton(View view) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_16);
             return;
         }
         this.hideInputMethod();
@@ -433,7 +433,7 @@ public class MemoViewerActivity extends Activity {
                 this.showStateExportService();
                 break;
             default:
-                Utils.alertShort(this, R.string.msg_internal_error);
+                Utils.internalError(this, IE.I_17);
                 break;
         }
     }
@@ -545,7 +545,7 @@ public class MemoViewerActivity extends Activity {
         }
 
         if (this.memoName == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_18);
             return false;
         }
 
@@ -572,14 +572,14 @@ public class MemoViewerActivity extends Activity {
             return true;
 
         } catch (Exception ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_19);
             return false;
         }
     }
 
     private void selectService(int index) {
         if (this.idpwMemo == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_20);
             return;
         }
         try {
@@ -595,13 +595,13 @@ public class MemoViewerActivity extends Activity {
             this.setStateDisplayValueList();
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_21);
         }
     }
 
     private void updateServiceList() {
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_22);
             return;
         }
         this.serviceListAdapter.setNotifyOnChange(false);
@@ -616,7 +616,7 @@ public class MemoViewerActivity extends Activity {
 
     private void updateValueList() {
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_23);
             return;
         }
         this.valueListAdapter.setNotifyOnChange(false);
@@ -636,7 +636,7 @@ public class MemoViewerActivity extends Activity {
 
     private void updateSecretList() {
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_24);
             return;
         }
         this.secretListAdapter.setNotifyOnChange(false);
@@ -650,7 +650,7 @@ public class MemoViewerActivity extends Activity {
 
     private boolean saveMemo() {
         if (this.idpwMemo == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_25);
             return false;
         }
         File memoFile = Utils.getMemoFile(this, this.memoName);
@@ -678,14 +678,14 @@ public class MemoViewerActivity extends Activity {
                 }
             } catch (Exception ex2) {}
 
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_26);
             return false;
         }
     }
 
     private void addNewService(String newServiceName) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_27);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
@@ -711,13 +711,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_new_service);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_28);
         }
     }
 
     private void addValue(int valueType, String value) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_29);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
@@ -729,11 +729,11 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (!Utils.isValidValueType(valueType)) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_30);
             return;
         }
         if (value == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_31);
             return;
         }
         try {
@@ -758,13 +758,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_new_value);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_32);
         }
     }
 
     private void addSecret(int valueType, String value) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_33);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
@@ -776,11 +776,11 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (!Utils.isValidValueType(valueType)) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_34);
             return;
         }
         if (value == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_35);
             return;
         }
         try {
@@ -805,13 +805,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_new_secret);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_36);
         }
     }
 
     private void editValue(int itemIndex, boolean keeping, int valueType, String value) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_37);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
@@ -823,26 +823,26 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (!Utils.inSize(itemIndex, this.valueListAdapter.getCount())) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_38);
             return;
         }
         if (!Utils.isValidValueType(valueType)) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_39);
             return;
         }
         if (value == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_40);
             return;
         }
         if (keeping && value.trim().length() == 0) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_41);
             return;
         }
         try {
             idpwmemo.Value[] values = this.idpwMemo.getValues();
 
             if (keeping && (valueType != (int)values[itemIndex].type)) {
-                Utils.alertShort(this, R.string.msg_internal_error);
+                Utils.internalError(this, IE.I_42);
                 return;
             }
 
@@ -863,13 +863,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_edit_value);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_43);
         }
     }
 
     private void editSecret(int itemIndex, boolean keeping, int valueType, String value) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_44);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
@@ -881,26 +881,26 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (!Utils.inSize(itemIndex, this.secretListAdapter.getCount())) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_45);
             return;
         }
         if (!Utils.isValidValueType(valueType)) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_46);
             return;
         }
         if (value == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_47);
             return;
         }
         if (keeping && value.trim().length() == 0) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_48);
             return;
         }
         try {
             idpwmemo.Value[] values = this.idpwMemo.getSecrets();
 
             if (keeping && (valueType != (int)values[itemIndex].type)) {
-                Utils.alertShort(this, R.string.msg_internal_error);
+                Utils.internalError(this, IE.I_49);
                 return;
             }
 
@@ -921,13 +921,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_edit_secret);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_50);
         }
     }
 
     private void deleteValue(int itemIndex) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_51);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
@@ -939,7 +939,7 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (!Utils.inSize(itemIndex, this.valueListAdapter.getCount())) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_52);
             return;
         }
         try {
@@ -964,13 +964,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_delete_value);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_53);
         }
     }
 
     private void deleteSecret(int itemIndex) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_54);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
@@ -982,7 +982,7 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (!Utils.inSize(itemIndex, this.secretListAdapter.getCount())) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_55);
             return;
         }
         try {
@@ -1007,13 +1007,13 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_delete_secret);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_56);
         }
     }
 
     private void deleteService(int index, String name, long lastupdate) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_57);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
@@ -1025,23 +1025,23 @@ public class MemoViewerActivity extends Activity {
             return;
         }
         if (name == null) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_58);
             return;
         }
         if (!Utils.inSize(index, this.serviceListAdapter.getCount())) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_59);
             return;
         }
         try {
             idpwmemo.Service service = this.idpwMemo.getService(index);
 
             if (!name.equals(service.getServiceName())) {
-                Utils.alertShort(this, R.string.msg_internal_error);
+                Utils.internalError(this, IE.I_60);
                 return;
             }
 
             if (lastupdate != service.getTime()) {
-                Utils.alertShort(this, R.string.msg_internal_error);
+                Utils.internalError(this, IE.I_61);
                 return;
             }
 
@@ -1058,21 +1058,21 @@ public class MemoViewerActivity extends Activity {
             Utils.alertShort(this, R.string.msg_success_delete_service);
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_62);
         }
     }
 
     private void importService() {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_63);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasMemo()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_64);
             return;
         }
         if (this.state != MemoViewerActivity.STATE_IMPORT_SERVICE) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_65);
             return;
         }
 
@@ -1123,15 +1123,15 @@ public class MemoViewerActivity extends Activity {
 
     private void exportService() {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_66);
             return;
         }
         if (this.idpwMemo == null || !this.idpwMemo.hasSelectedService()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_67);
             return;
         }
         if (this.state != MemoViewerActivity.STATE_EXPORT_SERVICE) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_68);
             return;
         }
 
@@ -1148,7 +1148,7 @@ public class MemoViewerActivity extends Activity {
             dst.addService(this.idpwMemo);
             exportData = Utils.encodeBase64(dst.save());
             if (exportData == null) {
-                Utils.alertShort(this, R.string.msg_internal_error);
+                Utils.internalError(this, IE.I_69);
                 return;
             }
 
@@ -1158,7 +1158,7 @@ public class MemoViewerActivity extends Activity {
             lastupdate = service.getTime();
 
         } catch (idpwmemo.IDPWMemoException ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.I_70);
             return;
         }
 
@@ -1257,12 +1257,12 @@ public class MemoViewerActivity extends Activity {
         public void onOk(Intent data) {
             MemoViewerActivity.this.tlChecker.clear();
             if (data == null || !data.hasExtra(NewServiceActivity.INTENT_EXTRA_NEW_SERVICE_NAME)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_71);
                 return;
             }
             String newServiceName = data.getStringExtra(NewServiceActivity.INTENT_EXTRA_NEW_SERVICE_NAME);
             if (newServiceName == null) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_72);
                 return;
             }
             MemoViewerActivity.this.addNewService(newServiceName);
@@ -1288,11 +1288,11 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_73);
                 return;
             }
             if (data.getBooleanExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, true)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_74);
                 return;
             }
             int valueType = data.getIntExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE, -1);
@@ -1320,11 +1320,11 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
                 && data.hasExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_75);
                 return;
             }
             if (!data.getBooleanExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_IS_SECRET, false)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_76);
                 return;
             }
             int valueType = data.getIntExtra(NewValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE, -1);
@@ -1358,11 +1358,11 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_77);
                 return;
             }
             if (data.getBooleanExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET, true)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_78);
                 return;
             }
             boolean keeping = data.getBooleanExtra(EditValueActivity.INTENT_EXTRA_KEEPING, false);
@@ -1398,11 +1398,11 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_NEW_VALUE_TYPE)
                 && data.hasExtra(EditValueActivity.INTENT_EXTRA_NEW_VALUE_VALUE);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_79);
                 return;
             }
             if (!data.getBooleanExtra(EditValueActivity.INTENT_EXTRA_IS_SECRET, false)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_80);
                 return;
             }
             boolean keeping = data.getBooleanExtra(EditValueActivity.INTENT_EXTRA_KEEPING, false);
@@ -1434,11 +1434,11 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_81);
                 return;
             }
             if (data.getBooleanExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, true)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_82);
                 return;
             }
             int itemIndex = data.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
@@ -1467,11 +1467,11 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET)
                 && data.hasExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_83);
                 return;
             }
             if (!data.getBooleanExtra(DeleteValueActivity.INTENT_EXTRA_IS_SECRET, false)) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_84);
                 return;
             }
             int itemIndex = data.getIntExtra(DeleteValueActivity.INTENT_EXTRA_ITEM_INDEX, -1);
@@ -1500,7 +1500,7 @@ public class MemoViewerActivity extends Activity {
                 && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_SERVICE_NAME)
                 && data.hasExtra(DeleteServiceActivity.INTENT_EXTRA_LASTUPDATE);
             if (!hasExtra) {
-                Utils.alertShort(MemoViewerActivity.this, R.string.msg_internal_error);
+                Utils.internalError(MemoViewerActivity.this, IE.I_85);
                 return;
             }
             int index = data.getIntExtra(DeleteServiceActivity.INTENT_EXTRA_INDEX, -1);

@@ -54,7 +54,7 @@ public class DeleteMemoActivity extends Activity {
     // res/layout/delete_memo.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.C_01);
             return;
         }
 
@@ -62,7 +62,7 @@ public class DeleteMemoActivity extends Activity {
 
         File memoFile = Utils.getMemoFile(this, this.memoName);
         if (!memoFile.exists()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.C_02);
             return;
         }
 
@@ -83,7 +83,7 @@ public class DeleteMemoActivity extends Activity {
         try {
             Files.deleteIfExists(memoFile.toPath());
         } catch (Exception ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.C_03);
             return;
         }
 

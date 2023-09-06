@@ -83,7 +83,7 @@ public class NewValueActivity extends Activity {
     // res/layout/new_value.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.K_01);
             return;
         }
 

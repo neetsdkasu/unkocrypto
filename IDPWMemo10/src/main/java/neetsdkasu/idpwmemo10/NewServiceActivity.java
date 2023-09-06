@@ -56,7 +56,7 @@ public class NewServiceActivity extends Activity {
     public void onClickOkButton(View v) {
 
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.J_01);
             return;
         }
 

@@ -55,7 +55,7 @@ public class ChangeMemoNameActivity extends Activity {
     // res/layout/change_memo_name.xml Button onClick
     public void onClickOkButton(View v) {
         if (!this.statusOk) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.B_01);
             return;
         }
 
@@ -65,7 +65,7 @@ public class ChangeMemoNameActivity extends Activity {
 
         File curMemoFile = Utils.getMemoFile(this, curMemoName);
         if (!curMemoFile.exists()) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.B_02);
             return;
         }
 
@@ -93,7 +93,7 @@ public class ChangeMemoNameActivity extends Activity {
         try {
             Files.move(curMemoFile.toPath(), newMemoFile.toPath());
         } catch (Exception ex) {
-            Utils.alertShort(this, R.string.msg_internal_error);
+            Utils.internalError(this, IE.B_03);
             return;
         }
 
