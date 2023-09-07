@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:icon="@android:drawable/ic_menu_add"
+          android:title="@string/add_memo_menu_item_text"
+          android:showAsAction="ifRoom" >
+      <menu>
+        <item android:title="@string/new_memo_menu_item_text"
+              android:onClick="onClickNewMemoMenuItem" />
+        <item android:title="@string/import_memo_menu_item_text"
+              android:onClick="onClickImportMemoMenuItem" />
+      </menu>
+    </item>
+</menu>
