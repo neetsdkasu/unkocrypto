@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="neetsdkasu.idpwmemo10"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:allowBackup="false">
+        <activity android:name="neetsdkasu.idpwmemo10.MainActivity"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.NewMemoActivity"
+                  android:label="@string/new_memo_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.ImportMemoActivity"
+                  android:label="@string/import_memo_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.ChangeMemoKeywordActivity"
+                  android:label="@string/change_memo_keyword_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.ChangeMemoNameActivity"
+                  android:label="@string/change_memo_name_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.DeleteMemoActivity"
+                  android:label="@string/delete_memo_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.MemoViewerActivity"
+                  android:label="@string/memo_viewer_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.NewServiceActivity"
+                  android:label="@string/new_service_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.NewValueActivity"
+                  android:label="@string/new_value_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.EditValueActivity"
+                  android:label="@string/edit_value_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.DeleteValueActivity"
+                  android:label="@string/delete_value_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.DeleteServiceActivity"
+                  android:label="@string/delete_service_title"
+                  android:exported="false">
+        </activity>
+        <activity android:name="neetsdkasu.idpwmemo10.ExportServiceActivity"
+                  android:label="@string/export_service_title"
+                  android:exported="false">
+        </activity>
+    </application>
+</manifest>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IDPWMemo10</string>
+
+    <string name="ok_button_text">OK</string>
+
+    <!-- Import Messages -->
+    <string name="msg_success_import">Success Import</string>
+    <string name="msg_failure_import">Failure Import</string>
+    <string name="msg_canceled_import">Canceled Import</string>
+
+    <!-- Export Messages -->
+    <string name="msg_success_export">Success Export</string>
+    <string name="msg_failure_export">Failure Export</string>
+    <string name="msg_canceled_export">Canceled Export</string>
+
+    <!-- New Memo Messages -->
+    <string name="msg_success_new_memo">Success New Memo</string>
+    <string name="msg_failure_new_memo">Failure New Memo</string>
+    <string name="msg_canceled_new_memo">Canceled New Memo</string>
+
+    <!-- Change Memo Keyword Messages -->
+    <string name="msg_success_change_memo_keyword">Success Change Password</string>
+    <string name="msg_failure_change_memo_keyword">Failure Change Password</string>
+    <string name="msg_canceled_change_memo_keyword">Canceled Change Password</string>
+
+    <!-- Change Memo Name Messages -->
+    <string name="msg_success_change_memo_name">Success Change Name</string>
+    <string name="msg_failure_change_memo_name">Failure Change Name</string>
+    <string name="msg_canceled_change_memo_name">Canceled Change Name</string>
+
+    <!-- Delete Messages -->
+    <string name="msg_success_delete">Success Delete</string>
+    <string name="msg_failure_delete">Failure Delete</string>
+    <string name="msg_canceled_delete">Canceled Delete</string>
+
+    <!-- New Service Messages -->
+    <string name="msg_success_new_service">Success New Service</string>
+    <string name="msg_failure_new_service">Failure New Service</string>
+    <string name="msg_canceled_new_service">Canceled New Service</string>
+
+    <!-- New Value Messages -->
+    <string name="msg_success_new_value">Success New Value</string>
+    <string name="msg_failure_new_value">Failure New Value</string>
+    <string name="msg_canceled_new_value">Canceled New Value</string>
+
+    <!-- New Secret Messages -->
+    <string name="msg_success_new_secret">Success New Secret</string>
+    <string name="msg_failure_new_secret">Failure New Secret</string>
+    <string name="msg_canceled_new_secret">Canceled New Secret</string>
+
+    <!-- Edit Value Messages -->
+    <string name="msg_success_edit_value">Success Edit Value</string>
+    <string name="msg_failure_edit_value">Failure Edit Value</string>
+    <string name="msg_canceled_edit_value">Canceled Edit Value</string>
+
+    <!-- Edit Secret Messages -->
+    <string name="msg_success_edit_secret">Success Edit Secret</string>
+    <string name="msg_failure_edit_secret">Failure Edit Secret</string>
+    <string name="msg_canceled_edit_secret">Canceled Edit Secret</string>
+
+    <!-- Delete Value Messages -->
+    <string name="msg_success_delete_value">Success Delete Value</string>
+    <string name="msg_failure_delete_value">Failure Delete Value</string>
+    <string name="msg_canceled_delete_value">Canceled Delete Value</string>
+
+    <!-- Delete Secret Messages -->
+    <string name="msg_success_delete_secret">Success Delete Secret</string>
+    <string name="msg_failure_delete_secret">Failure Delete Secret</string>
+    <string name="msg_canceled_delete_secret">Canceled Delete Secret</string>
+
+    <!-- Delete Service Messages -->
+    <string name="msg_success_delete_service">Success Delete Service</string>
+    <string name="msg_failure_delete_service">Failure Delete Service</string>
+    <string name="msg_canceled_delete_service">Canceled Delete Service</string>
+
+    <!-- Import Service Messages -->
+    <string name="msg_success_import_service">Success Import Service</string>
+    <string name="msg_failure_import_service">Failure Import Service</string>
+
+    <!-- some Messages -->
+    <string name="msg_wrong_memo_name">This Name Is Wrong</string>
+    <string name="msg_memo_name_already_exists">This Name Already Exists</string>
+    <string name="msg_failure_create_memo">Failure Create Memo</string>
+    <string name="msg_not_found_memo_name">Not Found The Memo Name</string>
+    <string name="msg_please_switch_on">Please Switch On</string>
+    <string name="msg_wrong_current_keyword">Wrong Current Password</string>
+    <string name="msg_wrong_keyword">Wrong Password</string>
+    <string name="msg_not_match_memo_name">Not Match Memo Name</string>
+    <string name="msg_copied">Copied</string>
+    <string name="msg_wrong_service_name">Wrong Service Name</string>
+    <string name="msg_value_is_required">Value Is Required</string>
+    <string name="msg_secret_is_required">Secret Is Required</string>
+    <string name="msg_invalid_import_data">Invalid Import Data</string>
+    <string name="msg_wrong_keyword_or_invalid_data">Wrong Password or Invalid Data</string>
+    <string name="msg_time_is_up">"Time's Up"</string>
+
+    <!-- Common text -->
+    <string name="common_text_unknown_name">"??????"</string>
+    <string name="common_text_new_memo_name">New Memo Name (length &lt;= 50)</string>
+    <string name="common_text_memo_name_allows">allows: a&#8211;z A&#8211;Z 0&#8211;9 and -_()[]</string>
+    <string name="common_text_status_error_title">"[ERROR!]"</string>
+
+    <!-- MainActivity Option Menu -->
+    <string name="add_memo_menu_item_text">Add</string>
+    <string name="new_memo_menu_item_text">New</string>
+    <string name="import_memo_menu_item_text">Import</string>
+
+    <!-- MemoListView Context Menu -->
+    <string name="export_memo_menu_item_text">Export</string>
+    <string name="change_memo_keyword_menu_item_text">Change Password</string>
+    <string name="change_memo_name_menu_item_text">Change Name</string>
+    <string name="delete_memo_menu_item_text">Delete</string>
+
+    <!-- NewMemoAtivity -->
+    <string name="new_memo_title">Add New Memo</string>
+    <string name="new_memo_keyword_text_view_text">Memo Password</string>
+
+    <!-- ImportMemoAtivity -->
+    <string name="import_memo_title">Import Memo From File</string>
+    <string name="import_memo_file_name_text_view_text">Import File</string>
+    <string name="import_memo_overwrite_switch_text">"Create New or Overwrite ?"</string>
+    <string name="import_memo_overwrite_switch_textoff">Create New</string>
+    <string name="import_memo_overwrite_switch_texton">Overwrite</string>
+
+    <!-- ChangeMemoKeywordActivity -->
+    <string name="change_memo_keyword_title">Change Memo Password</string>
+    <string name="change_memo_keyword_old_keyword_text">Current Password</string>
+    <string name="change_memo_keyword_new_keyword_text">New Password</string>
+    <string name="change_memo_keyword_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="change_memo_keyword_execute_switch_textoff">Do NOT Change</string>
+    <string name="change_memo_keyword_execute_switch_texton">Do Change</string>
+
+    <!-- ChangeMemoNameActivity -->
+    <string name="change_memo_name_title">Change Memo Name</string>
+    <string name="change_memo_name_current_name_text_view_text">Current Name</string>
+    <string name="change_memo_name_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="change_memo_name_execute_switch_textoff">Do NOT Change</string>
+    <string name="change_memo_name_execute_switch_texton">Do Change</string>
+
+    <!-- DeleteMemoActivity -->
+    <string name="delete_memo_title">Delete Memo</string>
+    <string name="delete_memo_memo_name_text_view_text">Delete Target Memo Name</string>
+    <string name="delete_memo_memo_name_confirm_text_view_text">Input The Memo Name For Confirmation</string>
+    <string name="delete_memo_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="delete_memo_execute_switch_textoff">Do NOT Delete</string>
+    <string name="delete_memo_execute_switch_texton">Do Delete</string>
+
+    <!-- MemoViewerActivity -->
+    <string name="memo_viewer_title">Memo Viewer</string>
+    <string name="memo_viewer_keyword_text_view_text">Password</string>
+    <string name="show_service_list_button_text">Show Service List</string>
+    <string name="memo_viewer_values_secrets_switch_text">Values or Secrets</string>
+    <string name="memo_viewer_values_secrets_switch_textoff">Values</string>
+    <string name="memo_viewer_values_secrets_switch_texton">Secrets</string>
+    <string name="memo_viewer_import_keyword_text">Import Password</string>
+    <string name="import_service_button_text">Do Import</string>
+    <string name="memo_viewer_import_data_text">Import Data (Base64)</string>
+    <string name="memo_viewer_export_service_name_text">Service Name</string>
+    <string name="memo_viewer_export_service_lastupdate_text">Lastupdate</string>
+    <string name="memo_viewer_export_keyword_text">Export Password</string>
+    <string name="export_service_button_text">Do Export</string>
+
+    <!-- MemoViewerActivity Option Menu -->
+    <string name="add_service_submenu_text">Add</string>
+    <string name="new_service_menu_item_text">New</string>
+    <string name="import_service_menu_item_text">Import</string>
+    <string name="add_value_menu_item_text">Add</string>
+    <string name="add_secret_menu_item_text">Add</string>
+
+    <!-- ServiceListView Context Menu -->
+    <string name="export_service_menu_item_text">Export</string>
+    <string name="delete_service_menu_item_text">Delete</string>
+
+    <!--ValueListView Context Menu -->
+    <string name="edit_value_menu_item_text">Edit</string>
+    <string name="delete_value_menu_item_text">Delete</string>
+
+    <!--SecretListView Context Menu -->
+    <string name="edit_secret_menu_item_text">Edit</string>
+    <string name="delete_secret_menu_item_text">Delete</string>
+
+    <!-- NewServiceActivity -->
+    <string name="new_service_title">New Service</string>
+    <string name="new_service_name_text">New Service Name</string>
+
+    <!-- NewValueActivity -->
+    <string name="new_value_title">New Value</string>
+    <string name="new_secret_title">New Secret</string>
+    <string name="new_value_type_text">Type</string>
+    <string name="new_value_value_text">Value</string>
+    <string name="new_secret_secret_text">Secret</string>
+
+    <!-- EditValueActivity -->
+    <string name="edit_value_title">Edit Value</string>
+    <string name="edit_secret_title">Edit Secret</string>
+    <string name="edit_service_name_title">Edit Service Name</string>
+    <string name="old_value_type_text">Old Type</string>
+    <string name="old_value_value_text">Old Value</string>
+    <string name="old_secret_secret_text">Old Secret</string>
+    <string name="old_service_name_text">Old Service Name</string>
+    <string name="edit_new_value_type_text">New Type</string>
+    <string name="edit_new_value_value_text">New Value</string>
+    <string name="edit_new_secret_secret_text">New Secret</string>
+    <string name="edit_new_service_name_text">New Service Name</string>
+
+    <!-- DeleteValueActivity -->
+    <string name="delete_value_title">Delete Value</string>
+    <string name="delete_secret_title">Delete Secret</string>
+    <string name="delete_value_type_text">Type</string>
+    <string name="delete_value_value_text">Value</string>
+    <string name="delete_secret_secret_text">Secret</string>
+    <string name="delete_value_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="delete_value_execute_switch_textoff">Do NOT Delete</string>
+    <string name="delete_value_execute_switch_texton">Do Delete</string>
+
+    <!-- DeleteServiceActivity -->
+    <string name="delete_service_title">Delete Service</string>
+    <string name="delete_service_name_text">Name</string>
+    <string name="delete_service_lastupdate_text">Lastupdate</string>
+    <string name="delete_service_execute_switch_text">"Do or Do Not ?"</string>
+    <string name="delete_service_execute_switch_textoff">Do NOT Delete</string>
+    <string name="delete_service_execute_switch_texton">Do Delete</string>
+
+    <!-- ExportServiceActivity -->
+    <string name="export_service_title">Export Service</string>
+    <string name="export_service_name_text">Service Name</string>
+    <string name="export_service_lastupdate_text">Lastupdate</string>
+    <string name="copy_export_keyword_button_text">Copy Password</string>
+    <string name="export_keyword_text">Export Password</string>
+    <string name="copy_export_data_button_text">Copy Data</string>
+    <string name="export_data_text">Export Data (Base64)</string>
+
+</resources>

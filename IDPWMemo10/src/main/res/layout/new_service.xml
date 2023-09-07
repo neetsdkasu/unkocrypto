@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/new_service_name_text"
+      android:labelFor="@id/new_service_name"
+      />
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="12sp"
+      />
+  <EditText
+      android:id="@+id/new_service_name"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:singleLine="true"
+      android:importantForAutofill="no"
+      android:inputType="text"
+      android:imeOptions="actionDone"
+      />
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="12sp"
+      />
+  <Button
+      android:id="@+id/new_service_execute_button"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/ok_button_text"
+      android:onClick="onClickOkButton"
+      />
+</LinearLayout>
+
