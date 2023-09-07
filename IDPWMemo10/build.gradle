@@ -62,6 +62,15 @@ android {
         targetSdk 29
     }
 
+    signingConfigs {
+        release {
+            storeFile      file('mykeystore')
+            storePassword 'ABCDEFGH'
+            keyAlias      'neetsdkasu'
+            keyPassword   'ABCDEFGH'
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix '.debug'
@@ -70,12 +79,7 @@ android {
         release {
             // proguardFile getDefaultProguardFile('proguard-android.txt')
 
-            // signingConfig {
-            //     storeFile      file('mykeystore')
-            //     storePassword 'ABCDEFGH'
-            //     keyAlias      'neetsdkasu'
-            //     keyPassword   'ABCDEFGH'
-            // }
+            signingConfig signingConfigs.release
         }
     }
 
