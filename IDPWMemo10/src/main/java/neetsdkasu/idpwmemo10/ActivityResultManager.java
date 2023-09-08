@@ -57,12 +57,13 @@ final class ActivityResultManager {
                 this.creator.onFailedToStart();
                 return false;
             }
-            if (intent.resolveActivity(activity.getPackageManager()) == null) {
+            try {
+                this.activity.startActivityForResult(intent, this.requestCode);
+                return true;
+            } catch (android.content.ActivityNotFoundException ex) {
                 this.creator.onFailedToStart();
                 return false;
             }
-            this.activity.startActivityForResult(intent, this.requestCode);
-            return true;
         }
     }
 

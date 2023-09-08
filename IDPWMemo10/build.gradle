@@ -28,11 +28,11 @@ apply plugin: 'com.android.application'
 android {
     // PlatformToolsのバージョン番号らしい？
     // 常に最新版を指定するのが推奨らしい？
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     // ビルドに使用するBuildToolsのバージョン？
     // 使用するPlatformToolsに合わせた最新のバージョンを使うほうがいいぽい？
-    buildToolsVersion '29.0.3'
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         // システムがアプリを識別するためのIDらしい？
@@ -42,12 +42,12 @@ android {
         // アプリをインストールする側が最新かどうかシステムが確認するための値
         // 値が大きいほど新しいバージョンだと認識される
         // 開発側はリリースする前にこれをインクリメントしておく必要がある
-        versionCode 94
+        versionCode 95
 
         // 人間に見せるアプリのバージョン
         // バージョン番号フォーマットでもニックネーム(コードネーム？)でも何でもいいらしい
         // システム側は表示するだけのもの
-        versionName '1.25.0'
+        versionName '1.25.1'
 
         // 実行するスマホ側への制限（？）、APIがこれ未満のスマホでは動かないことを示す、らしい
         // これを下げるほど古いスマホサポートで、これを上げるほど古いスマホを切り捨てる、ことになるらしい
@@ -59,7 +59,7 @@ android {
         // compileSdkVersionと同じにして開発するのが推奨らしい？
         // minSdk以上compileSdkVersion以下にする必要がある
         // minSDKでは有効なAPIだが現在は廃止されたAPIについては…どうなんだろう？ここで使用の有無の保証なのかminSDKで保証なのか…？
-        targetSdk 29
+        targetSdk 30
     }
 
     signingConfigs {
