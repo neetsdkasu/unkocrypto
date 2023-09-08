@@ -23,5 +23,6 @@
  - ソースのコンパイルチェックは`gradlew.bat lintDebug`  
  - Debug版APKビルドは`gradlew.bat assembleDebug`  
  - Release版APKビルドは`gradlew.bat assembleRelease`  
+ - APKファイルは`./build/outputs/apk/`に作られるぽいのでそこからスマホへファイルコピーして使う   
  - android 10（API-level-29）は既にサポートが終了しているOSらしい  
  - `build.gradle`の`minSdk`を`30`にしてもビルドは可能（API-level-30で廃止されたAPIは使ってないのかも）  
