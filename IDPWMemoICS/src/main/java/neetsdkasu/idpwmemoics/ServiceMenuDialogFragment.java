@@ -36,17 +36,13 @@ public class ServiceMenuDialogFragment extends DialogFragment
     public void onClick (View v) {
         Listener listener = (Listener) getActivity();
         int serviceIndex = getArguments().getInt(SERVICE_INDEX);
-        switch (v.getId()) {
-            case R.id.service_menu_dialog_show:
+        final int id = v.getId();
+        if (id == R.id.service_menu_dialog_show)
                 listener.showService(serviceIndex);
-                break;
-            case R.id.service_menu_dialog_export:
+        else if (id == R.id.service_menu_dialog_export)
                 listener.exportService(serviceIndex);
-                break;
-            case R.id.service_menu_dialog_delete:
+        else if (id == R.id.service_menu_dialog_delete)
                 listener.deleteService(serviceIndex);
-                break;
-        }
         dismiss();
     }
 

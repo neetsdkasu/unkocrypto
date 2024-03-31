@@ -35,20 +35,17 @@ public class MemoMenuDialogFragment extends DialogFragment
     public void onClick (View v) {
         Listener listener = (Listener) getActivity();
         String memoName = getArguments().getString(MEMO_NAME);
-        switch (v.getId()) {
-            case R.id.memo_menu_dialog_open:
+        final int id = v.getId();
+
+        if (id == R.id.memo_menu_dialog_open)
                 listener.openMemo(memoName);
-                break;
-            case R.id.memo_menu_dialog_export:
+        else if (id == R.id.memo_menu_dialog_export)
                 listener.exportMemo(memoName);
-                break;
-            case R.id.memo_menu_dialog_change_password:
+        else if (id == R.id.memo_menu_dialog_change_password)
                 listener.changeMemoPassword(memoName);
-                break;
-            case R.id.memo_menu_dialog_delete:
+        else if (id == R.id.memo_menu_dialog_delete)
                 listener.deleteMemo(memoName);
-                break;
-        }
+
         dismiss();
     }
 

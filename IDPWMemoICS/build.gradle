@@ -1,0 +1,109 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url = uri('https://repo.maven.apache.org/maven2')
+        }
+        maven {
+            url = uri('https://maven.google.com')
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.3.1'
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url = uri('https://maven.google.com')
+        }
+    }
+}
+
+// android{}のブロックに関する定義を読み込むやつぽい？
+apply plugin: 'com.android.application'
+
+android {
+    // PlatformToolsのバージョン番号らしい？
+    // 常に最新版を指定するのが推奨らしい？
+    compileSdkVersion 34
+
+    // ビルドに使用するBuildToolsのバージョン？
+    // 使用するPlatformToolsに合わせた最新のバージョンを使うほうがいいぽい？
+    buildToolsVersion '34.0.0'
+
+    defaultConfig {
+        // システムがアプリを識別するためのIDらしい？
+        // よくわからんが、package名とは異なっててもいいらしい？
+        applicationId 'neetsdkasu.idpwmemoics'
+
+        // よくわからんがapplicationIdと同じにしとけばいい？
+        namespace 'neetsdkasu.idpwmemoics'
+
+        // アプリをインストールする側が最新かどうかシステムが確認するための値
+        // 値が大きいほど新しいバージョンだと認識される
+        // 開発側はリリースする前にこれをインクリメントしておく必要がある
+        versionCode 4
+
+        // 人間に見せるアプリのバージョン
+        // バージョン番号フォーマットでもニックネーム(コードネーム？)でも何でもいいらしい
+        // システム側は表示するだけのもの
+        versionName '1.3'
+
+        // 実行するスマホ側への制限（？）、APIがこれ未満のスマホでは動かないことを示す、らしい
+        // これを下げるほど古いスマホサポートで、これを上げるほど古いスマホを切り捨てる、ことになるらしい
+        // 新しいAPIだらけにしたいなら古いスマホはさっさと切り捨てるべし、ということらしい
+        // より広範囲のユーザーを得たいなら古いスマホもサポートしとけ、ということらしい？
+        // compileSdkVersion以下にする必要がある
+        minSdk 15
+
+        // compileSdkVersionと同じにして開発するのが推奨らしい？
+        // minSdk以上compileSdkVersion以下にする必要がある
+        // minSDKでは有効なAPIだが現在は廃止されたAPIについては…どうなんだろう？ここで使用の有無の保証なのかminSDKで保証なのか…？
+        targetSdk 34
+    }
+
+    signingConfigs {
+        release {
+            storeFile      file('mykeystore')
+            storePassword 'ABCDEFGH'
+            keyAlias      'neetsdkasu'
+            keyPassword   'ABCDEFGH'
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix   '-debug'
+        }
+        release {
+            // proguardFile getDefaultProguardFile('proguard-android.txt')
+
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lintOptions {
+        xmlReport false
+        disable 'ScopedStorage','IconMissingDensityFolder','TextFields'
+    }
+}
+
+// ライブラリやパッケージなどの依存関係を書くブロック
+// implementationで指定したやつはアプリに同梱（マージ？）されるぽい
+dependencies {
+    // jetpackやandroidxなどは最新版のSDKじゃないと動かないぽい･･･？
+
+    // mt1997ar,unkocrypto,IDPWMemoを入れた libs/libs.jar を読み込むよう
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+tasks.withType(JavaCompile) {
+    configure(options) {
+        // コンパイル時に非推奨の警告が出たらコメント解除して確認する
+        // options.compilerArgs.add('-Xlint:deprecation')
+    }
+}

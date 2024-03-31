@@ -51,17 +51,13 @@ public class ValueMenuDialogFragment extends DialogFragment
         int valueIndex = getArguments().getInt(VALUE_INDEX);
         boolean isSecret = this.isSecretValue();
         boolean isServiceName = getArguments().getBoolean(IS_SERVICE_NAME);
-        switch (v.getId()) {
-            case R.id.value_menu_dialog_copy:
+        final int id = v.getId();
+        if (id == R.id.value_menu_dialog_copy)
                 listener.copyValue(serviceIndex, valueIndex, isSecret);
-                break;
-            case R.id.value_menu_dialog_edit:
+        else if (id == R.id.value_menu_dialog_edit)
                 listener.editValue(serviceIndex, valueIndex, isSecret, isServiceName);
-                break;
-            case R.id.value_menu_dialog_delete:
+        else if (id == R.id.value_menu_dialog_delete)
                 listener.deleteValue(serviceIndex, valueIndex, isSecret, isServiceName);
-                break;
-        }
         dismiss();
     }
 

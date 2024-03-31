@@ -11,3 +11,8 @@ gen/
 local.properties
 
 
+.gradle/
+androidTest/
+build/
+local.properties
+!gradle-wrapper.jar
