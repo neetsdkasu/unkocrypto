@@ -157,9 +157,9 @@ final class Utils {
         clipboard.setPrimaryClip(clip);
 
         // if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-        if (android.os.Build.VERSION.SDK_INT <= BUILD_VERSIONS_CODES_S_V2) {
-            Utils.alertShort(context, R.string.msg_copied);
-        }
+        // if (android.os.Build.VERSION.SDK_INT <= BUILD_VERSIONS_CODES_S_V2) {
+        //     Utils.alertShort(context, R.string.msg_copied);
+        // }
     }
 
     static byte[] decodeBase64(String src) {
