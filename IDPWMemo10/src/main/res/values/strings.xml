@@ -87,7 +87,6 @@
     <string name="msg_wrong_current_keyword">Wrong Current Password</string>
     <string name="msg_wrong_keyword">Wrong Password</string>
     <string name="msg_not_match_memo_name">Not Match Memo Name</string>
-    <string name="msg_copied">Copied</string>
     <string name="msg_wrong_service_name">Wrong Service Name</string>
     <string name="msg_value_is_required">Value Is Required</string>
     <string name="msg_secret_is_required">Secret Is Required</string>
