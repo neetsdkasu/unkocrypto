@@ -8,6 +8,8 @@ import java.io.OutputStream;
 
 public final class Fenc {
 
+    private Fenc() {}
+
     public static byte[] encData(final String password, final String fileName, final byte[] data) throws IOException {
         if  (password == null || password.isEmpty()) {
             throw new IllegalArgumentException("require: String password");
