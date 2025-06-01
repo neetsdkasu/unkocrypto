@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 import neetsdkasu.crypto.Crypto;
+import neetsdkasu.crypto.CryptoException;
 
 final class Dec {
     final FencRandom rng;
@@ -68,8 +69,12 @@ final class Dec {
         final CRC32 cs = new CRC32();
         final InputStream in = new Take(this.in, encSize);
         final OutputStream out = new WithChecksumOutputStream(data, this.cs);
-        final long dataSize = (long)Crypto.decrypt(blockSize, cs, this.rng, in, out);
-        this.sizes.add(dataSize);
+        try {
+            final long dataSize = (long)Crypto.decrypt(blockSize, cs, this.rng, in, out);
+            this.sizes.add(dataSize);
+        } catch (CryptoException ex) {
+            throw new FencException(FencException.Cause.WRONG_PASSWORD, ex);
+        }
     }
 
     Dec readFileName(final Appendable fileName) throws IOException {
