@@ -6,7 +6,8 @@ public final class FencException extends java.lang.RuntimeException {
         UNSUPPORTED_VERSION,
         WRONG_FORMAT_FILENAME,
         UNMATCHED_SIZES,
-        UNMATCHED_CHECKSUM
+        UNMATCHED_CHECKSUM,
+        WRONG_PASSWORD
     }
     
     public final Cause cause;
