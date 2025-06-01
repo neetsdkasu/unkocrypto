@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.ClipData;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
@@ -126,5 +129,18 @@ public final class Utils {
 
     public static boolean isNotBlank(String s) {
         return !Utils.isNullOrBlank(s);
+    }
+
+    public static String getFilenameFromUri(Context context, Uri uri) {
+        try {
+            try (Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null)) {
+                int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                returnCursor.moveToFirst();
+                String filename = returnCursor.getString(nameIndex);
+                return filename;
+            }
+        } catch (Exception ex) {
+            return null;
+        }
     }
 }

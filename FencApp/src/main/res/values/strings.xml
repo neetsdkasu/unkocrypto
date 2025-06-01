@@ -10,5 +10,12 @@
     <string name="log_message_canceled">CANCELED</string>
     <string name="log_message_require_password">REQUIRE PASSWORD</string>
     <string name="log_message_dec_success">DEC SUCCESS</string>
+    <string name="log_message_enc_success">ENC SUCCESS</string>
     <string name="log_message_unknown_error">UNKNOWN ERROR</string>
+    <string name="log_message_pick_fenc_file">PICK FENC FILE</string>
+    <string name="log_message_pick_source_file">PICK SOURCE FILE</string>
+    <string name="log_message_dec_processing">DEC PROCESSING</string>
+    <string name="log_message_enc_processing">ENC PROCESSING</string>
+    <string name="log_message_export">EXPORT</string>
+    <string name="log_message_exporting">EXPORTING</string>
 </resources>
