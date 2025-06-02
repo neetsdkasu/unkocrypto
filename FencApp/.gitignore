@@ -1,0 +1,14 @@
+# .gitignore
+
+# project temporary directories
+.gradle/
+androidTest/
+build/
+tmpclasses/
+
+# project local setting files
+gradle.properties
+
+# any untracked files
+untracks/
+
